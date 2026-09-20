@@ -1,0 +1,2861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二极管器件 · 交互式图解</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23070b09'/><path d='M5 9 L23 16 L5 23 Z' fill='%2334e08a'/><path d='M25 6 V26' stroke='%2334e08a' stroke-width='3.4'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b09;
+  --bg2:#0a100c;
+  --panel:#0d1510;
+  --panel2:#101a13;
+  --line:#1d2c22;
+  --line2:#27392d;
+  --ink:#dcebe1;
+  --dim:#8aa294;
+  --faint:#5c7264;
+  --green:#34e08a;
+  --green-dim:#1d8a55;
+  --amber:#ffb02e;
+  --cyan:#57d8f2;
+  --red:#ff6478;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --disp:'Chakra Petch','Noto Sans SC',sans-serif;
+  --sans:'Noto Sans SC',-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:300;
+  line-height:1.8;
+  letter-spacing:.01em;
+  overflow-x:hidden;
+}
+/* 全局网格纸背景 */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(rgba(52,224,138,.014) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.014) 1px,transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 0%,transparent 60%,rgba(0,0,0,.5));
+}
+main{position:relative;z-index:1}
+::selection{background:rgba(52,224,138,.3)}
+
+/* ============ 导航 ============ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;gap:22px;
+  padding:0 26px;height:52px;flex-wrap:wrap;
+  background:rgba(7,11,9,.82);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+nav .logo{font-family:var(--disp);font-weight:700;font-size:17px;color:var(--green);letter-spacing:.04em}
+nav a{
+  color:var(--dim);text-decoration:none;font-size:12.5px;
+  font-family:var(--mono);letter-spacing:.05em;
+  transition:color .2s;
+}
+nav a:hover{color:var(--green)}
+nav .spacer{flex:1}
+nav .live{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+nav .live i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ============ Hero ============ */
+.hero{
+  min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  padding:110px 6vw 40px;position:relative;
+}
+.hero .eyebrow{
+  font-family:var(--mono);font-size:12px;color:var(--amber);
+  letter-spacing:.32em;margin-bottom:22px;
+  display:flex;align-items:center;gap:14px;
+}
+.hero .eyebrow::before{content:"";width:44px;height:1px;background:var(--amber)}
+.hero h1{
+  font-family:var(--disp);font-weight:700;
+  font-size:clamp(52px,10vw,132px);
+  line-height:.95;letter-spacing:-.01em;
+  color:var(--ink);
+}
+.hero h1 .h1cap{
+  height:.56em;width:auto;color:var(--green);
+  display:inline-block;vertical-align:baseline;
+  transform:translateY(.015em);margin:0 .015em;
+}
+.hero h1 .zh{
+  display:block;font-family:var(--sans);font-weight:300;
+  font-size:clamp(18px,2.4vw,30px);color:var(--dim);
+  letter-spacing:.42em;margin-top:18px;
+}
+.hero p.lede{
+  max-width:660px;margin-top:34px;font-size:16px;color:var(--dim);
+}
+.hero p.lede b{color:var(--ink);font-weight:500}
+.hero .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.hero .chips span{
+  font-family:var(--mono);font-size:11.5px;padding:5px 12px;
+  border:1px solid var(--line2);border-radius:3px;color:var(--dim);
+  background:rgba(13,21,16,.6);
+}
+.hero .chips span b{color:var(--green);font-weight:500}
+.hero .scope-wrap{
+  margin-top:52px;border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;background:rgba(9,14,11,.75);position:relative;
+}
+.hero .scope-wrap::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px);
+}
+.hero canvas{display:block;width:100%;height:150px}
+.hero .scroll-hint{
+  margin-top:40px;font-family:var(--mono);font-size:11px;color:var(--faint);
+  letter-spacing:.2em;display:flex;align-items:center;gap:10px;
+}
+.hero .scroll-hint svg{animation:bounce 1.8s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* ============ 通用 section ============ */
+section{padding:96px 6vw;max-width:1280px;margin:0 auto;position:relative}
+section a{color:var(--green);text-decoration:none;border-bottom:1px dotted var(--green-dim)}
+section a:hover{border-bottom-style:solid}
+.sec-head{display:flex;align-items:baseline;gap:20px;margin-bottom:16px}
+.sec-head .no{
+  font-family:var(--mono);font-size:13px;color:var(--green);
+  letter-spacing:.1em;border:1px solid var(--green-dim);
+  padding:3px 10px;border-radius:3px;white-space:nowrap;
+}
+.sec-head h2{
+  font-family:var(--disp);font-weight:600;font-size:clamp(26px,3.6vw,40px);
+  letter-spacing:.01em;
+}
+.sec-head .en{
+  font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.24em;
+  text-transform:uppercase;margin-left:auto;white-space:nowrap;
+}
+.sec-sub{color:var(--dim);max-width:780px;margin-bottom:44px;font-size:15px}
+.sec-sub b{color:var(--ink);font-weight:500}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ §01 是什么 ============ */
+.two-col{display:grid;grid-template-columns:1.25fr .9fr;gap:44px;align-items:start}
+.prose p{margin-bottom:18px;color:var(--dim);font-size:15px}
+.prose p b{color:var(--ink);font-weight:500}
+.prose .kw{color:var(--green);font-family:var(--mono);font-size:.92em}
+.prose .kw2{color:var(--amber);font-family:var(--mono);font-size:.92em}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th{
+  font-family:var(--mono);font-weight:500;color:var(--faint);text-align:left;
+  padding:9px 12px;border-bottom:1px solid var(--line2);font-size:11.5px;letter-spacing:.06em;
+}
+.cmp-table td{
+  padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top;
+}
+.cmp-table td:first-child{color:var(--ink);font-weight:400;white-space:nowrap}
+.cmp-table .yes{color:var(--green)}
+.cmp-table .no{color:var(--red)}
+.fact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:36px}
+.fact{
+  border:1px solid var(--line);border-radius:6px;padding:20px 20px 18px;
+  background:linear-gradient(160deg,var(--panel) 0%,rgba(13,21,16,.4) 100%);
+  transition:border-color .25s,transform .25s;
+}
+.fact:hover{border-color:var(--green-dim);transform:translateY(-3px)}
+.fact .f-no{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.14em}
+.fact h4{font-family:var(--disp);font-size:16.5px;font-weight:600;margin:8px 0 8px}
+.fact h4 code{font-family:var(--mono);font-size:.85em;color:var(--green)}
+.fact p{font-size:12.8px;color:var(--dim);line-height:1.7}
+
+/* ============ §02 家族 ============ */
+.fam-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.fam-card{
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  background:var(--panel);display:flex;flex-direction:column;
+  transition:border-color .25s;
+}
+.fam-card:hover{border-color:var(--line2)}
+.fam-card .pic{background:#080d0a;border-bottom:1px solid var(--line);padding:8px 14px 0}
+.fam-card .pic svg{display:block;width:100%;height:84px}
+.fam-card .body{padding:18px 22px 20px}
+.fam-card .names{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.fam-card .names .main{font-family:var(--disp);font-size:20px;font-weight:600}
+.fam-card .names .alias{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.06em}
+.fam-card .names .tag{
+  margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  padding:2px 8px;border-radius:3px;
+}
+.fam-card p{font-size:13px;color:var(--dim);margin-top:10px;line-height:1.75}
+.fam-card p b{color:var(--ink);font-weight:500}
+.fam-card .formula{
+  font-family:var(--mono);font-size:12px;color:var(--green);
+  margin-top:12px;padding:8px 12px;background:rgba(52,224,138,.06);
+  border-left:2px solid var(--green-dim);border-radius:0 3px 3px 0;
+}
+.c-rc .main,.c-rc .tag{color:var(--green)} .c-rc .tag{background:rgba(52,224,138,.1);border:1px solid var(--green-dim)}
+.c-fr .main,.c-fr .tag{color:var(--cyan)} .c-fr .tag{background:rgba(87,216,242,.08);border:1px solid rgba(87,216,242,.3)}
+.c-sb .main,.c-sb .tag{color:var(--amber)} .c-sb .tag{background:rgba(255,176,46,.08);border:1px solid rgba(255,176,46,.35)}
+.c-zn .main,.c-zn .tag{color:var(--red)} .c-zn .tag{background:rgba(255,100,120,.08);border:1px solid rgba(255,100,120,.35)}
+.c-sw .main,.c-sw .tag{color:var(--green)} .c-sw .tag{background:rgba(52,224,138,.08);border:1px solid var(--green-dim)}
+.c-pd .main,.c-pd .tag{color:var(--cyan)} .c-pd .tag{background:rgba(87,216,242,.06);border:1px solid rgba(87,216,242,.3)}
+
+/* ============ §03 VI 实验室 ============ */
+.lab{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  overflow:hidden;
+}
+.lab-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:18px;
+  padding:16px 20px;border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+}
+.ctrl{display:flex;align-items:center;gap:9px}
+.ctrl label{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
+.seg{display:flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden}
+.seg button{
+  font-family:var(--mono);font-size:12px;padding:7px 13px;border:none;cursor:pointer;
+  background:transparent;color:var(--dim);border-right:1px solid var(--line2);
+  transition:all .18s;letter-spacing:.02em;
+}
+.seg button:last-child{border-right:none}
+.seg button:hover{color:var(--ink);background:rgba(52,224,138,.06)}
+.seg button.on{background:var(--green);color:#052013;font-weight:600}
+.icon-btn{
+  width:32px;height:32px;border:1px solid var(--line2);border-radius:5px;background:transparent;
+  color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:14px;
+  transition:all .18s;display:flex;align-items:center;justify-content:center;
+}
+.icon-btn:hover{color:var(--green);border-color:var(--green-dim)}
+.icon-btn.play.on{color:var(--green);border-color:var(--green-dim);background:rgba(52,224,138,.08)}
+input[type=range]{
+  -webkit-appearance:none;width:120px;height:2px;background:var(--line2);border-radius:2px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--green);
+  cursor:pointer;box-shadow:0 0 8px rgba(52,224,138,.5);
+}
+.lab-body{display:grid;grid-template-columns:1fr 292px;gap:0}
+.scope-main{position:relative;background:#080d0a;min-width:0}
+.scope-main::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.14) 3px 4px);
+}
+.scope-main svg{display:block;width:100%;height:auto;padding:6px 14px 0}
+.readout{
+  border-left:1px solid var(--line);background:#0a110d;
+  padding:18px 18px 14px;display:flex;flex-direction:column;gap:0;min-width:0;
+}
+.readout .r-title{
+  font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.22em;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.readout .r-title::before{content:"";width:6px;height:6px;background:var(--red);border-radius:50%;animation:blink 1.4s infinite}
+.r-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--mono);padding:7px 0;border-bottom:1px dashed var(--line);
+}
+.r-row .k{font-size:11px;color:var(--faint);letter-spacing:.08em}
+.r-row .v{font-size:13px;color:var(--ink);text-align:right}
+.r-row .v.g{color:var(--green)} .r-row .v.a{color:var(--amber)} .r-row .v.c{color:var(--cyan)}
+.r-note{font-size:11px;color:var(--faint);line-height:1.65;margin-top:12px;font-family:var(--mono)}
+.r-note b{color:var(--dim);font-weight:500}
+.cc-formula{
+  margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--green);
+  padding:10px 12px;background:rgba(52,224,138,.06);
+  border-left:2px solid var(--green-dim);border-radius:0 3px 3px 0;line-height:1.7;
+}
+.cc-result{
+  margin-top:14px;padding:12px 14px;border:1px solid var(--line2);border-radius:6px;
+  background:rgba(9,14,11,.7);
+}
+.cc-result small{display:block;font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.2em;margin-bottom:6px}
+.cc-result b{font-family:var(--disp);font-size:22px;color:var(--amber);font-weight:700}
+.cc-result span{display:block;font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:5px;line-height:1.6}
+.lab-foot{
+  padding:14px 20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 28px;
+  background:rgba(10,16,12,.6);
+}
+.legend{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.legend i{width:12px;height:12px;border-radius:2px;display:inline-block;flex:none}
+.rule-callout{
+  margin-top:26px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;
+  border:1px solid rgba(255,176,46,.3);border-radius:8px;padding:20px 26px;
+  background:linear-gradient(120deg,rgba(255,176,46,.06),transparent 60%);
+}
+.rule-callout .mnemonic{
+  font-family:var(--disp);font-weight:700;font-size:clamp(19px,2.6vw,26px);
+  color:var(--amber);letter-spacing:.08em;white-space:nowrap;
+}
+.rule-callout .mnemonic small{display:block;font-size:11px;font-weight:500;color:var(--faint);letter-spacing:.24em;margin-top:6px;font-family:var(--mono)}
+.rule-callout p{font-size:13.5px;color:var(--dim)}
+.rule-callout p b{color:var(--ink);font-weight:500}
+
+/* ============ §04 丝印 ============ */
+.fmt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.fmt-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.fmt-card .fh{
+  display:flex;align-items:baseline;gap:12px;padding:16px 20px 12px;border-bottom:1px solid var(--line);
+}
+.fmt-card .fh .tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:3px 8px;border-radius:3px;
+}
+.fmt-card .fh h4{font-family:var(--disp);font-size:17px;font-weight:600}
+.fmt-card .fh .en{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-left:auto}
+.fmt-card svg{display:block;width:100%;height:auto;background:#080d0a}
+.fmt-card .fb{padding:14px 20px 18px;font-size:12.8px;color:var(--dim);line-height:1.75}
+.fmt-card .fb b{color:var(--ink);font-weight:500}
+.t-do .tag{color:var(--green);border:1px solid var(--green-dim);background:rgba(52,224,138,.07)}
+.t-sma .tag{color:var(--cyan);border:1px solid rgba(87,216,242,.3);background:rgba(87,216,242,.06)}
+.t-sod .tag{color:var(--amber);border:1px solid rgba(255,176,46,.35);background:rgba(255,176,46,.06)}
+.t-zn .tag{color:var(--red);border:1px solid rgba(255,100,120,.35);background:rgba(255,100,120,.06)}
+.smd-lab{
+  margin-top:26px;border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden;
+}
+.smd-bar{
+  display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+  padding:16px 20px;border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+}
+.smd-bar .ctrl label{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
+.smd-in{
+  font-family:var(--mono);font-size:19px;letter-spacing:.28em;color:var(--ink);
+  background:#080d0a;border:1px solid var(--line2);border-radius:5px;
+  padding:9px 12px 9px 16px;width:170px;outline:none;text-transform:uppercase;text-align:center;
+}
+.smd-in:focus{border-color:var(--green-dim)}
+.smd-chips{display:flex;gap:6px;flex-wrap:wrap}
+.smd-chips button{
+  font-family:var(--mono);font-size:12px;color:var(--dim);background:transparent;
+  border:1px solid var(--line2);border-radius:4px;padding:6px 11px;cursor:pointer;transition:all .18s;
+}
+.smd-chips button:hover{color:var(--green);border-color:var(--green-dim)}
+.smd-body{display:grid;grid-template-columns:250px 1fr;gap:0}
+.smd-val{
+  padding:24px 24px 20px;border-right:1px solid var(--line);background:#0a110d;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.smd-val small{font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.22em;margin-bottom:8px}
+.smd-val b{font-family:var(--disp);font-size:26px;color:var(--amber);font-weight:700;line-height:1.15}
+.smd-val span{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:8px;line-height:1.6}
+.smd-val.err b{color:var(--red);font-size:20px}
+.smd-steps{padding:20px 26px;font-family:var(--mono);font-size:12.5px;line-height:2.05}
+.smd-steps div{white-space:pre-wrap;color:var(--dim)}
+.smd-steps .ok{color:var(--ink)}
+.smd-steps .hl{color:var(--green)}
+.fmt-note{
+  margin-top:26px;padding:18px 22px;border-left:2px solid var(--red);
+  background:rgba(255,100,120,.05);border-radius:0 6px 6px 0;font-size:13.5px;color:var(--dim);
+}
+.fmt-note b{color:var(--red);font-weight:500}
+.fmt-note code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* 极性翻转实验室 */
+.polflop{
+  margin-top:26px;border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden;
+}
+.polflop > svg{display:block;width:100%;height:auto;background:#080d0a;padding:10px 18px 0}
+.pol-ctrl{
+  display:flex;flex-wrap:wrap;gap:18px;align-items:center;
+  padding:16px 22px;border-top:1px solid var(--line);background:rgba(10,16,12,.7);
+}
+.pol-read{display:flex;gap:26px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--dim);width:100%}
+.pol-read b{color:var(--amber);font-weight:600;font-size:14px}
+.pol-read .ok{color:var(--green)}
+.pol-read .no{color:var(--red)}
+.flowline{stroke-dasharray:2 9;animation:flowdash .9s linear infinite}
+.flowline.off{animation:none;opacity:0}
+@keyframes flowdash{to{stroke-dashoffset:-11}}
+
+/* ============ §05 参数 ============ */
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.derating{
+  border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden;
+}
+.derating .dh{padding:16px 20px 10px;border-bottom:1px solid var(--line)}
+.derating .dh h4{font-family:var(--disp);font-size:17px;font-weight:600}
+.derating .dh span{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-left:10px}
+.derating svg{display:block;width:100%;height:auto;background:#080d0a}
+.derating .db{padding:13px 20px 16px;font-size:12.6px;color:var(--dim);line-height:1.75}
+.derating .db b{color:var(--ink);font-weight:500}
+.tcr-note{
+  border-left:2px solid var(--cyan);background:rgba(87,216,242,.05);
+  padding:16px 20px;border-radius:0 6px 6px 0;font-size:13.2px;color:var(--dim);line-height:1.8;
+}
+.tcr-note b{color:var(--cyan);font-weight:500}
+.tcr-note code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* ============ §06 计算器 ============ */
+.calc{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  display:grid;grid-template-columns:1fr 1fr;overflow:hidden;margin-bottom:26px;
+}
+.calc .inputs{padding:30px 32px;border-right:1px solid var(--line)}
+.calc .outputs{padding:30px 32px;background:#0a110d}
+.calc h5{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.22em;margin-bottom:18px}
+.calc .calc-title{
+  grid-column:1/-1;padding:16px 32px;border-bottom:1px solid var(--line);
+  font-family:var(--disp);font-size:18px;font-weight:600;
+  background:rgba(10,16,12,.7);display:flex;align-items:baseline;gap:14px;
+}
+.calc .calc-title span{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.14em}
+.field{margin-bottom:20px}
+.field label{display:block;font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-bottom:8px;letter-spacing:.06em}
+.field select{
+  width:100%;font-family:var(--mono);font-size:14px;color:var(--ink);
+  background:#080d0a;border:1px solid var(--line2);border-radius:5px;padding:10px 12px;outline:none;
+  cursor:pointer;transition:border-color .2s;
+}
+.field select:focus{border-color:var(--green-dim)}
+.out-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:13px 0;border-bottom:1px dashed var(--line);
+}
+.out-row .ok{font-size:12.5px;color:var(--dim)}
+.out-row .ok small{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.08em}
+.out-row .ov{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--green);text-align:right}
+.out-row .ov small{font-size:11px;color:var(--faint);font-weight:400;margin-left:4px}
+.out-row.big .ov{font-size:26px;color:var(--amber)}
+.out-row .ov.bad{color:var(--red);font-size:15px}
+.calc-formula{
+  grid-column:1/-1;padding:15px 32px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:12.5px;color:var(--dim);background:rgba(10,17,13,.8);line-height:1.8;
+}
+.calc-formula b{color:var(--green);font-weight:500}
+
+/* ============ §07 经典电路实验室 ============ */
+.cc2-body{position:relative;background:#080d0a;min-width:0}
+.cc2-body::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.14) 3px 4px);
+}
+.cc2-body canvas{display:block;width:100%;height:300px}
+.cc2-read{
+  display:flex;flex-wrap:wrap;gap:8px 28px;align-items:baseline;
+  padding:13px 20px;border-top:1px solid var(--line);background:rgba(10,16,12,.6);
+  font-family:var(--mono);font-size:12px;color:var(--dim);
+}
+.cc2-read .k{font-size:10.5px;color:var(--faint);letter-spacing:.06em}
+.cc2-read b{color:var(--amber);font-weight:600;font-size:13.5px}
+.cc2-read .g{color:var(--green)}
+.cc2-note{
+  padding:0 20px 14px;font-family:var(--mono);font-size:11px;color:var(--faint);line-height:1.7;
+}
+.cc2-note b{color:var(--dim);font-weight:500}
+
+/* ============ §08 特殊器件 ============ */
+.fact .sym{margin:2px 0 10px}
+.fact .sym svg{display:block;width:100%;height:56px;background:#080d0a;border-radius:4px}
+
+/* ============ §09 实战 ============ */
+.dbg-steps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.dbg-step{
+  flex:1;min-width:138px;display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border:1px solid var(--line2);border-radius:6px;
+  background:var(--panel);cursor:pointer;transition:all .18s;text-align:left;
+  font-family:inherit;color:var(--dim);font-size:13px;
+}
+.dbg-step .n{
+  font-family:var(--mono);font-size:15px;font-weight:600;color:var(--faint);
+  width:1.2em;transition:color .18s;
+}
+.dbg-step:hover{border-color:var(--green-dim);color:var(--ink)}
+.dbg-step.on{border-color:var(--green);background:rgba(52,224,138,.08);color:var(--ink)}
+.dbg-step.on .n{color:var(--green)}
+.dbg-verdict{
+  border-left:2px solid var(--amber);background:rgba(255,176,46,.06);
+  padding:13px 18px;border-radius:0 5px 5px 0;font-size:13.2px;color:var(--dim);
+  margin-bottom:16px;line-height:1.75;
+}
+.dbg-verdict b{color:var(--amber);font-weight:500}
+.dbg-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.term-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px}
+.term{
+  border:1px solid var(--line);border-radius:8px;background:#070c09;
+  overflow:hidden;display:flex;flex-direction:column;min-width:0;
+  transition:border-color .25s;
+}
+.term:hover{border-color:var(--line2)}
+.term.wide{grid-column:1/-1}
+.term-bar{
+  display:flex;align-items:center;gap:7px;padding:10px 14px;
+  border-bottom:1px solid var(--line);background:rgba(10,16,12,.85);
+}
+.term-bar i{width:10px;height:10px;border-radius:50%}
+.term-bar .d1{background:rgba(255,100,120,.55)}
+.term-bar .d2{background:rgba(255,176,46,.5)}
+.term-bar .d3{background:rgba(52,224,138,.5)}
+.term-bar span{margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.12em}
+.term-body{
+  padding:15px 18px 17px;font-family:var(--mono);font-size:12.3px;
+  line-height:1.95;overflow-x:auto;flex:1;
+}
+.term-body div{white-space:pre;min-height:1.35em}
+.t-ps{color:#3f5247;user-select:none}
+.t-cmd{
+  color:var(--green);cursor:pointer;font-family:inherit;
+  border-bottom:1px dotted transparent;transition:border-color .15s;
+}
+.t-cmd:hover{border-bottom-color:var(--green)}
+.t-cmd.copied{color:#052013;background:var(--green);border-radius:2px;padding:0 4px}
+.t-out{color:var(--dim)}
+.t-hl{color:var(--amber)}
+.t-cmt{color:#516657}
+.t-tag{color:var(--cyan)}
+.lnx-note{
+  margin-top:26px;padding:18px 22px;border-left:2px solid var(--cyan);
+  background:rgba(87,216,242,.05);border-radius:0 6px 6px 0;font-size:13.5px;color:var(--dim);
+}
+.lnx-note b{color:var(--cyan);font-weight:500}
+.lnx-note code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+.eq-table{width:100%;border-collapse:collapse;font-size:12.3px;margin-top:30px}
+.eq-table th{
+  font-family:var(--mono);font-weight:500;color:var(--faint);text-align:left;
+  padding:9px 12px;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.08em;
+}
+.eq-table td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top}
+.eq-table td:first-child{color:var(--ink);white-space:nowrap}
+.eq-table td code{font-family:var(--mono);font-size:11.5px;color:var(--cyan);word-break:break-all}
+.eq-table tr td:nth-child(2) code{color:var(--green)}
+
+/* ============ §10 踩坑 ============ */
+.pit-list{display:flex;flex-direction:column;gap:12px}
+.pit{
+  display:grid;grid-template-columns:44px 1fr;gap:18px;align-items:start;
+  border:1px solid var(--line);border-radius:6px;padding:17px 20px;background:var(--panel);
+  transition:border-color .2s;
+}
+.pit:hover{border-color:rgba(255,100,120,.4)}
+.pit .symptom{
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--red);
+  border:1px solid rgba(255,100,120,.35);border-radius:4px;padding:5px 7px;text-align:center;
+  line-height:1.5;background:rgba(255,100,120,.05);height:fit-content;
+}
+.pit .fix b{display:block;font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.pit .fix b code{font-family:var(--mono);font-size:.88em;color:var(--green)}
+.pit .fix p{font-size:12.8px;color:var(--dim);line-height:1.7}
+.pit .fix p code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* ============ §11 速查 ============ */
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.qr-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.qr-card .qh{padding:15px 20px 10px;border-bottom:1px solid var(--line)}
+.qr-card .qh h4{font-family:var(--disp);font-size:16.5px;font-weight:600}
+.qr-card .qh span{font-family:var(--mono);font-size:10px;color:var(--faint);margin-left:10px;letter-spacing:.12em}
+.qr-card .qb{padding:8px 20px 16px}
+
+/* ============ footer ============ */
+footer{
+  border-top:1px solid var(--line);padding:44px 6vw 60px;margin-top:40px;
+  display:flex;flex-wrap:wrap;gap:24px;align-items:baseline;justify-content:space-between;
+}
+footer .f-l{font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:2.1}
+footer .f-l b{color:var(--dim);font-weight:500}
+footer a{color:var(--faint);text-decoration:none;border-bottom:1px dotted var(--faint)}
+footer a:hover{color:var(--green);border-color:var(--green)}
+footer .f-r{font-family:var(--disp);font-weight:700;font-size:22px;color:var(--green)}
+footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-size:10px;color:var(--faint);letter-spacing:.18em;text-align:right;margin-top:6px}
+
+/* ============ 响应式 ============ */
+@media (max-width:1000px){
+  .two-col,.param-grid,.dbg-cols,.qr-grid{grid-template-columns:1fr}
+  .lab-body{grid-template-columns:1fr}
+  .readout{border-left:none;border-top:1px solid var(--line)}
+  .calc{grid-template-columns:1fr}
+  .calc .inputs{border-right:none;border-bottom:1px solid var(--line)}
+  .smd-body{grid-template-columns:1fr}
+  .smd-val{border-right:none;border-bottom:1px solid var(--line)}
+}
+@media (max-width:720px){
+  .fam-grid,.fmt-grid,.fact-grid,.term-grid{grid-template-columns:1fr}
+  nav a{display:none}
+  section{padding:70px 5vw}
+  .sec-head .en{display:none}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">DIODE</div>
+  <a href="#s1">概述</a><a href="#s2">家族</a><a href="#s3">VI实验</a><a href="#s4">丝印</a><a href="#s5">参数</a><a href="#s6">计算器</a><a href="#s7">经典电路</a><a href="#s8">特殊器件</a><a href="#s9">实战</a><a href="#s10">踩坑</a>
+  <button class="pnav-open" aria-label="打开器件导航" title="全部器件">☰ 器件</button>
+  <div class="spacer"></div>
+  <div class="live"><i></i>CURVE TRACER</div>
+</nav>
+
+<main>
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="eyebrow">ONE-WAY GATE · 0.7 V KNEE · 图解硬件器件</div>
+  <h1>DI<svg class="h1cap" viewBox="0 0 30 40" aria-hidden="true"><path d="M3 9 L23 20 L3 31 Z" fill="currentColor"/><path d="M26 5 V35" stroke="currentColor" stroke-width="4.6"/></svg>DE
+    <span class="zh">二 极 管 器 件 · 从 P N 结 到 整 流 、 续 流 与 保 护</span>
+  </h1>
+  <p class="lede">
+    它是一块 PN 结加两个电极：正偏时势垒被推倒、电流按<b>指数律</b>奔涌；反偏时耗尽层加宽、只剩 nA 级漏电——
+    世界上最小的<b>单向阀门</b>。0.7 V 的硅门槛、0.3 V 的肖特基、住在击穿区的稳压管、还有会发光的 LED，全是同一块结的不同活法。
+    <b>往下滚动：VI 逐段扫描实验室、丝印与极性解码器、齐纳与续流功耗计算器、整流与续流电路实验室。</b>
+  </p>
+  <div class="chips">
+    <span><b>单向导电</b> 正偏导通 · 反偏截止</span>
+    <span><b>Si ≈ 0.7 V</b> 肖特基 0.3 · LED 1.8–3.4</span>
+    <span><b>I = Is·(e^(V/nVT) − 1)</b> 指数律</span>
+    <span><b>trr</b> 反向恢复定频率上限</span>
+  </div>
+  <div class="scope-wrap"><canvas id="heroScope"></canvas></div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    SCROLL · VI 实验室在 03 节
+  </div>
+</header>
+
+<!-- ================= §01 ================= -->
+<section id="s1">
+  <div class="sec-head reveal"><span class="no">01</span><h2>它是什么，为什么需要它</h2><span class="en">What &amp; Why</span></div>
+  <p class="sec-sub reveal">一句话：<b>二极管是把「方向」变成「通断」的器件</b>——PN 结的内建势垒，就是那道只放行一个方向的门。</p>
+  <div class="two-col">
+    <div class="prose reveal">
+      <p>
+        二极管（<b>Diode</b>）是最简单的半导体器件：P 型半导体（多子为空穴）与 N 型半导体（多子为电子）接在一起，
+        交界处载流子互相扩散、复合，留下一层没有自由载流子的<b>耗尽层</b>与一个<b>内建电场</b>（硅约 0.7 V）。
+        这道势垒决定了它全部的脾气：<b>阳极接正、阴极接负</b>（正偏）时外场削薄势垒，电流按
+        <span class="kw2">I = Is·(e^(V/nVT) − 1)</span> 指数上升；反过来（反偏）时势垒加宽，只剩 nA 级漏电流——<b>单向导电</b>。
+      </p>
+      <p>
+        工程上把那条指数曲线简化成两句话：<b>导通时像一节 0.7 V 的「电池」串一个小电阻，截止时像一个绝缘体</b>。
+        硅管门槛 0.7 V、肖特基 0.3–0.5 V、LED 由禁带宽度决定（1.8–3.4 V）。这个「门槛电压 VF」乘以电流就是导通功耗——
+        整流、续流电路的效率账本从这一项开始算。反向也不是完美的开路：漏电流 IR 在 datasheet 里是小字，在电池产品里是大坑。
+      </p>
+      <p>
+        它在电路里反复扮演这些角色：<b>整流</b>（把交流变直流，工频到 MHz）、<b>续流</b>（给感性负载的电流留泄洪道，
+        见 <a href="inductor.html">电感页</a>）、<b>稳压</b>（齐纳管住在击穿区当基准）、<b>钳位与防护</b>（TVS 吸浪涌、
+        钳位电路限幅）、<b>开关与逻辑</b>（1N4148 快如门神）、<b>发光与感光</b>（LED 与光电二极管互为镜像）。
+        电阻页讲「限与分」，电容页讲「稳与时」，电感页讲「流与磁」，本页讲「向与门」。
+      </p>
+    </div>
+    <table class="cmp-table reveal">
+      <tr><th>角色</th><th>典型器件</th><th>关键参数</th></tr>
+      <tr><td>工频整流</td><td>1N4007</td><td class="yes">VF · IF(AV) · VRRM</td></tr>
+      <tr><td>Buck 续流</td><td>SS34 肖特基</td><td class="yes">VF 低 · trr ≈ 0</td></tr>
+      <tr><td>高频高压整流</td><td>UF4007</td><td class="yes">trr 75 ns</td></tr>
+      <tr><td>信号钳位/开关</td><td>1N4148</td><td class="yes">trr 4 ns · Cj 4 pF</td></tr>
+      <tr><td>电压基准</td><td>齐纳 5V1</td><td class="yes">Vz ±% · rz</td></tr>
+      <tr><td>浪涌/ESD 防护</td><td>TVS SMAJ</td><td class="yes">VRWM · VC</td></tr>
+      <tr><td>指示/照明</td><td>LED</td><td class="yes">VF · IF 限流</td></tr>
+      <tr><td>光电检测</td><td>光电二极管</td><td class="yes">光电流 · 响应度</td></tr>
+      <tr><td>调谐</td><td>变容二极管</td><td class="yes">Cj(V) · Q</td></tr>
+    </table>
+  </div>
+  <div class="fact-grid reveal">
+    <div class="fact"><div class="f-no">FACT / A</div><h4>猫须检波器 <code>1874</code></h4><p>布劳恩发现金属丝压在方铅矿上会单向导电——人类第一件半导体器件「猫须检波器」，比晶体管早了七十多年。早期的收音机就是靠这颗「石头」从电磁波里检出声音。</p></div>
+    <div class="fact"><div class="f-no">FACT / B</div><h4>0.7 V 从哪来 <code>BARRIER</code></h4><p>势垒高度 ≈ kT/q·ln(NA·ND/ni²)，硅的禁带 1.12 eV 把它钉在 0.6–0.8 V。它不是常数：温度每升 1 °C 门槛降约 2 mV——并联二极管会抢流的根源（05 节）。</p></div>
+    <div class="fact"><div class="f-no">FACT / C</div><h4>肖克利方程 <code>1949</code></h4><p>一条 I = Is·(e^(V/nVT) − 1) 浓缩了 PN 结的全部静态行为：死区、指数膝、反向饱和，全在这条曲线上。肖克利后来因晶体管拿诺贝尔奖，这条方程是他留给二极极管的签名。</p></div>
+    <div class="fact"><div class="f-no">FACT / D</div><h4>多子 vs 少子 <code>WHY SCHOTTKY IS FAST</code></h4><p>肖特基管的「结」是金属-半导体势垒，导电只靠多数载流子——没有少子储存，关断不需要「抽走库存」，所以 trr ≈ 0。PN 结反偏前得先把注入的少子抽干，这就是反向恢复（08 节实验室）。</p></div>
+  </div>
+</section>
+
+<!-- ================= §02 ================= -->
+<section id="s2">
+  <div class="sec-head reveal"><span class="no">02</span><h2>家族谱系 · 一块结的八种活法</h2><span class="en">Family</span></div>
+  <p class="sec-sub reveal">按<b>怎么用 PN 结</b>分家：普通结看 VF 与 trr，故意击穿的看 Vz 与功率，把结做成光的看禁带——选型先选家族，再挑参数。</p>
+  <div class="fam-grid">
+    <div class="fam-card c-rc reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <line x1="10" y1="45" x2="52" y2="45" stroke="#9aa79d" stroke-width="4"/><line x1="210" y1="45" x2="250" y2="45" stroke="#9aa79d" stroke-width="4"/>
+        <rect x="52" y="30" width="158" height="30" rx="14" fill="#14181c" stroke="rgba(0,0,0,.5)"/>
+        <rect x="196" y="30" width="14" height="30" fill="#c3c7cb"/>
+        <text x="118" y="51" text-anchor="middle" fill="#dcebe1" font-size="13" font-family="IBM Plex Mono,monospace">1N4007</text>
+        <text x="130" y="80" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">DO-41 插件 · 端头银环 = 阴极</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">整流二极管</span><span class="alias">RECTIFIER</span><span class="tag">工频苦力</span></div>
+        <p>市电整流的苦力：1 A / 50–1000 V，皮实便宜到尘埃里。<b>trr 是 µs 级</b>（手册常不标），只伺候 50/60 Hz——把它放进开关电源就是事故（06 节计算器直接算给你看）。</p>
+        <div class="formula">1A · 50–1000V · VF ≤ 1.1V · 只做工频</div>
+      </div>
+    </div>
+    <div class="fam-card c-fr reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <line x1="10" y1="45" x2="52" y2="45" stroke="#9aa79d" stroke-width="4"/><line x1="210" y1="45" x2="250" y2="45" stroke="#9aa79d" stroke-width="4"/>
+        <rect x="52" y="30" width="158" height="30" rx="14" fill="#14181c" stroke="rgba(0,0,0,.5)"/>
+        <rect x="196" y="30" width="14" height="30" fill="#c3c7cb"/>
+        <text x="122" y="51" text-anchor="middle" fill="#dcebe1" font-size="13" font-family="IBM Plex Mono,monospace">UF4007</text>
+        <text x="130" y="80" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">掺金/铂 加速少子复合 · 高压快关断</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">快/超快恢复</span><span class="alias">FR / UF</span><span class="tag">高频高压</span></div>
+        <p>在硅里掺金或铂，让储存的少子尽快复合：<b>1000 V 耐压 + trr 25–500 ns</b>。反激电源、PFC 升压、图腾柱里的高频整流位——要高压又要速度时的正解。</p>
+        <div class="formula">UF4007 1kV·75ns · FR107 1kV·500ns</div>
+      </div>
+    </div>
+    <div class="fam-card c-sb reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <line x1="10" y1="45" x2="52" y2="45" stroke="#9aa79d" stroke-width="4"/><line x1="210" y1="45" x2="250" y2="45" stroke="#9aa79d" stroke-width="4"/>
+        <rect x="52" y="24" width="158" height="42" rx="6" fill="#2b3038" stroke="rgba(0,0,0,.5)"/>
+        <rect x="176" y="24" width="34" height="42" fill="#3a3f47"/>
+        <path d="M70 45 L100 30 L100 60 Z" fill="none" stroke="#d8b25c" stroke-width="2.6"/>
+        <path d="M100 30 V60" stroke="#d8b25c" stroke-width="2.6"/>
+        <text x="150" y="50" fill="#d8b25c" font-size="11" font-family="IBM Plex Mono,monospace">SS34</text>
+        <text x="130" y="80" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">SMA · 金属-半导体势垒 · 多子器件</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">肖特基二极管</span><span class="alias">SCHOTTKY</span><span class="tag">低 VF 无 trr</span></div>
+        <p>金属与半导体直接成结：<b>VF 只有 0.3–0.5 V，且无少子储存、trr ≈ 0</b>——Buck 续流与防反接的首选。代价是反向漏电大（µA 级、每升 10 °C 翻倍）、VRRM 一般 ≤ 200 V。</p>
+        <div class="formula">40–100V · 1–5A · VF≈0.45V · 漏电大</div>
+      </div>
+    </div>
+    <div class="fam-card c-sw reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <line x1="10" y1="45" x2="90" y2="45" stroke="#9aa79d" stroke-width="3.5"/><line x1="176" y1="45" x2="250" y2="45" stroke="#9aa79d" stroke-width="3.5"/>
+        <rect x="90" y="30" width="86" height="30" rx="15" fill="#14181c" stroke="rgba(0,0,0,.5)" opacity="0"/>
+        <path d="M98 32 L134 45 L98 58 Z" fill="#c9d8cf" opacity=".9"/>
+        <path d="M134 32 V58" stroke="#c9d8cf" stroke-width="3"/>
+        <path d="M176 45 q4 -12 8 0 q4 12 8 0" fill="none" stroke="#9aa79d" stroke-width="2"/>
+        <text x="130" y="80" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">玻封 LL4148 · 小信号快开关</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">开关二极管</span><span class="alias">SWITCHING</span><span class="tag">4 ns</span></div>
+        <p><b>1N4148 是销量传奇</b>：trr 4 ns、结电容 4 pF、几厘钱一颗。信号钳位、检波、逻辑隔离、保护脚位——凡是不问电流大小只问快不快的场合都是它。</p>
+        <div class="formula">100V · 150mA · trr 4ns · Cj 4pF</div>
+      </div>
+    </div>
+    <div class="fam-card c-zn reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <line x1="10" y1="45" x2="90" y2="45" stroke="#9aa79d" stroke-width="3.5"/><line x1="172" y1="45" x2="250" y2="45" stroke="#9aa79d" stroke-width="3.5"/>
+        <path d="M90 30 L130 45 L90 60 Z" fill="none" stroke="#ff6478" stroke-width="2.6"/>
+        <path d="M130 30 h-7 v7 M130 60 h-7 v-7" stroke="#ff6478" stroke-width="2.6" fill="none"/>
+        <path d="M130 30 V60" stroke="#ff6478" stroke-width="2.6"/>
+        <text x="150" y="80" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">住在反向击穿区的基准 · Vz±5%</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">稳压二极管</span><span class="alias">ZENER</span><span class="tag">反向击穿</span></div>
+        <p>故意把击穿做得又陡又稳：Vz 2.4–200 V、配一只限流电阻就是最便宜的电压基准。低于 5 V 靠隧道击穿（负温度系数）、高于 7 V 靠雪崩（正温度系数），<b>5.6 V 附近温度系数接近零</b>——做基准的首选点。</p>
+        <div class="formula">Vz ±2~5% · rz 10–100Ω · 0.4–5W</div>
+      </div>
+    </div>
+    <div class="fam-card c-zn reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <line x1="10" y1="45" x2="70" y2="45" stroke="#9aa79d" stroke-width="3.5"/><line x1="180" y1="45" x2="250" y2="45" stroke="#9aa79d" stroke-width="3.5"/>
+        <rect x="70" y="24" width="110" height="42" rx="6" fill="#2b3038" stroke="rgba(0,0,0,.5)"/>
+        <path d="M86 45 L112 33 L112 57 Z" fill="#ff6478" opacity=".85"/>
+        <path d="M112 33 V57" stroke="#ff6478" stroke-width="2.4"/>
+        <path d="M126 40 l8 10 M134 40 l-8 10" stroke="#ffb02e" stroke-width="2"/>
+        <text x="130" y="80" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">TVS：平时不动 · 浪涌来时雪崩钳位</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">TVS 瞬态抑制</span><span class="alias">AVALANCHE</span><span class="tag">浪涌保险丝</span></div>
+        <p>大号雪崩管：平时像开路，浪涌/ESD 打来的 <b>ps 级</b>响应内把电压钳到 VC，替下游芯片挨这一刀。选型三电压要分清：<b>VRWM 高于工作电平、VBR 击穿、VC 低于被保护耐压</b>。</p>
+        <div class="formula">VRWM > VDD·1.1 · 400–1500W · ps 响应</div>
+      </div>
+    </div>
+    <div class="fam-card c-rc reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <circle cx="130" cy="42" r="22" fill="none" stroke="#34e08a" stroke-width="2.4"/>
+        <path d="M118 42 a12 8 0 0 1 24 0" fill="none" stroke="#34e08a" stroke-width="2"/>
+        <line x1="10" y1="42" x2="108" y2="42" stroke="#9aa79d" stroke-width="3.5"/><line x1="152" y1="42" x2="250" y2="42" stroke="#9aa79d" stroke-width="3.5"/>
+        <path d="M130 16 v-8 M136 10 l-6 4 6 4 M130 68 v8 M136 76 l-6 -4 6 -4" stroke="#34e08a" stroke-width="1.6" fill="none"/>
+        <text x="130" y="86" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">正向电流→光子 · 禁带决定颜色</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">发光二极管</span><span class="alias">LED</span><span class="tag">电→光</span></div>
+        <p>正向电流把电子送进复合区，能量以光子离开：禁带宽度决定颜色——<b>红 1.8、黄 2.1、绿 2.2、蓝 3.0、白 3.2 V</b>。VF 会随温度变低，<b>必须限流</b>（限流电阻见 <a href="resistor.html">电阻页</a>）或恒流驱动。</p>
+        <div class="formula">VF 1.8–3.4V · IF 5–20mA · 串限流！</div>
+      </div>
+    </div>
+    <div class="fam-card c-pd reveal">
+      <div class="pic"><svg viewBox="0 0 260 90">
+        <circle cx="130" cy="42" r="22" fill="none" stroke="#57d8f2" stroke-width="2.4"/>
+        <path d="M118 42 a12 8 0 0 0 24 0" fill="none" stroke="#57d8f2" stroke-width="2"/>
+        <line x1="10" y1="42" x2="108" y2="42" stroke="#9aa79d" stroke-width="3.5"/><line x1="152" y1="42" x2="250" y2="42" stroke="#9aa79d" stroke-width="3.5"/>
+        <path d="M104 18 l16 -10 M112 8 l8 0 0 8" stroke="#ffb02e" stroke-width="1.8" fill="none"/>
+        <text x="130" y="86" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">LED 的反演：光→电流 · 反偏工作</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">光电二极管</span><span class="alias">PHOTODIODE</span><span class="tag">光→电</span></div>
+        <p>LED 的镜像：反偏的结被光照出电子-空穴对，形成与照度成正比的光电流。红外接收头、光耦里的受光管、光照传感器都是它——反偏越高结电容越小、响应越快。</p>
+        <div class="formula">反偏工作 · 光电流 µA–mA · 响应度 A/W</div>
+      </div>
+    </div>
+  </div>
+  <table class="eq-table reveal">
+    <tr><th>类型</th><th>VF 典型</th><th>VRRM</th><th>trr</th><th>反向漏电</th><th>典型用途</th></tr>
+    <tr><td><code>硅整流 1N4007</code></td><td>0.8–1.1 V</td><td>50–1000 V</td><td>µs 级（常不标）</td><td>&lt; 5 µA</td><td>工频整流</td></tr>
+    <tr><td><code>超快恢复 UF4007</code></td><td>1.0–1.7 V</td><td>400–1000 V</td><td>25–75 ns</td><td>&lt; 5 µA</td><td>反激/PFC</td></tr>
+    <tr><td><code>肖特基 SS34</code></td><td>0.35–0.5 V</td><td>20–200 V</td><td>≈ 0</td><td>0.1–1 mA（热）</td><td>Buck 续流/防反接</td></tr>
+    <tr><td><code>开关 1N4148</code></td><td>0.6–0.75 V</td><td>75–100 V</td><td>4 ns</td><td>≈ 25 nA</td><td>信号/钳位</td></tr>
+    <tr><td><code>齐纳 MMSZ 系列</code></td><td>正向同硅管</td><td>按 Vz 定</td><td>—</td><td>—</td><td>基准/钳位</td></tr>
+    <tr><td><code>TVS SMAJ</code></td><td>—</td><td>VRWM 5–190 V</td><td>—</td><td>µA 级</td><td>ESD/浪涌</td></tr>
+    <tr><td><code>LED</code></td><td>1.8–3.4 V</td><td>反向仅 ≈ 5 V</td><td>—</td><td>—</td><td>指示/照明</td></tr>
+  </table>
+  <p class="sec-sub reveal" style="margin-bottom:0;margin-top:18px;font-size:13px">
+    一条主线：<b>要效率选肖特基（VF 低），要高压选快恢复，要频率看 trr，要便宜皮实选 1N4007 只做工频</b>。
+    家族选错，参数再好也白搭——06 节计算器会用数字证明这一点。
+  </p>
+</section>
+
+<!-- ================= §03 VI 实验室 ================= -->
+<section id="s3">
+  <div class="sec-head reveal"><span class="no">03</span><h2>VI 特性实验室 · 逐段扫描那条指数曲线</h2><span class="en">I–V Curve Lab</span></div>
+  <p class="sec-sub reveal">
+    二极管的全部静态行为浓缩为一条曲线：<b>反向击穿 → 截止漏电 → 死区 → 指数膝 → 导通</b>。
+    播放或单步这间实验室，看电压从深处反向扫到正向导通——上格正向、下格反向，<b>四种器件同一条方程不同的脾气</b>。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>器件</label>
+        <div class="seg" id="viSeg">
+          <button data-i="0" class="on" type="button">硅 1N4148</button>
+          <button data-i="1" type="button">肖特基 SS14</button>
+          <button data-i="2" type="button">齐纳 5V1</button>
+          <button data-i="3" type="button">红光 LED</button>
+        </div>
+      </div>
+      <div class="ctrl"><label>速度</label><input type="range" id="viSpeed" min="1" max="10" value="5"></div>
+      <div class="ctrl">
+        <button class="icon-btn" id="viStep" title="单步" type="button">⏵</button>
+        <button class="icon-btn play on" id="viPlay" title="暂停/播放" type="button">❚❚</button>
+      </div>
+    </div>
+    <div class="lab-body">
+      <div class="scope-main">
+        <div id="viSvg"></div>
+      </div>
+      <div class="readout">
+        <div class="r-title">CURVE TRACER · 实时读数</div>
+        <div class="r-row"><span class="k">当前阶段</span><span class="v a" id="viMode">反向截止</span></div>
+        <div class="r-row"><span class="k">偏置电压 V</span><span class="v" id="viV">0.00 V</span></div>
+        <div class="r-row"><span class="k">电流 I</span><span class="v g" id="viI">0 nA</span></div>
+        <div class="r-row"><span class="k">动态电阻 rd = nVT/I</span><span class="v c" id="viRd">—</span></div>
+        <div class="r-row"><span class="k">管耗 P = V×I</span><span class="v" id="viP">0 µW</span></div>
+        <div class="cc-formula">I = Is·(e^(V/nVT) − 1) · VT = kT/q ≈ 26 mV</div>
+        <div class="cc-result">
+          <small>器件档案 · PROFILE</small>
+          <b id="viProf">Si 开关管</b>
+          <span id="viProfS">VF ≈ 0.7 V @10mA · VRRM 100 V（图外）</span>
+        </div>
+        <div class="r-note" id="viNote"><b>解说</b>：换器件看曲线怎么搬家。</div>
+      </div>
+    </div>
+    <div class="lab-foot">
+      <div class="legend"><i style="background:#34e08a"></i>正向 IF（上格，线性向上）</div>
+      <div class="legend"><i style="background:#57d8f2"></i>反向 IR（下格，|I| 向下）</div>
+      <div class="legend"><i style="background:rgba(255,100,120,.5)"></i>击穿区</div>
+      <div class="legend">白线 = 扫描游标</div>
+    </div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">死区不导通 · 0.7 打开来 · 反向像绝缘<small>SILICON'S THREE FACES</small></div>
+    <p>
+      工程上把这条曲线折算成三段口诀：V &lt; VF 当<b>开路</b>（死区/反偏），V ≥ VF 当 <b>0.7 V 恒压源</b>（导通），
+      电流永远由<b>外电路</b>决定——二极管自己从不限流，忘了串电阻它就毫不犹豫烧给你看（LED 直接连 5 V 的经典事故）。
+      齐纳管则把第三句改成「反向击穿区当恒压源」——同一块结，换个住址就是另一种器件。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §04 丝印 ================= -->
+<section id="s4">
+  <div class="sec-head reveal"><span class="no">04</span><h2>丝印、命名与极性判别</h2><span class="en">Markings &amp; Polarity</span></div>
+  <p class="sec-sub reveal">二极管是<b>有极性</b>的器件：插件看<b>阴极色环</b>，贴片看<b>带线端/宽端</b>；丝印则是一套缩写宇宙——<code>M7</code>、<code>SS34</code>、<code>T4</code> 各有来历，解码器在下面。</p>
+  <div class="fmt-grid">
+    <div class="fmt-card t-do reveal"><div class="fh"><span class="tag">DO-41</span><h4>插件直印 · 1N 编号</h4><span class="en">THROUGH-HOLE</span></div>
+      <svg viewBox="0 0 300 96">
+        <line x1="12" y1="48" x2="60" y2="48" stroke="#9aa79d" stroke-width="3.5"/><line x1="240" y1="48" x2="288" y2="48" stroke="#9aa79d" stroke-width="3.5"/>
+        <rect x="60" y="32" width="180" height="32" rx="15" fill="#14181c" stroke="rgba(0,0,0,.5)"/>
+        <rect x="222" y="32" width="18" height="32" fill="#c3c7cb"/>
+        <text x="140" y="54" text-anchor="middle" fill="#dcebe1" font-size="15" font-family="IBM Plex Mono,monospace">1N4007</text>
+        <text x="60" y="86" fill="#5c7264" font-size="9.5" font-family="IBM Plex Mono,monospace">1N = JEDEC 注册</text>
+        <text x="196" y="86" fill="#ffb02e" font-size="9.5" font-family="IBM Plex Mono,monospace">银环端 = 阴极 K</text>
+      </svg>
+      <div class="fb">插件管直印型号：<code>1N</code> 开头是美国 JEDEC 注册号（1 = 一个 PN 结）、<code>BA/BAT/BZX</code> 开头是欧系 Pro Electron、日系是 <code>1S</code> 开头。<b>端头的色环/白环永远标阴极</b>——三角箭头指向的那一侧。</div></div>
+    <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">SMA</span><h4>功率贴片 · 缩写代码</h4><span class="en">SMD CODE</span></div>
+      <svg viewBox="0 0 300 96">
+        <line x1="10" y1="40" x2="44" y2="40" stroke="#9aa79d" stroke-width="4"/><line x1="230" y1="40" x2="264" y2="40" stroke="#9aa79d" stroke-width="4"/>
+        <rect x="44" y="22" width="186" height="36" rx="6" fill="#2b3038" stroke="rgba(0,0,0,.5)"/>
+        <rect x="186" y="22" width="44" height="36" fill="#3a3f47"/>
+        <text x="110" y="46" text-anchor="middle" fill="#d8d2c5" font-size="15" font-family="IBM Plex Mono,monospace">SS34</text>
+        <text x="150" y="86" text-anchor="middle" fill="#5c7264" font-size="9.5" font-family="IBM Plex Mono,monospace">带线宽端 = 阴极 · 代码需查表</text>
+      </svg>
+      <div class="fb">大电流贴片印的是<b>两到四位缩写</b>：<code>M7</code>/<code>S1M</code> = 1N4007 的 SMA 马甲，<code>SS14/SS34</code> = 1A/3A 肖特基 40 V，<code>SK34</code>、<code>B340A</code> 同规格不同厂。同码不同厂偶有出入，出货前以手册为准。</div></div>
+    <div class="fmt-card t-sod reveal"><div class="fh"><span class="tag">SOD</span><h4>小信号 · T4 与 LL</h4><span class="en">SIGNAL</span></div>
+      <svg viewBox="0 0 300 96">
+        <line x1="10" y1="40" x2="80" y2="40" stroke="#9aa79d" stroke-width="3.5"/><line x1="222" y1="40" x2="290" y2="40" stroke="#9aa79d" stroke-width="3.5"/>
+        <rect x="80" y="24" width="142" height="32" rx="5" fill="#23272b" stroke="rgba(255,255,255,.12)"/>
+        <rect x="196" y="24" width="26" height="32" fill="#2e3338"/>
+        <text x="140" y="45" text-anchor="middle" fill="#dcebe1" font-size="14" font-family="IBM Plex Mono,monospace">T4</text>
+        <text x="150" y="86" text-anchor="middle" fill="#5c7264" font-size="9.5" font-family="IBM Plex Mono,monospace">SOD-123/323 · LL4148 为 SOD-80 玻封</text>
+      </svg>
+      <div class="fb">小信号管体积小到印不下型号：<code>T4</code> 是 1N4148W（SOD-323）的丝印，<code>LL4148/LL34</code> 是玻封 miniMELF 版的 1N4148，<code>A0/A7</code> 常是低漏开关管 BAT54 类——<b>同一颗 1N4148 至少有五种马甲</b>，解码器一站识别。</div></div>
+    <div class="fmt-card t-zn reveal"><div class="fh"><span class="tag">ZENER</span><h4>稳压管 · 电压码</h4><span class="en">VZ CODE</span></div>
+      <svg viewBox="0 0 300 96">
+        <line x1="10" y1="48" x2="76" y2="48" stroke="#9aa79d" stroke-width="3.5"/><line x1="212" y1="48" x2="288" y2="48" stroke="#9aa79d" stroke-width="3.5"/>
+        <rect x="76" y="30" width="136" height="36" rx="6" fill="#23272b" stroke="rgba(255,255,255,.12)"/>
+        <rect x="192" y="30" width="20" height="36" fill="#3a3f47"/>
+        <text x="140" y="54" text-anchor="middle" fill="#dcebe1" font-size="15" font-family="IBM Plex Mono,monospace">5V1</text>
+        <text x="150" y="86" text-anchor="middle" fill="#5c7264" font-size="9.5" font-family="IBM Plex Mono,monospace">字母当小数点 · 单位 V</text>
+      </svg>
+      <div class="fb">稳压丝印 = 系列号 + 电压码：<code>5V1</code>/<code>5.1</code> 都是 5.1 V；<code>1N4733A</code> 要查表（= 5.1 V/1 W），<code>BZX55C-xx</code>/<code>MMSZ52xx</code>/<code>BZT52C-xx</code> 的尾数即电压。个别老玻封用<b>色环表压值</b>，认不出就查手册，别猜。</div></div>
+  </div>
+
+  <div class="polflop reveal">
+    <svg viewBox="0 0 640 208" id="polSvg">
+      <g font-family="IBM Plex Mono,monospace" font-size="10">
+        <path id="polFlow" class="flowline" d="M70 88 H570 V150 H70 Z" fill="none" stroke="rgba(52,224,138,.85)" stroke-width="2.4"/>
+        <line x1="70" y1="88" x2="570" y2="88" stroke="rgba(220,235,225,.4)" stroke-width="1.6"/>
+        <line x1="570" y1="88" x2="570" y2="150" stroke="rgba(220,235,225,.4)" stroke-width="1.6"/>
+        <line x1="570" y1="150" x2="70" y2="150" stroke="rgba(220,235,225,.4)" stroke-width="1.6"/>
+        <line x1="70" y1="150" x2="70" y2="88" stroke="rgba(220,235,225,.4)" stroke-width="1.6"/>
+        <rect x="58" y="104" width="24" height="30" rx="3" fill="none" stroke="#8aa294" stroke-width="1.8"/>
+        <text x="70" y="99" text-anchor="middle" fill="#8aa294">+</text>
+        <text x="70" y="156" text-anchor="middle" fill="#8aa294">−</text>
+        <text x="34" y="122" fill="#8aa294">DC 5V</text>
+        <path d="M150 88 l0 0" stroke="none"/>
+        <path d="M140 78 l7 -8 l7 8" fill="none" stroke="#dcebe1" stroke-width="1.8"/>
+        <path d="M132 72 h30" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <rect x="120" y="78" width="54" height="10" fill="#0d1510" stroke="none"/>
+        <text x="147" y="66" text-anchor="middle" fill="#5c7264">R 330Ω</text>
+        <path d="M190 80 h14 M204 76 a5 12 0 0 1 10 0 a5 12 0 0 1 10 0 M224 80 h14" fill="none" stroke="#9aa79d" stroke-width="2" opacity="0"/>
+        <circle id="polLed" cx="300" cy="88" r="20" fill="rgba(52,224,138,.10)" stroke="#34e08a" stroke-width="2.2"/>
+        <path id="polLedRay" d="M300 58 v-12 M282 64 l-9 -9 M318 64 l9 -9 M276 88 h-12 M324 88 h12" stroke="#34e08a" stroke-width="1.8" opacity="0"/>
+        <text x="300" y="128" text-anchor="middle" fill="#5c7264">LED 绿 · VF 2.2V</text>
+        <g id="polD" transform="rotate(0 450 150)">
+          <path d="M432 142 L468 142 L468 158 L432 158 Z" fill="none"/>
+          <path d="M436 142 L464 150 L436 158 Z" fill="#dcebe1"/>
+          <path d="M464 142 V158" stroke="#dcebe1" stroke-width="3"/>
+        </g>
+        <text x="450" y="134" text-anchor="middle" fill="#8aa294" id="polDLabel">D 硅管 · 三角箭头指向阴极</text>
+        <text x="450" y="180" text-anchor="middle" fill="#5c7264" id="polDK">K（阴极）在下 · 正向接入</text>
+        <text x="570" y="70" text-anchor="middle" fill="#5c7264">回路电流顺时针</text>
+      </g>
+    </svg>
+    <div class="pol-ctrl">
+      <div class="ctrl"><label>二极管方向</label>
+        <div class="seg" id="polSeg">
+          <button data-v="1" class="on" type="button">正向接入</button>
+          <button data-v="0" type="button">反向接入</button>
+        </div>
+      </div>
+      <div class="pol-read">
+        <span>状态 <b id="polState" class="ok">导通 · LED 亮</b></span>
+        <span>IF <b id="polI">6.4 mA</b></span>
+        <span>VD 压降 <b id="polVf">0.71 V</b></span>
+        <span>LED 端电压 <b id="polVled">2.2 V</b></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="smd-lab reveal">
+    <div class="smd-bar">
+      <div class="ctrl"><label>丝印输入</label><input id="dioIn" class="smd-in" maxlength="10" placeholder="SS34" value="SS34" spellcheck="false" autocomplete="off"></div>
+      <div class="smd-chips" id="dioChips">
+        <button type="button" data-code="M7">M7</button>
+        <button type="button" data-code="S1M">S1M</button>
+        <button type="button" data-code="1N4007">1N4007</button>
+        <button type="button" data-code="UF4007">UF4007</button>
+        <button type="button" data-code="1N4148">1N4148</button>
+        <button type="button" data-code="T4">T4</button>
+        <button type="button" data-code="SS34">SS34</button>
+        <button type="button" data-code="SK34">SK34</button>
+        <button type="button" data-code="B340A">B340A</button>
+        <button type="button" data-code="MMSZ5231B">MMSZ5231B</button>
+        <button type="button" data-code="1N4733A">1N4733A</button>
+        <button type="button" data-code="SMAJ12A">SMAJ12A</button>
+        <button type="button" data-code="DB107">DB107</button>
+      </div>
+    </div>
+    <div class="smd-body">
+      <div class="smd-val" id="dioValBox"><small>DECODED · 解码结果</small><b id="dioVal">肖特基 40V/3A</b><span id="dioKind">SMA 贴片代码</span></div>
+      <div class="smd-steps" id="dioSteps"></div>
+    </div>
+  </div>
+  <div class="fmt-note reveal">
+    <b>万用表二极管档是最快的判别工具：</b>红表笔接阳极、黑表笔接阴极时读数为 VF——<code>0.5–0.7</code> 硅管、<code>0.2–0.3</code> 肖特基、
+    LED 会微亮且读数更高；反接应显示 <code>OL</code>。<b>双向都响是击穿短路，双向都 OL 是开路</b>。注意在路测量会受并联支路影响，判定前脱开一脚。
+    数字表二极管档红笔输出正电压（与电阻档相反）——测出来「反了」多半是表笔记忆出了错。
+  </div>
+</section>
+
+<!-- ================= §05 参数 ================= -->
+<section id="s5">
+  <div class="sec-head reveal"><span class="no">05</span><h2>关键参数与热设计</h2><span class="en">Key Parameters</span></div>
+  <p class="sec-sub reveal">九个数定一颗二极管：<b>VF、IF、IFSM、VRRM、IR、trr、Cj、TJ、RθJA</b>。前四个定「能不能用」，后五个定「用多久」——发热才是二极管的主要死因。</p>
+  <div class="param-grid">
+    <div>
+      <table class="cmp-table reveal">
+        <tr><th>参数</th><th>典型值</th><th>含义与选型要点</th></tr>
+        <tr><td>VF @ IF</td><td>0.3–1.1 V</td><td>导通压降：导通损耗 P = VF×I 的来源；肖特基比硅管省一半以上。</td></tr>
+        <tr><td>IF(AV)</td><td>0.15–5 A</td><td>平均正向电流（规定的占空比/温度下）；按平均值选再留 50% 余量。</td></tr>
+        <tr><td>IFSM</td><td>几–几十 A</td><td>不重复浪涌峰值（半个工频周波）：上电给滤波电容充电那一下靠它扛。</td></tr>
+        <tr><td>VRRM</td><td>40–1000 V</td><td>反向重复峰值电压：<b>≥ 1.5~2×</b> 工作反压；整流电路按 √2×Vac 再加裕量。</td></tr>
+        <tr><td>IR</td><td>nA–mA</td><td>反向漏电：硅管 nA 级；<b>肖特基 µA 级且每升 10 °C 翻倍</b>，反向功耗 = V×IR。</td></tr>
+        <tr><td>trr</td><td>0–30 µs</td><td>反向恢复时间：决定频率上限（08 节实验室）；工频管 µs 级、超快 &lt; 100 ns、肖特基 ≈ 0。</td></tr>
+        <tr><td>Cj</td><td>1–100 pF</td><td>结电容：高频信号路径的隐性低通；检波选小、变容管反而靠它工作。</td></tr>
+        <tr><td>TJ / RθJA</td><td>150 °C / 数十 °C/W</td><td>结温链路 TJ = TA + P×RθJA；SMA 封装的热阻由<b>铜箔面积</b>决定。</td></tr>
+        <tr><td>齐纳三件套</td><td>Vz · rz · Pz</td><td>基准电压、动态电阻、允许功耗；rz 越小越稳，06 节计算器里算。</td></tr>
+      </table>
+      <div class="tcr-note" style="margin-top:18px">
+        <b>两个温度陷阱：</b>① VF 温度系数约 <code>−2 mV/°C</code>——越热门槛越低，<b>并联的二极管会互相抢流</b>导致热点集中，要并联就各自串均流电阻；
+        ② 肖特基 IR 每升 10 °C 翻倍，反向功耗 V×IR 加热结温、结温又推高 IR——高压高温场合务必校验这个循环。
+      </div>
+    </div>
+    <div class="derating reveal">
+      <div class="dh"><h4>正向电流降额曲线</h4><span>DERATING</span></div>
+      <svg viewBox="0 0 340 250">
+        <g font-family="IBM Plex Mono,monospace" font-size="10">
+          <line x1="46" y1="20" x2="46" y2="206" stroke="#27392d" stroke-width="1.4"/>
+          <line x1="46" y1="206" x2="322" y2="206" stroke="#27392d" stroke-width="1.4"/>
+          <text x="14" y="44" fill="#5c7264">100%</text>
+          <text x="20" y="85" fill="#5c7264">80</text>
+          <text x="20" y="127" fill="#5c7264">60</text>
+          <text x="20" y="168" fill="#5c7264">40</text>
+          <text x="20" y="209" fill="#5c7264">20</text>
+          <text x="42" y="222" fill="#5c7264">25</text>
+          <text x="110" y="222" fill="#5c7264">50</text>
+          <text x="186" y="222" fill="#5c7264">75</text>
+          <text x="252" y="222" fill="#5c7264">100</text>
+          <text x="306" y="222" fill="#5c7264">125°C</text>
+          <text x="184" y="240" fill="#5c7264" font-size="9.5" text-anchor="middle">环境温度 TA（°C）</text>
+          <text x="16" y="120" fill="#5c7264" font-size="9.5" transform="rotate(-90 16 120)">IF 允许值</text>
+          <line x1="46" y1="41" x2="322" y2="41" stroke="rgba(140,162,148,.25)" stroke-width="1" stroke-dasharray="4 4"/>
+          <path d="M46 41 L172 41 L322 206" fill="none" stroke="#34e08a" stroke-width="2.4"/>
+          <text x="70" y="60" fill="#34e08a" font-size="9">DO-41 插件 · 自然冷却 75°C 起线性降额</text>
+          <path d="M46 41 L140 41 L322 178" fill="none" stroke="#57d8f2" stroke-width="2.4"/>
+          <text x="150" y="150" fill="#57d8f2" font-size="9">SMA · 1in² 铜箔 · 50°C 起降额更快</text>
+          <path d="M46 41 L104 41 L322 206" fill="none" stroke="#ff6478" stroke-width="2.4" stroke-dasharray="6 4"/>
+          <text x="200" y="190" fill="#ff6478" font-size="9">SMA · 无铜箔 · 35°C 就开始弯腰</text>
+        </g>
+      </svg>
+      <div class="db">曲线就是热欧姆定律：<b>IF_allowed = (TJ_max − TA) / (RθJA × VF)</b>。同一颗 SMA 贴片，铺 1 in² 铜箔与裸焊盘的可用电流差近一倍——
+      <b>贴片二极管的热设计其实是 PCB 设计</b>：阴极端（芯片主要焊在这端）铺铜、打过孔到内层散热。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= §06 计算器 ================= -->
+<section id="s6">
+  <div class="sec-head reveal"><span class="no">06</span><h2>计算器 · 齐纳稳压电阻与续流功耗</h2><span class="en">Engineering Math</span></div>
+  <p class="sec-sub reveal">二极管设计两大高频题：<b>这颗齐纳要串多大的电阻才稳得住</b>（空载到满载都要校验），以及<b>这颗续流管在这个频率下到底发多少热</b>（导通 + 反向 + 恢复三笔账）。改下拉框，实时出结果。</p>
+  <div class="calc reveal">
+    <div class="calc-title">齐纳稳压电阻计算器<span>ZENER RESISTOR</span></div>
+    <div class="inputs">
+      <h5>INPUT · 输入</h5>
+      <div class="field"><label>输入电压 Vin</label>
+        <select id="znVin">
+          <option value="9">9 V</option>
+          <option value="12" selected>12 V</option>
+          <option value="15">15 V</option>
+          <option value="24">24 V</option>
+        </select>
+      </div>
+      <div class="field"><label>稳压值 Vz</label>
+        <select id="znVz">
+          <option value="3.3">3.3 V</option>
+          <option value="5.1" selected>5.1 V</option>
+          <option value="9.1">9.1 V</option>
+          <option value="12">12 V</option>
+        </select>
+      </div>
+      <div class="field"><label>负载电流 Iload</label>
+        <select id="znIl">
+          <option value="0.005">5 mA</option>
+          <option value="0.01">10 mA</option>
+          <option value="0.02" selected>20 mA</option>
+          <option value="0.05">50 mA</option>
+        </select>
+      </div>
+    </div>
+    <div class="outputs">
+      <h5>OUTPUT · 输出</h5>
+      <div class="out-row"><span class="ok">理论电阻<small>R = (Vin−Vz)/(Izmin+Iload)</small></span><span class="ov" id="oR">276 Ω</span></div>
+      <div class="out-row big"><span class="ok">就近标准值<small>E12 系列</small></span><span class="ov" id="oR12">270 Ω</span></div>
+      <div class="out-row"><span class="ok">电阻功耗<small>PR = (Vin−Vz)²/R</small></span><span class="ov" id="oPr">176 mW</span></div>
+      <div class="out-row"><span class="ok">齐纳空载功耗<small>Pz = Vz·Iz_max</small></span><span class="ov" id="oPz">— mW</span></div>
+      <div class="out-row"><span class="ok">满载时 Iz<small>≥ Izmin = 5 mA 才稳</small></span><span class="ov" id="oIz">— mA</span></div>
+      <div class="out-row"><span class="ok">工作状态<small>REGION</small></span><span class="ov" id="oZStat">稳压中 ✓</span></div>
+    </div>
+    <div class="calc-formula" id="znFormula"></div>
+  </div>
+  <div class="calc reveal">
+    <div class="calc-title">续流/整流二极管功耗计算器<span>BUCK FREEWHEEL LOSS</span></div>
+    <div class="inputs">
+      <h5>INPUT · 输入</h5>
+      <div class="field"><label>二极管</label>
+        <select id="fwDev">
+          <option value="0" selected>1N4007 工频整流</option>
+          <option value="1">FR107 快恢复</option>
+          <option value="2">UF4007 超快恢复</option>
+          <option value="3">SS34 肖特基</option>
+        </select>
+      </div>
+      <div class="field"><label>输入电压 Vin（= 反压）</label>
+        <select id="fwVin">
+          <option value="5">5 V</option>
+          <option value="12" selected>12 V</option>
+          <option value="24">24 V</option>
+        </select>
+      </div>
+      <div class="field"><label>负载电流 Iout</label>
+        <select id="fwIo">
+          <option value="0.5">0.5 A</option>
+          <option value="1">1 A</option>
+          <option value="2" selected>2 A</option>
+          <option value="3">3 A</option>
+        </select>
+      </div>
+      <div class="field"><label>占空比 D（续流管导通 1−D）</label>
+        <select id="fwD">
+          <option value="0.2">0.2</option>
+          <option value="0.3">0.3</option>
+          <option value="0.45" selected>0.45</option>
+          <option value="0.6">0.6</option>
+        </select>
+      </div>
+      <div class="field"><label>开关频率 fsw</label>
+        <select id="fwF">
+          <option value="20000">20 kHz</option>
+          <option value="100000">100 kHz</option>
+          <option value="500000" selected>500 kHz</option>
+          <option value="1000000">1 MHz</option>
+        </select>
+      </div>
+    </div>
+    <div class="outputs">
+      <h5>OUTPUT · 输出</h5>
+      <div class="out-row"><span class="ok">续流平均电流<small>ID = (1−D)·Iout</small></span><span class="ov" id="oId">1.10 A</span></div>
+      <div class="out-row"><span class="ok">导通损耗<small>Pc = VF·ID</small></span><span class="ov" id="oPc">— W</span></div>
+      <div class="out-row"><span class="ok">反向损耗<small>Pv = D·Vin·IR</small></span><span class="ov" id="oPv">— mW</span></div>
+      <div class="out-row big"><span class="ok">恢复损耗<small>Prr ≈ Vin·Iout·trr·f/2</small></span><span class="ov" id="oPrr">— W</span></div>
+      <div class="out-row"><span class="ok">总功耗<small>SUM</small></span><span class="ov" id="oPt">— W</span></div>
+      <div class="out-row"><span class="ok">结论<small>SMA · 90°C/W 估温升</small></span><span class="ov" id="oFwS">—</span></div>
+    </div>
+    <div class="calc-formula" id="fwFormula"></div>
+  </div>
+</section>
+
+<!-- ================= §07 经典电路实验室 ================= -->
+<section id="s7">
+  <div class="sec-head reveal"><span class="no">07</span><h2>经典电路实验室 · 五个必懂的电路</h2><span class="en">Classic Circuits</span></div>
+  <p class="sec-sub reveal">
+    同一颗二极管，接进电路的位置不同就是五种经典：<b>半波整流</b>（削掉负半周）、<b>桥式整流</b>（两个半周都利用）、
+    <b>齐纳稳压</b>（住在击穿区当基准）、<b>感性负载断开</b>（没有续流的灾难现场）与<b>续流二极管</b>（给电流一条回家的路）。
+    切换电路、拖动参数——左边原理图的电流在走，右边示波器的波形在变。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>电路</label>
+        <div class="seg" id="cc3Cir">
+          <button data-i="0" class="on" type="button">半波整流</button>
+          <button data-i="1" type="button">桥式整流</button>
+          <button data-i="2" type="button">齐纳稳压</button>
+          <button data-i="3" type="button">无续流 ✕</button>
+          <button data-i="4" type="button">有续流 ✓</button>
+        </div>
+      </div>
+      <div class="ctrl"><label id="cc3ParamL">滤波电容 C（对数）</label><input type="range" id="cc3Param" min="0" max="100" value="55" style="width:170px"></div>
+      <div class="ctrl"><button class="icon-btn play on" id="cc3Play" title="暂停/播放" type="button">❚❚</button></div>
+    </div>
+    <div class="cc2-body"><canvas id="cc3Canvas"></canvas></div>
+    <div class="cc2-read" id="cc3Read"></div>
+    <div class="cc2-note" id="cc3Note"></div>
+  </div>
+  <div class="fmt-grid">
+    <div class="fmt-card t-do reveal"><div class="fh"><span class="tag">HALF</span><h4>半波整流 = 削掉负半周</h4><span class="en">50 Hz</span></div>
+      <svg viewBox="0 0 300 96">
+        <circle cx="40" cy="50" r="14" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <path d="M32 50 a8 5 0 0 1 16 0" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
+        <path d="M54 50 h16 M70 42 L84 50 L70 58 Z" fill="#dcebe1"/>
+        <path d="M84 42 V58" stroke="#dcebe1" stroke-width="2.4"/>
+        <path d="M84 50 h30 M114 42 v16 M124 42 v16 M124 50 h24" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <path d="M158 50 h20 M178 44 h16 M178 50 v8" stroke="#dcebe1" stroke-width="1.6" fill="none"/>
+        <path d="M148 18 h14 v10 h14" fill="none" stroke="#ffb02e" stroke-width="1.4"/>
+        <path d="M148 28 h14" fill="none" stroke="#34e08a" stroke-width="2"/>
+        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">导通角只有峰值附近</text>
+      </svg>
+      <div class="fb">正半周且 Vs &gt; Vout+VF 时才导通：<b>导通角集中在峰值附近</b>，电容在谷底撑住——纹波频率 50 Hz、Vdc ≈ 峰值−纹波/2。只利用一半波形，效率低但只需一颗管。</div></div>
+    <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">BRIDGE</span><h4>桥式整流 = 两个半周都用</h4><span class="en">100 Hz</span></div>
+      <svg viewBox="0 0 300 96">
+        <rect x="104" y="24" width="44" height="44" fill="none" stroke="#8aa294" stroke-width="1.6" transform="rotate(45 126 46)"/>
+        <path d="M92 46 h16 M136 46 h24" stroke="#9aa79d" stroke-width="2"/>
+        <path d="M126 12 v10 M126 70 v10 M160 50 h30" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <path d="M126 22 m-6 0 h12 M126 80 m-6 0 h12" stroke="#34e08a" stroke-width="1.6"/>
+        <text x="66" y="40" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">AC</text>
+        <text x="240" y="44" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">DC</text>
+        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">四管轮流值班 · 纹波翻倍到 100Hz</text>
+      </svg>
+      <div class="fb">四颗管两两轮流值班，负半周也被翻上来：<b>纹波频率 100 Hz</b>、同样的电容纹波减半，Vdc 比半波多约 0.7 V（两管压降 1.4 V 换来的）。反激与前级电源的标配，桥堆把它打包成四个脚。</div></div>
+    <div class="fmt-card t-zn reveal"><div class="fh"><span class="tag">ZENER</span><h4>齐纳稳压 = 住在击穿区</h4><span class="en">SHUNT REG</span></div>
+      <svg viewBox="0 0 300 96">
+        <circle cx="36" cy="50" r="12" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <text x="36" y="54" text-anchor="middle" fill="#dcebe1" font-size="9" font-family="IBM Plex Mono,monospace">Vin</text>
+        <path d="M48 50 h20 M68 44 h16 M68 50 v12 M68 56 h16" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <path d="M84 40 h20 M100 40 V60 M106 44 a4 8 0 0 0 12 0" stroke="none"/>
+        <path d="M94 38 L110 46 L94 54 Z" fill="#ff6478"/>
+        <path d="M110 38 h-5 v5 M110 62 h-5 v-5 M110 38 V62" stroke="#ff6478" stroke-width="2" fill="none"/>
+        <path d="M110 50 h30 M140 42 v16 M150 42 v16 M150 50 h30" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <path d="M96 24 h24 l-6 8 M120 24 v10" fill="none" stroke="#ffb02e" stroke-width="1.4"/>
+        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">R 吸收波动 · Dz 锁住电压</text>
+      </svg>
+      <div class="fb">串联电阻吃掉 Vin 的波动，齐纳把多余电流<b>并联泄放</b>到地：负载轻时 Iz 大、负载重时 Iz 小，只要 Iz 不触零输出就锁在 Vz。<b>从空载到满载、从 Vin 最低到最高，两端都要校验</b>（06 节计算器）。</div></div>
+    <div class="fmt-card t-sod reveal"><div class="fh"><span class="tag">FLYBACK</span><h4>续流二极管 = 泄洪道</h4><span class="en">FREEWHEEL</span></div>
+      <svg viewBox="0 0 300 96">
+        <rect x="46" y="30" width="34" height="30" rx="4" fill="none" stroke="#8aa294" stroke-width="1.8"/>
+        <text x="63" y="49" text-anchor="middle" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">SW</text>
+        <path d="M80 45 h14 M94 37 a4 8 0 0 1 8 0 a4 8 0 0 1 8 0 a4 8 0 0 1 8 0 M118 45 h14" fill="none" stroke="#dcebe1" stroke-width="1.8"/>
+        <path d="M132 45 h44 M176 45 v10 M170 55 h12 v10" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
+        <path d="M94 68 L110 58 L94 48 Z" fill="#34e08a" opacity=".9"/>
+        <path d="M110 58 h-5 v5 M110 48 h5 v-5 M110 48 V58" stroke="#34e08a" stroke-width="1.8" fill="none"/>
+        <path d="M94 58 v14 h16" fill="none" stroke="#9aa79d" stroke-width="1.6"/>
+        <path d="M14 45 h32 M132 45 v0" stroke="#9aa79d" stroke-width="1.6" fill="none"/>
+        <path d="M238 24 l6 8 M246 24 l-6 8 M252 30 l6 8 M260 30 l-6 8" stroke="#ff6478" stroke-width="1.8"/>
+        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">SW 断开瞬间 · 无 D = 千伏尖峰</text>
+      </svg>
+      <div class="fb">V = L·di/dt（<a href="inductor.html">电感页</a>）：开关断开瞬间电流无处可去，电压冲向数百伏打穿开关；反向并联一颗二极管，电流改走它继续流动、电压被钳在 −0.7 V。<b>右边的实验室就是有无对比的现场</b>。</div></div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">导通想电池 · 截止想开路<small>BATTERY WHEN ON · OPEN WHEN OFF</small></div>
+    <p>
+      分析任何二极管电路先做这个替换：假设每个二极管导通，把它换成 0.7 V 电池；假设截止，把它换成开路——
+      然后校验假设是否自洽（电流方向对吗？反压够高吗？）。整流、钳位、续流、逻辑门，全是这三步的排列组合。
+      滤波电容的账在 <a href="capacitor.html">电容页</a>，感性负载的账在 <a href="inductor.html">电感页</a>，三页合读就是无源世界的完整闭环。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §08 特殊器件 ================= -->
+<section id="s8">
+  <div class="sec-head reveal"><span class="no">08</span><h2>特殊二极管与反向恢复实验室</h2><span class="en">Beyond Rectifiers</span></div>
+  <p class="sec-sub reveal">把「单向导电」用到极致的亲戚们：发光的、感光的、电容会变的、自带负阻的。最后是一间实验室，把 trr 这个看不见的参数画出来。</p>
+  <div class="fact-grid reveal">
+    <div class="fact"><div class="f-no">LED / A</div><div class="sym"><svg viewBox="0 0 240 56">
+      <circle cx="120" cy="28" r="18" fill="rgba(52,224,138,.12)" stroke="#34e08a" stroke-width="2.2"/>
+      <line x1="14" y1="28" x2="102" y2="28" stroke="#8aa294" stroke-width="2"/><line x1="138" y1="28" x2="226" y2="28" stroke="#8aa294" stroke-width="2"/>
+      <path d="M120 2 v-8 M112 0 l8 -6 8 6 M104 8 l-8 -8 M136 8 l8 -8" stroke="#34e08a" stroke-width="1.6" fill="none"/>
+    </svg></div><h4>发光二极管 <code>LED</code></h4><p>禁带宽度决定光子能量即颜色：红 1.8 / 黄 2.1 / 绿 2.2 / 蓝 3.0 / 白（蓝光+荧光粉）3.2 V。<b>驱动是恒流问题不是电压问题</b>：限流电阻算式见电阻页；调光用 PWM 而不是降压。</p></div>
+    <div class="fact"><div class="f-no">PD / B</div><div class="sym"><svg viewBox="0 0 240 56">
+      <circle cx="120" cy="28" r="18" fill="rgba(87,216,242,.08)" stroke="#57d8f2" stroke-width="2.2"/>
+      <line x1="14" y1="28" x2="102" y2="28" stroke="#8aa294" stroke-width="2"/><line x1="138" y1="28" x2="226" y2="28" stroke="#8aa294" stroke-width="2"/>
+      <path d="M96 12 l-14 -10 M88 2 l12 2 -2 12 M104 6 l-6 -8 M112 2 l0 -8" stroke="#ffb02e" stroke-width="1.6" fill="none"/>
+    </svg></div><h4>光电二极管 <code>PHOTODIODE</code></h4><p>反偏工作：光生载流子被电场扫出，光电流与照度成线性。反偏越高结电容越小、响应越快——<b>光电模式和光伏模式</b>（零偏，太阳能电池/精密测光）是两种用法。光耦、红外接收、激光管的看门人。</p></div>
+    <div class="fact"><div class="f-no">VAR / C</div><div class="sym"><svg viewBox="0 0 240 56">
+      <line x1="14" y1="28" x2="100" y2="28" stroke="#8aa79d" stroke-width="2"/><line x1="148" y1="28" x2="226" y2="28" stroke="#8aa79d" stroke-width="2"/>
+      <line x1="100" y1="12" x2="100" y2="44" stroke="#dcebe1" stroke-width="3"/><line x1="148" y1="12" x2="148" y2="44" stroke="#dcebe1" stroke-width="3"/>
+      <path d="M104 28 C114 10 134 46 144 28" fill="none" stroke="#57d8f2" stroke-width="2"/>
+      <text x="196" y="14" fill="#57d8f2" font-size="9" font-family="IBM Plex Mono,monospace">VR↑ Cj↓</text>
+    </svg></div><h4>变容二极管 <code>VARACTOR</code></h4><p>反偏的耗尽层就是电容的「介质」：反向电压越高耗尽层越宽、Cj 越小（比值的平方反比）。用电压调谐 LC 回路——FM/对讲机的电子调谐、VCO、PLL 全靠它，一颗管顶一个可变电容。</p></div>
+    <div class="fact"><div class="f-no">TVS / D</div><div class="sym"><svg viewBox="0 0 240 56">
+      <line x1="14" y1="28" x2="96" y2="28" stroke="#8aa79d" stroke-width="2"/><line x1="160" y1="28" x2="226" y2="28" stroke="#8aa79d" stroke-width="2"/>
+      <path d="M96 16 L128 28 L96 40 Z" fill="#ff6478"/>
+      <path d="M128 16 h-6 v6 M128 40 h-6 v-6 M128 16 V40 M136 16 V40 M136 16 h6 v6 M136 40 h6 v-6" stroke="#ff6478" stroke-width="2" fill="none"/>
+      <path d="M112 8 l8 -8 M128 6 l10 -6" stroke="#ffb02e" stroke-width="1.6"/>
+    </svg></div><h4>TVS / ESD 阵列 <code>TRANSIENT</code></h4><p>大截面雪崩管：平时开路，浪涌来时 ps 级导通把能量接地，钳位电压 VC 必须低于下游耐压。USB/HDMI/天线口的常驻保镖；多级防护里它当中锋，前级气体放电管、后级 TVS 二极管分工。</p></div>
+    <div class="fact"><div class="f-no">PIN / E</div><div class="sym"><svg viewBox="0 0 240 56">
+      <rect x="86" y="14" width="68" height="28" rx="4" fill="none" stroke="#8aa294" stroke-width="2"/>
+      <text x="120" y="33" text-anchor="middle" fill="#8aa294" font-size="11" font-family="IBM Plex Mono,monospace">P I N</text>
+      <line x1="14" y1="28" x2="86" y2="28" stroke="#8aa79d" stroke-width="2"/><line x1="154" y1="28" x2="226" y2="28" stroke="#8aa79d" stroke-width="2"/>
+    </svg></div><h4>PIN 二极管 <code>RF SWITCH</code></h4><p>P 与 N 之间夹一层本征半导体：正偏时像小电阻、反偏时像小电容——<b>用直流偏置控制射频通路</b>。大功率 RF 开关、步进衰减器、限幅器的前排，基站与对讲机的射频切换全由它值班。</p></div>
+    <div class="fact"><div class="f-no">TD / F</div><div class="sym"><svg viewBox="0 0 240 56">
+      <line x1="14" y1="28" x2="96" y2="28" stroke="#8aa79d" stroke-width="2"/><line x1="160" y1="28" x2="226" y2="28" stroke="#8aa79d" stroke-width="2"/>
+      <path d="M96 16 L128 28 L96 40 Z" fill="#b98cff" opacity=".85"/>
+      <path d="M128 16 V40" stroke="#b98cff" stroke-width="2.6"/>
+      <path d="M150 14 q10 14 0 28 q-12 -14 0 -28" fill="none" stroke="#b98cff" stroke-width="1.6"/>
+    </svg></div><h4>隧道二极管 <code>ESAKI</code></h4><p>重掺杂到量子隧穿接管：正向曲线带一段<b>负阻区</b>——电流随电压升高反而下降。1957 年江崎用它拿下诺贝尔奖；GHz 振荡与超快开关的先锋，如今多活在教材里，但「负阻」概念仍在振荡器设计里传宗接代。</p></div>
+    <div class="fact"><div class="f-no">BR / G</div><div class="sym"><svg viewBox="0 0 240 56">
+      <rect x="86" y="6" width="68" height="44" rx="5" fill="none" stroke="#8aa294" stroke-width="2.2"/>
+      <path d="M104 16 L120 24 L104 32 Z" fill="#dcebe1" opacity=".8"/><path d="M148 16 h-5 v5 M148 40 h-5 v-5 M148 16 V40" stroke="#dcebe1" stroke-width="1.4" fill="none"/>
+      <text x="70" y="14" fill="#ffb02e" font-size="10" font-family="IBM Plex Mono,monospace">~</text>
+      <text x="170" y="14" fill="#34e08a" font-size="10" font-family="IBM Plex Mono,monospace">+</text>
+      <text x="170" y="46" fill="#57d8f2" font-size="10" font-family="IBM Plex Mono,monospace">−</text>
+      <line x1="30" y1="14" x2="86" y2="14" stroke="#8aa79d" stroke-width="1.8"/><line x1="30" y1="46" x2="86" y2="46" stroke="#8aa79d" stroke-width="1.8"/>
+      <line x1="154" y1="14" x2="226" y2="14" stroke="#8aa79d" stroke-width="1.8"/><line x1="154" y1="46" x2="226" y2="46" stroke="#8aa79d" stroke-width="1.8"/>
+    </svg></div><h4>整流桥 <code>BRIDGE</code></h4><p>四颗整流管打包：<code>DB107</code>（1 A/1000 V 插件）、<code>MB10S</code>（0.5 A 贴片）……两个 <code>~</code> 脚接交流、<code>+/−</code> 出直流。<b>脚位接反即短路</b>（10 节有坑例），丝印认准波浪号与正负号再下烙铁。</p></div>
+    <div class="fact"><div class="f-no">CRD / H</div><div class="sym"><svg viewBox="0 0 240 56">
+      <line x1="14" y1="28" x2="100" y2="28" stroke="#8aa79d" stroke-width="2"/><line x1="148" y1="28" x2="226" y2="28" stroke="#8aa79d" stroke-width="2"/>
+      <circle cx="124" cy="28" r="22" fill="none" stroke="#8aa294" stroke-width="2.2"/>
+      <text x="124" y="32" text-anchor="middle" fill="#8aa294" font-size="9" font-family="IBM Plex Mono,monospace">CRD</text>
+      <path d="M196 16 v24 M190 22 h12 M190 40 h12" stroke="#34e08a" stroke-width="1.6" fill="none"/>
+    </svg></div><h4>恒流二极管 <code>CRD</code></h4><p>JFET 自偏置结构，两端电压在很宽范围内变化、电流恒定：小功率 LED 驱动与基准电流源的最省事方案。先定需要的 If（0.5–20 mA 常见），再按耐压与功耗挑——它把「限流电阻 + 稳压」两件事合成一个器件。</p></div>
+  </div>
+
+  <div class="lab reveal" style="margin-top:26px">
+    <div class="lab-bar">
+      <div class="ctrl"><label>器件</label>
+        <div class="seg" id="trrSeg">
+          <button data-i="0" class="on" type="button">1N4007 工频</button>
+          <button data-i="1" type="button">FR107 快恢复</button>
+          <button data-i="2" type="button">UF4007 超快</button>
+          <button data-i="3" type="button">SS34 肖特基</button>
+        </div>
+      </div>
+      <div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">测试条件：IF = 1A 硬换向 · VR = 30V · fsw = 100kHz</span></div>
+    </div>
+    <div class="cc2-body"><canvas id="trrCanvas"></canvas></div>
+    <div class="cc2-read" id="trrRead"></div>
+    <div class="cc2-note" id="trrNote"></div>
+  </div>
+</section>
+
+<!-- ================= §09 实战 ================= -->
+<section id="s9">
+  <div class="sec-head reveal"><span class="no">09</span><h2>测量与选型实战</h2><span class="en">Lab Practice</span></div>
+  <p class="sec-sub reveal">
+    按<b>选型五步</b>走一遍，再看三个实战场景：万用表怎么判好坏与方向、一台 9 VAC 电源的整流滤波全链路、以及一台 Buck 的续流管完整选型。
+    <b>点击下面任意步骤查看依据与典型选择。</b>
+  </p>
+  <div class="dbg-steps reveal" id="selSteps"></div>
+  <div class="dbg-panel reveal">
+    <div class="dbg-verdict" id="selVerdict"></div>
+    <div class="dbg-cols">
+      <div class="term">
+        <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span id="selTitleA">依据</span></div>
+        <div class="term-body" id="selBodyA"></div>
+      </div>
+      <div class="term">
+        <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span id="selTitleB">典型选择</span></div>
+        <div class="term-body" id="selBodyB"></div>
+      </div>
+    </div>
+  </div>
+  <div class="term-grid">
+    <div class="term reveal">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>万用表 — 二极管档判方向与好坏</span></div>
+      <div class="term-body">
+        <div class="t-cmt"># 红笔=表内正极。正向：红接阳极、黑接阴极 → 显示 VF</div>
+        <div><span class="t-ps">$ </span><code class="t-cmd" data-copy="红笔接阳极黑笔接阴极 -> 读VF -> 交换应显示OL">红笔接阳 → 读 VF → 交换笔 → OL</code></div>
+        <div class="t-out">0.52 V   <span class="t-cmt"># 0.5–0.7 硅管 ✓ · 0.2–0.3 肖特基 · LED 微亮 1.6–2.4</span></div>
+        <div class="t-out"><span class="t-hl">双向都响</span> = 击穿短路 · <span class="t-hl">双向 OL</span> = 开路</div>
+        <div class="t-cmt"># 在路测量受并联支路影响（LED/IC 钳位），判定前脱开一脚</div>
+        <div class="t-cmt"># 齐纳管反向读数 = Vz 仅当表内 9V 电池高于 Vz，高压试验用电阻接高压测</div>
+      </div>
+    </div>
+    <div class="term reveal">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>实例 — 9VAC → 5V 电源的整流链路</span></div>
+      <div class="term-body">
+        <div class="t-cmt"># 桥整后峰值 = 9×1.414 − 1.4（两管）≈ 11.3 V，纹波按 ΔV = 1V 设计</div>
+        <div><span class="t-ps">$ </span><code class="t-cmd" data-copy="C = I/(2·f·ΔV) = 0.5A/(2×50×1V) = 4700µF">C = I/(2f·ΔV) = 0.5/(2×50×1) = 4700 µF</code></div>
+        <div class="t-out">Vdc ≈ 11.3 − ΔV/2 ≈ <span class="t-hl">10.8 V → 送 7805/齐纳</span></div>
+        <div class="t-cmt"># 上电浪涌 = 给空电容充电那半周：IFSM ≥ 20×IF 才安心（05 节）</div>
+        <div class="t-cmt"># VRRM ≥ 2×√2×Vac = 26V → 1N4007(1000V) 随便用，够即是浪费也有度</div>
+      </div>
+    </div>
+    <div class="term wide reveal">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>Buck 续流管选型 — 12V → 3.3V @ 2A · 500kHz</span></div>
+      <div class="term-body">
+        <div class="t-cmt"># D = 3.3/12 = 0.275 → 续流管导通占空比 1−D = 0.725</div>
+        <div class="t-out">ID_avg = (1−D)×Iout = 0.725×2 = <span class="t-hl">1.45 A</span>   <span class="t-cmt"># 峰值 ≈ Iout+ΔIL/2 ≈ 2.3 A</span></div>
+        <div class="t-out">SS34：P = VF×ID = 0.5×1.45 = 0.73 W → SMA 温升 ≈ 66 °C   <span class="t-cmt"># 要铺铜，或升 SMC 封装</span></div>
+        <div class="t-out">反向：VR = 12V ≪ VRRM 40V ✓ · IR 0.2mA×12V×0.275 = 0.7mW 可忽略</div>
+        <div class="t-cmt"># 换成 1N4007 试试（06 节计算器）：恢复损耗按百瓦计——当场否决</div>
+        <div class="t-cmt"># 同步整流（MOS 当续流管）可把 0.73W 压到 ~0.1W，那是 MOSFET 页的故事</div>
+      </div>
+    </div>
+  </div>
+  <table class="eq-table reveal">
+    <tr><th>需求</th><th>推荐</th><th>理由</th></tr>
+    <tr><td>工频整流 1A 以下</td><td><code>1N4007 / M7</code></td><td>皮实便宜，1000V 裕量白送</td></tr>
+    <tr><td>Buck 续流 ≤ 3A</td><td><code>SS34 / SK34 / B340A</code></td><td>VF 0.5V · trr≈0</td></tr>
+    <tr><td>反激/PFC 高压整流</td><td><code>UF4007 / FR107</code></td><td>1kV + trr 75ns/500ns</td></tr>
+    <tr><td>信号钳位/检波</td><td><code>1N4148 / T4</code></td><td>4ns · 4pF · 几厘钱</td></tr>
+    <tr><td>电源防反接</td><td><code>SS54 / PMOS 方案</code></td><td>低压降；大电流用 MOS 更省</td></tr>
+    <tr><td>小电流电压基准</td><td><code>MMSZ5231B(5.1V)</code></td><td>配 R 当假负载/基准</td></tr>
+    <tr><td>接口 ESD</td><td><code>SMAJ/USBLC 系列</code></td><td>VRWM>电平 · VC<芯片耐压</td></tr>
+    <tr><td>小功率 LED 指示</td><td><code>LED + 1kΩ</code></td><td>限流电阻算式见电阻页</td></tr>
+  </table>
+  <div class="lnx-note reveal">
+    <b>布局与实操三原则：</b>① 整流管到滤波电容的<b>大电流环路最短最粗</b>——上电浪涌与纹波电流都从这里走；
+    ② 肖特基/TVS 的<b>阴极焊盘铺铜散热</b>（芯片贴在阴极端），过孔阵列引到内层；③ 极性上板前用万用表复核——
+    贴片代码看走眼、桥堆脚位插反，都是「一上电就冒烟」排行榜前三。齐纳做基准时记得<b>空载是它最烫的时候</b>。
+  </div>
+</section>
+
+<!-- ================= §10 踩坑 ================= -->
+<section id="s10">
+  <div class="sec-head reveal"><span class="no">10</span><h2>踩坑指南 · 症状 → 病因</h2><span class="en">Troubleshooting</span></div>
+  <p class="sec-sub reveal">二极管相关的调试时间几乎都花在下面这些地方。按症状对号入座。</p>
+  <div class="pit-list reveal">
+    <div class="pit"><div class="symptom">上电<br>就烫</div><div class="fix"><b>功耗没算 · VF×I 被当成零</b><p>SS34 在 3A 时导通损耗就有 0.5×3 = 1.5 W，SMA 裸焊盘根本扛不住。算清 <code>P = VF×I_avg</code>，按 TJ = TA+P×Rθ 校验；大电流就升 SMC/MBR 封装、铺铜散热，或直接上同步整流。</p></div></div>
+    <div class="pit"><div class="symptom">频率<br>一高就炸</div><div class="fix"><b>工频管进了开关电源 · trr 灾难</b><p>1N4007 的 trr 是 µs 级，放进 100kHz 电路每周期都有微秒级「反向导通」，恢复损耗按几十上百瓦计（06 节计算器）。频率高于 20kHz 就换快恢复/超快恢复，低压场合直接肖特基。</p></div></div>
+    <div class="pit"><div class="symptom">待机<br>暴耗</div><div class="fix"><b>肖特基漏电 · 高温下 mA 级</b><p>IR 每升 10 °C 翻倍：25 °C 时 0.2mA 的管子在 85 °C 机壳里可能漏 3–5mA，反向功耗 V×IR 还在给它加热。电池产品算清最坏温度下的 IR；高压场合考虑硅快恢复的折中。</p></div></div>
+    <div class="pit"><div class="symptom">无故<br>击穿</div><div class="fix"><b>VRRM 裕度不足 · 振铃浪涌超限</b><p>反激/续流位的振铃尖峰可轻松超过 2×Vin，贴着 VRRM 选就是赌博。按 <code>VRRM ≥ 2×</code> 工作反压选，感性节点加 RC 吸收或 TVS 兜底；击穿短路了的整流管会把变压器/保险丝一起带走。</p></div></div>
+    <div class="pit"><div class="symptom">输出<br>不稳</div><div class="fix"><b>齐纳 Iz 触零 · 电阻选错边</b><p>负载加重或 Vin 跌落时 Iz 低于 Izmin，稳压退出击穿区、Vout 跟着塌。用 06 节计算器把 <code>Vin 最低 + 满载</code> 与 <code>Vin 最高 + 空载</code> 两端都校验一遍；输入范围太宽别指望齐纳，上 LDO。</p></div></div>
+    <div class="pit"><div class="symptom">LED<br>抢流</div><div class="fix"><b>直接并联 LED · 负温度系数抢流</b><p>VF 随温度降低（−2mV/°C）：并联里最热的那颗吸走越来越多电流直到变暗烧毁——「一颗坏全串灭」。每路独立限流（电阻页的计算器）或用恒流源/多通道恒流驱动。</p></div></div>
+    <div class="pit"><div class="symptom">装反<br>就冒烟</div><div class="fix"><b>极性丝印看错 · 桥堆脚位插反</b><p>贴片代码端/插件色环端是阴极，原理图三角形箭头永远指向阴极；桥堆 <code>~ / + / −</code> 接反 = 短路。上板前万用表二极管档复核一遍，两分钟救命；LED 装反只是不亮，整流桥装反是真的炸。</p></div></div>
+    <div class="pit"><div class="symptom">TVS<br>白装</div><div class="fix"><b>三个电压分不清 · 平时就钳位或永不动作</b><p>VRWM 低于工作电平 → 正常运行就被 TVS「保护」着发热；VC 高于芯片耐压 → 打雷它才动、芯片先走。选型链条：<code>VRWM > 1.1×工作电压</code>，<code>VC < 芯片绝对耐压</code>，中间才是 VBR。</p></div></div>
+  </div>
+</section>
+
+<!-- ================= §11 速查 ================= -->
+<section id="s11">
+  <div class="sec-head reveal"><span class="no">11</span><h2>速查表</h2><span class="en">Quick Reference</span></div>
+  <p class="sec-sub reveal">撕下来贴工位的那一页：常用型号速查、VF 口诀与核心公式。</p>
+  <div class="qr-grid">
+    <div class="qr-card reveal">
+      <div class="qh"><h4>常用型号速查</h4><span>GO-TO PARTS</span></div>
+      <div class="qb">
+        <table class="cmp-table">
+          <tr><th>型号</th><th>规格</th><th>用途</th></tr>
+          <tr><td><b>1N4148</b></td><td>100V · 150mA · 4ns</td><td>信号/钳位</td></tr>
+          <tr><td><b>1N4007</b></td><td>1000V · 1A · 工频</td><td>市电整流</td></tr>
+          <tr><td><b>UF4007</b></td><td>1000V · 1A · 75ns</td><td>反激/PFC</td></tr>
+          <tr><td><b>SS14</b></td><td>40V · 1A · 肖特基</td><td>小 Buck 续流</td></tr>
+          <tr><td><b>SS34</b></td><td>40V · 3A · 肖特基</td><td>Buck/防反接</td></tr>
+          <tr><td><b>MMSZ5231B</b></td><td>5.1V · 0.5W 齐纳</td><td>基准/钳位</td></tr>
+          <tr><td><b>SMAJ12A</b></td><td>VRWM 12V · 400W</td><td>12V 接口 TVS</td></tr>
+          <tr><td><b>DB107</b></td><td>1000V · 1A 桥堆</td><td>小电源前级</td></tr>
+        </table>
+        <p style="margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:1.9">
+          贴片马甲：M7/S1M = 1N4007 · T4 = 1N4148W<br>
+          LL4148 = 1N4148 玻封 · B340A/SK34 ≈ SS34
+        </p>
+      </div>
+    </div>
+    <div class="qr-card reveal">
+      <div class="qh"><h4>压降口诀与核心公式</h4><span>FORMULAS</span></div>
+      <div class="qb">
+        <table class="cmp-table">
+          <tr><th>器件</th><th>VF 典型</th><th>备注</th></tr>
+          <tr><td>锗管</td><td>0.3 V</td><td>几乎退出历史</td></tr>
+          <tr><td>肖特基</td><td>0.3–0.5 V</td><td>trr ≈ 0 · 漏电大</td></tr>
+          <tr><td>硅 PN</td><td>0.7 V</td><td>−2mV/°C</td></tr>
+          <tr><td>LED 红/黄/绿</td><td>1.8–2.2 V</td><td>必须限流</td></tr>
+          <tr><td>LED 蓝/白</td><td>2.9–3.4 V</td><td>禁带更宽</td></tr>
+        </table>
+        <p style="margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:1.9">
+          I = Is·(e^(V/nVT)−1) · VT = 26mV<br>
+          rd = nVT/I · 导通损耗 P = VF×I<br>
+          齐纳 R = (Vin−Vz)/(Izmin+Iload)<br>
+          桥整滤波 C = I/(2f·ΔV) · Vdc ≈ √2·Vac−1.4<br>
+          续流 P = (1−D)·VF·Iout · 恢复 P ≈ V·Qrr·f
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-l">
+    <b>参考</b> · W. Shockley《The Theory of p-n Junctions in Silicon and Germanium》1949 ·
+    Vishay / Nexperia / onsemi 1N4000·1N4148·SS 系列数据手册 · 厂商齐纳与 TVS 选型应用笔记 · 《The Art of Electronics 3rd ed》Ch.1 ·
+    姊妹页：<a href="resistor.html">电阻</a> / <a href="capacitor.html">电容</a> / <a href="inductor.html">电感</a><br>
+    本页为单文件交互式图解，可离线打开 · 曲线与波形由浏览器实时渲染
+  </div>
+  <div class="f-r">DIODE·LAB<small>HW-BASIC · MAINTAINED WITH ♥ FOR EMBEDDED ENGINEERS</small></div>
+</footer>
+</main>
+
+<script>
+/* ================================================================
+   二极管器件交互引擎
+   ① hero 单向阀门动画  ② VI 逐段扫描实验室  ③ 极性翻转实验室
+   ④ 丝印解码器  ⑤ 齐纳/续流计算器  ⑥ 经典电路实验室（整流×2/齐纳/续流×2）
+   ⑦ 反向恢复实验室  ⑧ 选型五步  ⑨ 终端复制
+================================================================ */
+
+/* ---------------- 工具 ---------------- */
+const $ = id => document.getElementById(id);
+const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const trim3 = n => parseFloat(n.toPrecision(3));
+function fmtA(a){
+  if (!isFinite(a)) return '—';
+  if (a===0) return '0 A';
+  const s=a<0?'−':'';
+  a=Math.abs(a);
+  const us=[[1e3,'kA'],[1,'A'],[1e-3,'mA'],[1e-6,'µA'],[1e-9,'nA']];
+  for (const [f,n] of us){ if (a>=f) return s+trim3(a/f)+' '+n; }
+  return s+trim3(a/1e-12)+' pA';
+}
+function fmtV(v){
+  if (!isFinite(v)) return '—';
+  const s=v<0?'−':'';
+  v=Math.abs(v);
+  if (v>=1) return s+trim3(v)+' V';
+  return s+trim3(v*1e3)+' mV';
+}
+function fmtW(w){
+  if (!isFinite(w)) return '—';
+  if (w===0) return '0 W';
+  const s=w<0?'−':'';
+  w=Math.abs(w);
+  const us=[[1,'W'],[1e-3,'mW'],[1e-6,'µW'],[1e-9,'nW']];
+  for (const [f,n] of us){ if (w>=f) return s+trim3(w/f)+' '+n; }
+  return s+trim3(w/1e-12)+' pW';
+}
+function fmtOhm(v){
+  if (!isFinite(v)) return '—';
+  if (v===0) return '0 Ω';
+  const us=[[1e6,'MΩ'],[1e3,'kΩ'],[1,'Ω']];
+  for (const [f,n] of us){ if (v>=f) return trim3(v/f)+' '+n; }
+  return trim3(v/1e-3)+' mΩ';
+}
+function fmtF(c){
+  if (!isFinite(c)) return '—';
+  if (c>=1e-3) return trim3(c/1e-3)+' mF';
+  if (c>=1e-6) return trim3(c/1e-6)+' µF';
+  return trim3(c/1e-9)+' nF';
+}
+function fmtT(s){
+  if (!isFinite(s)) return '—';
+  if (s===0) return '0 s';
+  const us=[[1,'s'],[1e-3,'ms'],[1e-6,'µs'],[1e-9,'ns']];
+  for (const [f,n] of us){ if (s>=f) return trim3(s/f)+' '+n; }
+  return trim3(s/1e-12)+' ps';
+}
+function fmtHz(f){
+  if (!isFinite(f)) return '—';
+  if (f===0) return '0 Hz';
+  const us=[[1e9,'GHz'],[1e6,'MHz'],[1e3,'kHz'],[1,'Hz']];
+  for (const [g,n] of us){ if (f>=g) return trim3(f/g)+' '+n; }
+  return trim3(f)+' Hz';
+}
+
+/* ================================================================
+   ① HERO · 单向阀门：AC 源 → 二极管 → 负载
+      正半周导通（电流环游 + 二极管发光），负半周截止（一切熄灭）
+================================================================ */
+(function(){
+  const cv = $('heroScope'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const H = 150;
+  let W = 300;
+  function resize(){
+    const r = cv.parentElement.getBoundingClientRect();
+    W = Math.max(300, r.width);
+    const dpr = Math.min(devicePixelRatio||1, 2);
+    cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  new ResizeObserver(resize).observe(cv.parentElement);
+  resize();
+  const dots = []; for (let i=0;i<22;i++) dots.push({p:i/22});
+  function pt(p, g){
+    const L1=g.x1-g.x0, L2=g.y1-g.y0, total=2*(L1+L2);
+    let d=((p%1)+1)%1*total;
+    if (d<L1) return {x:g.x0+d, y:g.y0};
+    d-=L1; if (d<L2) return {x:g.x1, y:g.y0+d};
+    d-=L2; if (d<L1) return {x:g.x1-d, y:g.y1};
+    d-=L1; return {x:g.x0, y:g.y1-d};
+  }
+  const VPK = 12, VF = 0.7;
+  const hist = [];                 /* [{vin,vout}] */
+  let ph = 0, last = performance.now();
+  function frame(now){
+    const dt=Math.min(.05,(now-last)/1000); last=now;
+    ph += dt*(Math.PI*2/3.2);                    /* 3.2s 一个完整交流周期 */
+    const vin = VPK*Math.sin(ph);
+    const fwd = vin > VF;
+    const iF = fwd ? (vin-VF)/470 : 0;           /* RL = 470Ω */
+    const vout = fwd ? vin-VF : 0;
+    hist.push({vin:vin/VPK, vout:vout/VPK}); if (hist.length>560) hist.shift();
+    const g={x0:Math.max(80,W*0.18), x1:W-Math.max(80,W*0.18), y0:30, y1:96};
+    const cX=(g.x0+g.x1)/2, ry=(g.y0+g.y1)/2;
+    ctx.clearRect(0,0,W,H);
+    /* 回路（顶部给二极管留缺口） */
+    ctx.strokeStyle='rgba(220,235,225,.45)'; ctx.lineWidth=1.6;
+    ctx.beginPath();
+    ctx.moveTo(g.x0,g.y0); ctx.lineTo(cX-58,g.y0);
+    ctx.moveTo(cX+58,g.y0); ctx.lineTo(g.x1,g.y0); ctx.lineTo(g.x1,g.y1); ctx.lineTo(g.x0,g.y1); ctx.lineTo(g.x0,g.y0);
+    ctx.stroke();
+    /* AC 源（左） */
+    ctx.fillStyle='#0a100c'; ctx.fillRect(g.x0-11,ry-15,22,30);
+    ctx.strokeStyle='#dcebe1'; ctx.lineWidth=2.2;
+    ctx.beginPath(); ctx.arc(g.x0,ry,11,0,Math.PI*2); ctx.stroke();
+    ctx.lineWidth=1.6; ctx.beginPath();
+    ctx.moveTo(g.x0-6,ry); ctx.quadraticCurveTo(g.x0-3,ry-6,g.x0,ry);
+    ctx.quadraticCurveTo(g.x0+3,ry+6,g.x0+6,ry); ctx.stroke();
+    ctx.font='10px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='center';
+    ctx.fillText('AC '+VPK+'Vpk', g.x0-42, ry+4);
+    /* 负载 R（右）：锯齿 */
+    ctx.strokeStyle='#8aa294'; ctx.lineWidth=2.2;
+    ctx.beginPath(); ctx.moveTo(g.x1,g.y0+8); ctx.lineTo(g.x1,ry-24);
+    const ys=ry-24, ye=ry+24, seg=(ye-ys)/6;
+    for (let i=1;i<=11;i++){
+      const y=ys+i*(seg/2);
+      const x=(i%2===0)? g.x1 : (Math.floor(i/2)%2===0 ? g.x1-12 : g.x1+12);
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(g.x1,ye); ctx.lineTo(g.x1,g.y1-8); ctx.stroke();
+    ctx.fillStyle='#5c7264';
+    ctx.fillText('RL 470Ω', g.x1+40, ry+4);
+    /* 二极管（顶）：三角 + 阴极杆，导通时发光 */
+    ctx.save();
+    const glow = fwd ? Math.min(1, iF/0.02) : 0;
+    if (glow>0.05){
+      ctx.shadowColor='rgba(52,224,138,.7)'; ctx.shadowBlur=16*glow;
+    }
+    ctx.strokeStyle=fwd?'#34e08a':'#5c7264'; ctx.fillStyle=fwd?'rgba(52,224,138,.28)':'transparent';
+    ctx.lineWidth=2.8;
+    ctx.beginPath();
+    ctx.moveTo(cX-40,g.y0-12); ctx.lineTo(cX-8,g.y0-12); ctx.lineTo(cX-8,g.y0+12);
+    ctx.lineTo(cX-40,g.y0+12); ctx.closePath();
+    if (fwd){ ctx.fill(); }
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cX-40,g.y0-12); ctx.lineTo(cX-40,g.y0+12); ctx.lineTo(cX-8,g.y0); ctx.closePath();
+    if (fwd){ ctx.fillStyle='#34e08a'; ctx.fill(); }
+    ctx.beginPath(); ctx.moveTo(cX-6,g.y0-14); ctx.lineTo(cX-6,g.y0+14); ctx.stroke();
+    ctx.restore();
+    ctx.font='10px "IBM Plex Mono"'; ctx.fillStyle=fwd?'#34e08a':'#5c7264'; ctx.textAlign='center';
+    ctx.fillText(fwd?`导通 · VF ${VF.toFixed(2)} V`:'反向 · 像开路', cX-16, g.y0-24);
+    ctx.fillStyle='#5c7264'; ctx.fillText('K', cX-2, g.y0+28);
+    /* 电流环游：速度 ∝ i，反向时熄灭 */
+    const speed = 0.13*Math.max(iF/0.025,0.02);
+    for (const d of dots){
+      d.p = ((d.p + (fwd?speed:0)*dt)%1+1)%1;
+      const p=pt(d.p,g);
+      ctx.beginPath(); ctx.arc(p.x,p.y,2.6,0,Math.PI*2);
+      if (fwd){
+        ctx.fillStyle='rgba(52,224,138,.95)';
+        ctx.shadowColor='rgba(52,224,138,.9)'; ctx.shadowBlur=8;
+        ctx.fill(); ctx.shadowBlur=0;
+      } else {
+        ctx.fillStyle='rgba(92,114,100,.5)';
+        ctx.fill();
+      }
+    }
+    /* 双迹滚动条：Vin / Vout */
+    const gy0=108, gy1=142, mid=(gy0+gy1)/2;
+    ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(g.x0,mid); ctx.lineTo(g.x1,mid); ctx.stroke();
+    ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(255,176,46,.35)';
+    ctx.beginPath(); ctx.moveTo(g.x0,gy0); ctx.lineTo(g.x1,gy0); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle='rgba(255,176,46,.55)'; ctx.lineWidth=1.4; ctx.beginPath();
+    for (let i=0;i<hist.length;i++){
+      const x = g.x1-(hist.length-1-i)*((g.x1-g.x0)/560);
+      const y = mid-hist[i].vin*14;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.strokeStyle='#34e08a'; ctx.lineWidth=1.8; ctx.beginPath();
+    for (let i=0;i<hist.length;i++){
+      const x = g.x1-(hist.length-1-i)*((g.x1-g.x0)/560);
+      const y = mid-hist[i].vout*14;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    /* 读数行 */
+    ctx.font='11.5px "IBM Plex Mono"'; ctx.textAlign='left'; ctx.fillStyle='#8aa294';
+    const rt = fwd
+      ? `正向  IF ${(iF*1000).toFixed(1)} mA · VL ${vout.toFixed(2)} V`
+      : `反向  VR ${vin.toFixed(1)} V · IR 0.02 µA`;
+    ctx.fillText(rt+'   （黄=Vin 绿=Vout）', g.x0, H-4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ================================================================
+   ② VI 逐段扫描实验室：Shockley 模型 + 击穿项 + 漏电项
+================================================================ */
+const VT = 0.02585;
+const DEVS = [
+  { name:'Si 开关管', tag:'1N4148',
+    Is:1.4e-13, nVt:0.028, vfMax:1.0, iFwd:0.025,
+    vRev:-22, iRev:50e-9, br:null, leak:1e-9,
+    prof:'VF ≈ 0.7 V @10mA · VRRM 100 V（图外）· IR ≈ 25nA@20V',
+    keys:[
+      {v:-22, name:'反向深处', note:'耗尽层最宽、像绝缘体。1N4148 的 VRRM 是 100V——图外才击穿，这个区间它只交出 nA 级漏电。'},
+      {v:-10, name:'反向截止', note:'反偏把势垒加宽：多子过不去，只剩少数载流子的漂移电流 IR（≈25nA@20V）。电阻档量它就是「无穷大」。'},
+      {v:-1, name:'安全反压', note:'这是二极管当「阀门」用的常态位：反向电压再高（只要不超过 VRRM）也几乎不导电。'},
+      {v:0, name:'零偏平衡', note:'无外加电压：扩散与漂移恰好抵消，势垒保持自然厚度，净电流为零。'},
+      {v:0.3, name:'死区', note:'e^(V/nVT) 还很接近 1，电流只有 µA 级——硅管的「0.3V 门槛论」就是把肖特基的门槛错记到了硅管头上。'},
+      {v:0.55, name:'指数膝', note:'电流开始 mA 级起飞。每升高 60mV（一个 nVT·ln10）电流涨十倍——这就是那条著名指数曲线的斜率。'},
+      {v:0.7, name:'名义导通', note:'工程恒压模型的取值点：0.7V。此后电流基本由外电路决定，管子自己像个 0.7V 的「电池」。'},
+      {v:0.85, name:'大电流', note:'电流指数飙升，动态电阻 rd = nVT/I 已跌到几个 Ω——宏观上越来越像一根导线串小电阻。'},
+      {v:0.98, name:'电流上限', note:'真实器件到这里已到 IF 限：VF 负温度系数（−2mV/°C）让热点抢流，必须由外电路限流（05 节）。'},
+    ]},
+  { name:'肖特基', tag:'SS14',
+    Is:2.5e-4, nVt:0.0565, vfMax:0.7, iFwd:1.5,
+    vRev:-48, iRev:2e-3, br:{V:-42,k:0.05,Izb:1e-5}, leak:5e-6,
+    prof:'VF ≈ 0.45 V @1A · VRRM 40 V · 漏电 0.1–1mA 级',
+    keys:[
+      {v:-48, name:'超越 VRRM', note:'已越过 40V 额定：肖特基的击穿是毁灭性的（不是齐纳那种可重复的陡坡），实际管子在这里非死即伤。'},
+      {v:-40, name:'VRRM 边界', note:'漏电已达 µA~mA 级且随温度每 10°C 翻倍——反向功耗 V×IR 在高温场合能烧管（05 节温度陷阱）。'},
+      {v:-20, name:'漏电显著', note:'对比硅管的 nA：肖特基这里已经是几十到上百 µA。电池产品的待机账本里这一项不能漏。'},
+      {v:-5, name:'反偏常态', note:'Buck 续流位它天天住在这里：导通 0.45V、反向漏一点，两头都要算功耗（06 节计算器）。'},
+      {v:0, name:'零偏', note:'金属-半导体势垒比 PN 结矮：这也是它 VF 低的物理原因。'},
+      {v:0.2, name:'提前开门', note:'势垒低所以早开：0.2V 就有可观的电流——硅管还在死区睡觉。'},
+      {v:0.45, name:'额定导通点', note:'1A 时的典型 VF。就这 0.25V 的差距，让 Buck 效率差出好几个点——肖特基的全部商业价值在此。'},
+      {v:0.58, name:'大电流', note:'多子器件没有少子储存：关断瞬间不需要「抽库存」，trr ≈ 0（08 节实验室画给你看）。'},
+      {v:0.68, name:'浪涌区', note:'数据手册的 IFSM（不重复浪涌）可以到几十 A：上电充电容那一下靠它扛，但只能扛半个工频周波。'},
+    ]},
+  { name:'齐纳管', tag:'5V1',
+    Is:1e-14, nVt:0.027, vfMax:1.0, iFwd:0.02,
+    vRev:-7, iRev:0.15, br:{V:-5.1,k:0.06,Izb:1e-6}, leak:0.5e-9,
+    prof:'Vz = 5.1 V ±5% · 正向同硅管 · Iz 建议 5–75mA',
+    keys:[
+      {v:-7, name:'击穿深处', note:'只要限流电阻在场，它就安稳住在这里工作——「击穿」对齐纳管不是事故，是岗位。'},
+      {v:-5.1, name:'稳压点 Vz', note:'Vz 定义在指定测试电流（如 5mA）处。±5% 容差是常态，精密场合上 0.5% 档或基准 IC。'},
+      {v:-5.0, name:'膝点附近', note:'低于 Izmin 时曲线还躺在膝上：输出电压随电流明显变化——稳压失稳多发生在这一段（06 节计算器校验）。'},
+      {v:-2, name:'反向截止', note:'不到击穿区之前，它就是一颗普通（还偏贵）的硅二极管：漏电 nA 级。'},
+      {v:0, name:'零偏', note:'低于 5.6V 的齐纳靠隧道击穿（负温度系数），高于 7V 靠雪崩（正温度系数）——5.6V 附近两者相消，做基准最稳。'},
+      {v:0.55, name:'正向死区', note:'别忘了齐纳也是二极管：正向它就是一颗 0.7V 的硅管。'},
+      {v:0.7, name:'正向导通', note:'需要 0.7V 左右小基准时，直接正向用齐纳就行——比反着用更便宜的温度特性场合也存在。'},
+      {v:0.95, name:'正向大电流', note:'正向与反向两条「恒压」曲线在四个象限画出齐纳的完整人格：反向 5.1V、正向 0.7V，两头都能稳。'},
+    ]},
+  { name:'红光 LED', tag:'RED',
+    Is:9e-15, nVt:0.065, vfMax:2.4, iFwd:0.02,
+    vRev:-7, iRev:0.02, br:{V:-5,k:0.07,Izb:1e-7}, leak:2e-9,
+    prof:'VF ≈ 1.8 V @10mA · 反向仅 ≈ 5V · 必须限流',
+    keys:[
+      {v:-7, name:'反向超限', note:'LED 的反向耐压只有 5V 上下——比一颗 1N4148 脆弱二十倍。装反在高压上就是直接火化。'},
+      {v:-5, name:'反向击穿', note:'红外的禁带窄、击穿更低。交流驱动 LED 要反向并联保护二极管，正是给它挡这一刀。'},
+      {v:-2, name:'反向截止', note:'反向漏电 nA 级不是问题，问题是耐压余量：任何感性反冲都能送它走。'},
+      {v:0, name:'零偏', note:'GaP/AlGaAs 的禁带约 1.8eV：比硅（1.12eV）宽，所以门槛电压成比例地高。'},
+      {v:1.5, name:'微亮开始', note:'µA 级电流已经有微弱光输出——夜灯与指示灯的「呼吸感」就是工作在这一段。'},
+      {v:1.8, name:'额定工作点', note:'10mA 时的典型 VF。亮度与电流近似线性，所以 LED 是「电流器件」：稳的是电流不是电压。'},
+      {v:2.1, name:'电流飙升', note:'同样是指数曲线，只是门槛搬到了 1.8V——直接并 5V 电源的 LED 在这一段灰飞烟灭。'},
+      {v:2.35, name:'必须限流', note:'串联电阻或恒流源是 LED 的安全带（限流计算见电阻页）。蓝光/白光门槛 3.0–3.2V，还要更高。'},
+    ]},
+];
+function diodeI(d, V){
+  let i = d.Is*(Math.exp(Math.min(V/d.nVt,36))-1);
+  if (V<0 && d.leak) i -= d.leak*(-V);
+  if (d.br && V < d.br.V) i -= d.br.Izb*(Math.exp(Math.min(-(V-d.br.V)/d.br.k,36))-1);
+  return i;
+}
+
+const VI = { dev:0, p:0, playing:true, speed:5, last:0 };
+
+function viDev(){ return DEVS[VI.dev]; }
+const viXT = V => 64 + Math.max(0,V)/viDev().vfMax*544;                       /* 上格 x：0..vfMax */
+const viXB = V => 64 + (Math.max(V,viDev().vRev)-viDev().vRev)/(-viDev().vRev)*544; /* 下格 x：vRev..0 */
+const viYF = I => 26 + 120 - Math.min(I,viDev().iFwd)/viDev().iFwd*120;       /* 上格 y：电流向上 */
+const viYR = I => 196 - 8 + Math.min(Math.abs(I),viDev().iRev)/viDev().iRev*112; /* 下格 y：|I| 向下 */
+
+function viPathFwd(){
+  const d=viDev();
+  let path='', up=false;
+  for (let k=0;k<=260;k++){
+    const V=d.vfMax*k/260;
+    const I=diodeI(d,V);
+    if (I>d.iFwd*1.06){ break; }               /* 出上边界即止 */
+    path += (k?'L':'M')+viXT(V).toFixed(1)+' '+viYF(I).toFixed(1);
+    up=true;
+  }
+  return path;
+}
+function viPathRev(){
+  const d=viDev();
+  let path='';
+  for (let k=0;k<=260;k++){
+    const V=d.vRev + (0-d.vRev)*k/260;
+    const I=diodeI(d,V);
+    if (Math.abs(I)>d.iRev*1.06) break;
+    const x=viXB(V), y=viYR(I);
+    path += (k?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  return path;
+}
+function renderVIStatic(){
+  const d=viDev();
+  let fwdTicks='', revTicks='';
+  const fs=d.vfMax/5;
+  for (let j=0;j<=5;j++){
+    const V=fs*j, x=viXT(V);
+    fwdTicks += `<line x1="${x.toFixed(1)}" y1="26" x2="${x.toFixed(1)}" y2="146" stroke="rgba(52,224,138,.07)"/>`
+      + (j%2===0?`<text x="${x.toFixed(1)}" y="160" text-anchor="middle" fill="#5c7264" font-size="9.5" font-family="IBM Plex Mono,monospace">${trim3(V)}</text>`:'');
+  }
+  for (let j=0;j<=5;j++){
+    const V=d.vRev+(0-d.vRev)*j/5, x=viXB(V);
+    revTicks += `<line x1="${x.toFixed(1)}" y1="196" x2="${x.toFixed(1)}" y2="316" stroke="rgba(87,216,242,.06)"/>`
+      + (j%2===0?`<text x="${x.toFixed(1)}" y="330" text-anchor="middle" fill="#5c7264" font-size="9.5" font-family="IBM Plex Mono,monospace">${trim3(V)}</text>`:'');
+  }
+  let brMark='';
+  if (d.br && d.br.V>d.vRev){
+    const xb=viXB(d.br.V);
+    brMark = `<rect x="64" y="196" width="${(xb-64).toFixed(1)}" height="120" fill="rgba(255,100,120,.05)"/>`
+      + `<line x1="${xb.toFixed(1)}" y1="196" x2="${xb.toFixed(1)}" y2="316" stroke="rgba(255,100,120,.4)" stroke-dasharray="3 4"/>`
+      + `<text x="${(xb+5).toFixed(1)}" y="310" fill="rgba(255,100,120,.8)" font-size="9.5" font-family="IBM Plex Mono,monospace">击穿 ${trim3(-d.br.V)}V</text>`;
+  } else {
+    brMark = `<text x="604" y="310" fill="rgba(255,100,120,.5)" font-size="9.5" font-family="IBM Plex Mono,monospace" text-anchor="end">→ VRRM 在图外</text>`;
+  }
+  $('viSvg').innerHTML = `
+  <svg viewBox="0 0 640 338" xmlns="http://www.w3.org/2000/svg">
+    <text x="64" y="16" fill="#34e08a" font-size="11" font-family="IBM Plex Mono,monospace">IF 正向电流（0 – ${fmtA(d.iFwd)}）</text>
+    <text x="64" y="192" fill="#57d8f2" font-size="11" font-family="IBM Plex Mono,monospace">IR 反向电流（|I| 向下 · 0 – ${fmtA(d.iRev)}）</text>
+    <rect x="64" y="26" width="544" height="120" fill="none" stroke="#1d2c22"/>
+    <rect x="64" y="196" width="544" height="120" fill="none" stroke="#1d2c22"/>
+    <line x1="64" y1="146" x2="608" y2="146" stroke="#27392d"/>
+    <line x1="64" y1="196" x2="608" y2="196" stroke="#27392d"/>
+    ${fwdTicks}${revTicks}${brMark}
+    <path d="${viPathRev()}" fill="none" stroke="#57d8f2" stroke-width="2.4"/>
+    <path d="${viPathFwd()}" fill="none" stroke="#34e08a" stroke-width="2.6"/>
+    <g id="viCur">
+      <line id="viCurT" x1="64" y1="26" x2="64" y2="146" stroke="#dcebe1" stroke-width="1" stroke-dasharray="2 3" opacity=".8"/>
+      <circle id="viCurFDot" cx="64" cy="146" r="4" fill="#34e08a"/>
+      <line id="viCurB" x1="608" y1="196" x2="608" y2="316" stroke="#dcebe1" stroke-width="1" stroke-dasharray="2 3" opacity=".8"/>
+      <circle id="viCurRDot" cx="608" cy="196" r="4" fill="#57d8f2"/>
+      <text id="viCurLab" x="64" y="170" font-size="11" fill="#dcebe1" font-family="IBM Plex Mono,monospace" text-anchor="middle"></text>
+    </g>
+  </svg>`;
+}
+function viVnow(){ return viDev().vRev + (viDev().vfMax - viDev().vRev)*VI.p; }
+function viKeyIdx(){
+  const d=viDev(), V=viVnow();
+  let idx=0; d.keys.forEach((k,i)=>{ if (V>=k.v-1e-9) idx=i; });
+  return idx;
+}
+function viUpdate(){
+  const d=viDev(), V=viVnow(), I=diodeI(d,V);
+  const xT=viXT(Math.max(0,V)), xB=viXB(Math.min(0,V));
+  const lt=$('viCurT'), lb=$('viCurB');
+  if (lt){ lt.setAttribute('x1',xT); lt.setAttribute('x2',xT); lt.setAttribute('opacity', V>0?'.8':'0'); }
+  if (lb){ lb.setAttribute('x1',xB); lb.setAttribute('x2',xB); lb.setAttribute('opacity', V<0?'.8':'0'); }
+  const fd=$('viCurFDot'), rd=$('viCurRDot');
+  if (fd){ fd.setAttribute('cx',xT); fd.setAttribute('cy',viYF(I)); fd.setAttribute('opacity', V>0?'1':'0'); }
+  if (rd){ rd.setAttribute('cx',xB); rd.setAttribute('cy',viYR(I)); rd.setAttribute('opacity', V<0?'1':'0'); }
+  const lab=$('viCurLab');
+  if (lab){
+    lab.setAttribute('x', Math.min(Math.max(xT,150),560));
+    lab.textContent = `V ${V>=0?'+':''}${V.toFixed(2)} V · I ${fmtA(I)}`;
+  }
+  const k=d.keys[viKeyIdx()];
+  $('viMode').textContent = k.name;
+  $('viV').textContent = `${V>=0?'+':''}${V.toFixed(3)} V`;
+  $('viI').textContent = fmtA(I);
+  $('viRd').textContent = Math.abs(I)>d.Is ? fmtOhm(d.nVt/Math.abs(I)) : '∞（截止）';
+  $('viP').textContent = fmtW(Math.abs(V*I));
+  $('viProf').textContent = `${d.name} ${d.tag}`;
+  $('viProfS').textContent = d.prof;
+  $('viNote').innerHTML = `<b>${escHtml(k.name)} @ ${k.v>=0?'+':''}${k.v} V</b>：${escHtml(k.note)}`;
+}
+function viTick(now){
+  const dt=Math.min(.06,((now-VI.last)/1000)||0); VI.last=now;
+  if (VI.playing){
+    VI.p += dt*VI.speed*0.07;
+    if (VI.p>=1){ VI.p=0; }
+  }
+  viUpdate();
+  requestAnimationFrame(viTick);
+}
+function viSetPlaying(p){
+  VI.playing=p;
+  $('viPlay').classList.toggle('on',p);
+  $('viPlay').textContent = p?'❚❚':'▶';
+}
+function viStepNext(){
+  viSetPlaying(false);
+  const d=viDev();
+  const idx=viKeyIdx();
+  const next = idx<d.keys.length-1 ? idx+1 : 0;
+  const v=d.keys[next].v;
+  VI.p = (v - d.vRev)/(d.vfMax - d.vRev);
+  viUpdate();
+}
+$('viPlay').addEventListener('click',()=>viSetPlaying(!VI.playing));
+$('viStep').addEventListener('click',viStepNext);
+$('viSpeed').addEventListener('input',e=>{ VI.speed=+e.target.value; });
+$('viSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  $('viSeg').querySelectorAll('button').forEach((x,k)=>x.classList.toggle('on',k===+b.dataset.i));
+  VI.dev=+b.dataset.i; VI.p=0;
+  renderVIStatic(); viUpdate();
+});
+renderVIStatic(); viUpdate();
+VI.last=performance.now();
+requestAnimationFrame(viTick);
+
+/* ================================================================
+   ③ 极性翻转实验室：正向接入 → LED 亮；反向接入 → 全回路熄灭
+================================================================ */
+const POL = { fwd:true };
+function setPol(fwd){
+  POL.fwd=fwd;
+  const g=$('polD');
+  if (g) g.setAttribute('transform', `rotate(${fwd?0:180} 450 150)`);
+  const flow=$('polFlow');
+  if (flow) flow.classList.toggle('off', !fwd);
+  const led=$('polLed'), ray=$('polLedRay');
+  if (led){ led.setAttribute('fill', fwd?'rgba(52,224,138,.45)':'rgba(52,224,138,.06)'); led.setAttribute('stroke', fwd?'#34e08a':'#3a4a40'); }
+  if (ray) ray.setAttribute('opacity', fwd?'1':'0');
+  const dk=$('polDK');
+  if (dk) dk.textContent = fwd?'K（阴极）在下 · 正向接入':'K（阴极）在上 · 反向接入';
+  /* IF = (5 − VLED − VF)/330（导通）· 0（截止） */
+  const it = fwd ? (5-2.2-0.70)/330*1000 : 0;
+  const st=$('polState');
+  if (st){
+    st.textContent = fwd?'导通 · LED 亮':'截止 · LED 灭';
+    st.className = fwd?'ok':'no';
+  }
+  $('polI').textContent = it.toFixed(1)+' mA';
+  $('polVf').textContent = fwd?'0.70 V':'−5 V（反偏）';
+  $('polVled').textContent = fwd?'2.2 V':'0 V';
+}
+$('polSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  $('polSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  setPol(b.dataset.v==='1');
+});
+setPol(true);
+
+/* ================================================================
+   ④ 丝印解码器：贴片代码 → 器件
+================================================================ */
+const DIO_DB = {
+  '1N4007':{cat:'硅整流管', val:'整流 1A / 1000V', kind:'JEDEC 原型号 · DO-41 插件',
+    steps:[['ok','1N 前缀 = JEDEC 注册（1 = 一个 PN 结）'],['ok','4007 → 1A · 1000V 系列的最高压档'],['hl','工频整流专用 · trr µs 级勿进开关电源']]},
+  'M7':{cat:'硅整流管', val:'整流 1A / 1000V', kind:'SMA 贴片代码 = 1N4007',
+    steps:[['ok','M7 = 1N4007 的 SMA 马甲（业界通用缩写）'],['ok','同族：M1–M7 对应 1N4001–4007（50–1000V）'],['hl','买 1N4007 的贴片版就搜 M7 / S1M / SM4007']]},
+  'S1M':{cat:'硅整流管', val:'整流 1A / 1000V', kind:'SMA 贴片代码（S 系列命名）',
+    steps:[['ok','S 系列代码：S1M = 1A · 1000V SMA'],['ok','S1J/S1K/S1M 依次为 600/800/1000V'],['hl','与 M7 / SM4007 同规格，可互换']]},
+  'SM4007':{cat:'硅整流管', val:'整流 1A / 1000V', kind:'SM 前缀 = 贴片版 1N4007',
+    steps:[['ok','SM + 原型号 = 厂商贴片版命名法'],['hl','丝印多印作 M7，三个名字一颗管']]},
+  'UF4007':{cat:'超快恢复', val:'整流 1A / 1000V · trr 75ns', kind:'UF 系列 = 高速版 1N4007',
+    steps:[['ok','UF = UltraFast：掺金加速少子复合'],['ok','耐压同 1N4007，恢复快两个数量级'],['hl','反激/PFC 高压整流位的首选']]},
+  'FR107':{cat:'快恢复', val:'整流 1A / 1000V · trr 500ns', kind:'FR 系列（100/107 = 50/1000V）',
+    steps:[['ok','FR101–FR107 = 50–1000V'],['ok','trr 500ns：快于工频管、慢于 UF'],['hl','高频场合优先 UF，FR 更便宜']]},
+  '1N4148':{cat:'开关二极管', val:'100V / 150mA · trr 4ns', kind:'JEDEC 原型号 · DO-35 插件',
+    steps:[['ok','百年销量传奇：信号界万金油'],['ok','Cj ≈ 4pF · IFSM 2A 短时浪涌'],['hl','检波/钳位/逻辑隔离首选']]},
+  '1N4148W':{cat:'开关二极管', val:'100V / 150mA · trr 4ns', kind:'SOD-123 贴片版',
+    steps:[['ok','W 后缀 = 贴片（SOD-123）版本'],['hl','丝印常作 T4 或 A1，见下条']]},
+  'T4':{cat:'开关二极管', val:'100V / 150mA · trr 4ns', kind:'SOD-323 丝印 = 1N4148W',
+    steps:[['ok','T4 是 Nexperia/Vishay 系 1N4148W 的代码'],['ok','同族：LL4148（SOD-80 玻封）、1N4148W（SOD-123）'],['hl','三副面孔一颗芯，BOM 归一化时注意']]},
+  'LL4148':{cat:'开关二极管', val:'100V / 150mA · trr 4ns', kind:'SOD-80 玻封 miniMELF',
+    steps:[['ok','LL 前缀 = 玻封圆柱 miniMELF 封装'],['hl','耐焊性好、可靠性强，工业设备常指定']]},
+  'LL34':{cat:'开关二极管', val:'100V / 150mA', kind:'SOD-80 玻封 = 1N4148 类',
+    steps:[['ok','LL34 是 LL4148 的另一俗名'],['hl','与 1N4148 参数同档']]},
+  'BAT54':{cat:'肖特基(小信号)', val:'30V / 200mA', kind:'SOT-23 封装（A=单管 · C=共阴 · S=串联）',
+    steps:[['ok','BAT54 = 小信号肖特基经典'],['ok','后缀定结构：A 单管 / C 共阴对 / S 串联对'],['hl','电源钳位、逻辑保护常用 BAT54C']]},
+  'SS14':{cat:'肖特基', val:'40V / 1A · VF≈0.5V', kind:'SMA 贴片代码',
+    steps:[['ok','SS 系列：SS1x = 1A 档'],['ok','14 → 40V：尾数×10 = 反压'],['hl','小电流 Buck 续流 / 防反接主力']]},
+  'SS34':{cat:'肖特基', val:'40V / 3A · VF≈0.5V', kind:'SMA 贴片代码',
+    steps:[['ok','SS3x = 3A 档 · 34 → 40V'],['hl','1–3A Buck 续流的默认答案之一']]},
+  'SK34':{cat:'肖特基', val:'40V / 3A · VF≈0.5V', kind:'SMA 贴片（MDD 等厂）',
+    steps:[['ok','SK34 与 SS34 规格相同，厂商系列不同'],['hl','可与 SS34 / B340A 互换（对 VF 敏感时看手册）']]},
+  'B340A':{cat:'肖特基', val:'40V / 3A · VF≈0.5V', kind:'SMA 贴片（Vishay 命名）',
+    steps:[['ok','B 系列肖特基：B340 = 40V/3A'],['ok','A 后缀 = SMA 封装版本'],['hl','B360 = 60V/3A，耐压高 20V 其他不变']]},
+  'B360':{cat:'肖特基', val:'60V / 3A · VF≈0.6V', kind:'SMA 贴片',
+    steps:[['ok','60V 档：反压余量敏感时替换 B340'],['hl','VF 略高 0.1V，其余同族']]},
+  'SB560':{cat:'肖特基', val:'60V / 5A', kind:'TO-220 / SMA 大电流',
+    steps:[['ok','SB 系列 5A 档'],['hl','大电流 Buck/防反接 · 建议立式散热']]},
+  'MMSZ5231B':{cat:'稳压管', val:'Vz = 5.1V · 0.5W', kind:'SOD-123 贴片',
+    steps:[['ok','MMSZ52xx 系列：尾数对应电压表'],['ok','5231 → 5.1V · B 后缀 ±2%'],['hl','配限流电阻当基准/钳位（06 节算 R）']]},
+  'BZT52C5V1':{cat:'稳压管', val:'Vz = 5.1V · 0.5W', kind:'SOD-123 贴片',
+    steps:[['ok','BZT52 系列 + C(±5%) + 电压码 5V1'],['hl','与 MMSZ5231B 同规格可互换']]},
+  '1N4733A':{cat:'稳压管', val:'Vz = 5.1V · 1W', kind:'DO-41 插件 · 1N47xx 系列',
+    steps:[['ok','1N47xx 电压对照表：4733 = 5.1V'],['ok','A 后缀 ±5% · 1W 需 Iz ≈ 49mA 测试条件'],['hl','大功耗场合比贴片版更能扛']]},
+  'SMAJ12A':{cat:'TVS', val:'VRWM 12V · VC 19.9V · 400W', kind:'SMA 贴片 · A = 单向',
+    steps:[['ok','SMAJ 系列 400W · 12 = 工作电压 VRWM'],['ok','A = 单向（CA = 双向）'],['hl','12V 接口的浪涌保镖：VC 19.9V 需低于下游耐压']]},
+  'DB107':{cat:'整流桥', val:'1A / 1000V 桥式', kind:'DIP-4 插件',
+    steps:[['ok','DB1xx 系列：107 → 1000V'],['ok','两个 ~ 脚接交流 · +/− 出直流'],['hl','脚位接反 = 短路（10 节踩坑）']]},
+  'MB10S':{cat:'整流桥', val:'0.5A / 1000V 桥式', kind:'SOP-4 贴片',
+    steps:[['ok','贴片桥堆：小电源前级省四颗管'],['hl','散热靠焊盘铜箔，0.5A 以上注意温升']]},
+};
+function decodeDio(raw){
+  const s=String(raw).trim().toUpperCase().replace(/\s+/g,'');
+  if (!s) return {ok:false,msg:'输入丝印'};
+  const hit=DIO_DB[s];
+  if (hit) return {ok:true, cat:hit.cat, val:hit.val, kind:hit.kind, steps:hit.steps};
+  return {ok:false,msg:'库中暂无 · 可查厂商手册'};
+}
+function runDio(code){
+  $('dioIn').value=code;
+  const r=decodeDio(code);
+  const box=$('dioValBox');
+  if (r.ok){
+    box.classList.remove('err');
+    $('dioVal').textContent = r.val;
+    $('dioKind').textContent = r.cat+' · '+r.kind;
+    $('dioSteps').innerHTML = r.steps.map(([k,t])=>`<div class="${k}">${escHtml(t)}</div>`).join('');
+  } else {
+    box.classList.add('err');
+    $('dioVal').textContent = '✕ 无法识别';
+    $('dioKind').textContent = r.msg;
+    $('dioSteps').innerHTML =
+      `<div class="">库里收录的记法类型：</div>`+
+      `<div class="ok">① 整流：1N4007 / M7 / S1M / UF4007 / FR107</div>`+
+      `<div class="ok">② 开关：1N4148 / T4 / LL4148 / BAT54</div>`+
+      `<div class="ok">③ 肖特基：SS14 / SS34 / SK34 / B340A</div>`+
+      `<div class="ok">④ 稳压/TVS/桥：MMSZ5231B / 1N4733A / SMAJ12A / DB107</div>`;
+  }
+}
+$('dioIn').addEventListener('input',e=>runDio(e.target.value));
+$('dioChips').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  runDio(b.dataset.code);
+});
+runDio('SS34');
+
+/* ================================================================
+   ⑤ 计算器：齐纳稳压电阻 + 续流/整流功耗
+================================================================ */
+function nearestE12(v){
+  const E12=[1.0,1.2,1.5,1.8,2.2,2.7,3.3,3.9,4.7,5.6,6.8,8.2];
+  const dec=Math.floor(Math.log10(v));
+  const cands=[];
+  for (let d=dec-1; d<=dec+1; d++) E12.forEach(e=>cands.push(e*Math.pow(10,d)));
+  cands.sort((a,b)=>Math.abs(a-v)-Math.abs(b-v));
+  return cands[0];
+}
+const IZMIN = 0.005;                       /* 齐纳最小工作电流 5mA */
+function calcZener(){
+  const Vin=+$('znVin').value, Vz=+$('znVz').value, Il=+$('znIl').value;
+  const R=(Vin-Vz)/(Il+IZMIN);
+  const stat=$('oZStat');
+  stat.classList.remove('bad');
+  if (R<=0){
+    ['oR','oR12','oPr','oPz','oIz'].forEach(id=>$(id).textContent='—');
+    stat.textContent='Vin ≤ Vz ✕'; stat.classList.add('bad');
+    $('znFormula').innerHTML=`<b style="color:var(--red)">输入电压必须高于稳压值——升 Vin 或换小 Vz</b>`;
+    return;
+  }
+  const R12=nearestE12(R);
+  const IzFull=(Vin-Vz)/R12 - Il;          /* 满载时的 Iz */
+  const IzNoLoad=(Vin-Vz)/R12;             /* 空载 Iz（最坏） */
+  const Pr=Math.pow(Vin-Vz,2)/R12;
+  const Pz=Vz*IzNoLoad;
+  $('oR').textContent = fmtOhm(R);
+  $('oR12').textContent = fmtOhm(R12);
+  $('oPr').textContent = fmtW(Pr);
+  $('oPz').textContent = fmtW(Pz);
+  const iz=$('oIz');
+  iz.textContent = fmtA(Math.max(0,IzFull));
+  if (IzFull < IZMIN){ iz.classList.add('bad'); iz.textContent=fmtA(Math.max(0,IzFull))+' ✕'; }
+  else iz.classList.remove('bad');
+  let verdict='稳压中 ✓';
+  if (IzFull < IZMIN) verdict='Vin 低端失稳 ✕';
+  if (Pr>0.25 && Pr<=1) verdict='稳压 ✓ · R 用 1W 封装';
+  if (Pr>1) verdict='稳压 ✓ · R 功耗过大';
+  if (IzFull<IZMIN) stat.classList.add('bad');
+  stat.textContent = verdict;
+  $('znFormula').innerHTML =
+    `R = (Vin−Vz)/(Izmin+Iload) = (${Vin}−${Vz})/(${trim3((Il+IZMIN)*1000)}mA) = <b>${fmtOhm(R)}</b> → E12：<b>${fmtOhm(R12)}</b><br>`+
+    `空载 Iz = (Vin−Vz)/R = <b>${fmtA(IzNoLoad)}</b>（齐纳最热）· 满载 Iz = <b>${fmtA(Math.max(0,IzFull))}</b>（≥ ${fmtA(IZMIN)} 才稳）`+
+    ` · PR = (Vin−Vz)²/R = <b>${fmtW(Pr)}</b> · Pz(空载) = <b>${fmtW(Pz)}</b>`;
+}
+['znVin','znVz','znIl'].forEach(id=>$(id).addEventListener('change',calcZener));
+calcZener();
+
+const FWDEV = [
+  {name:'1N4007 工频整流', VF:0.85, trr:30e-6, IR:5e-6},
+  {name:'FR107 快恢复',    VF:1.00, trr:500e-9, IR:5e-6},
+  {name:'UF4007 超快恢复', VF:1.00, trr:75e-9,  IR:5e-6},
+  {name:'SS34 肖特基',     VF:0.50, trr:0,      IR:200e-6},
+];
+function calcFw(){
+  const d=FWDEV[+$('fwDev').value];
+  const Vin=+$('fwVin').value, Io=+$('fwIo').value, D=+$('fwD').value, f=+$('fwF').value;
+  const Id=(1-D)*Io;
+  const Pc=d.VF*Id;
+  const Pv=D*Vin*d.IR;
+  const Prr=Vin*Io*d.trr*f/2;
+  const Pt=Pc+Pv+Prr;
+  const dT=Pt*90;
+  $('oId').textContent = fmtA(Id);
+  $('oPc').textContent = fmtW(Pc);
+  $('oPv').textContent = fmtW(Pv);
+  $('oPrr').textContent = fmtW(Prr);
+  $('oPt').textContent = fmtW(Pt);
+  const st=$('oFwS');
+  st.classList.remove('bad');
+  let msg;
+  if (Prr>5){ msg='恢复损耗爆炸 · 不可用'; st.classList.add('bad'); }
+  else if (dT>60){ msg='温升 '+Math.round(dT)+'°C · 需铺铜/升封装'; }
+  else { msg='温升 '+Math.round(dT)+'°C ✓'; }
+  st.textContent = msg;
+  const qrr = d.trr>0 ? `Qrr ≈ ½·Io·trr = ${trim3(0.5*Io*d.trr*1e9)} nC` : `Qrr ≈ 0（无少子储存）`;
+  $('fwFormula').innerHTML =
+    `ID = (1−D)·Iout = ${(1-D).toFixed(2)}×${Io}A = <b>${fmtA(Id)}</b> ·`+
+    ` Pc = ${d.VF}×${trim3(Id)} = <b>${fmtW(Pc)}</b> ·`+
+    ` Pv = ${D}×${Vin}×${fmtA(d.IR)} = <b>${fmtW(Pv)}</b><br>`+
+    ` Prr = Vin·Io·trr·f/2 = ${Vin}×${Io}×${fmtT(d.trr)}×${fmtHz(f)}/2 = <b>${fmtW(Prr)}</b>（${qrr}）`+
+    ` · 合计 <b>${fmtW(Pt)}</b> → SMA 温升 ≈ <b>${Math.round(dT)} °C</b>`+
+    (Prr>5?`<br><b style="color:var(--red)">结论：${d.name}的 trr 在这个频率下每周期都在「反向导通」，当场否决——换 UF/肖特基。</b>`:'');
+}
+['fwDev','fwVin','fwIo','fwD','fwF'].forEach(id=>$(id).addEventListener('change',calcFw));
+calcFw();
+
+/* ================================================================
+   ⑥ 经典电路实验室：半波 / 桥式 / 齐纳 / 无续流 / 有续流
+      左侧原理图（电流环游动画） + 右侧示波器（双迹）
+================================================================ */
+const CC3CFG = [
+  {name:'半波整流', paramL:'滤波电容 C（对数）',
+   note:'<b>半波：</b>只有 Vs > Vout+0.75V 的峰值附近二极管才导通（导通角很窄），电容被充电到接近峰值；其余时间电容独自向负载放电、电压下垂——纹波频率 50Hz。拖大 C 纹波变小、但峰值充电电流更大（IFSM 压力）、导通角更窄。Vdc ≈ 峰值 − 纹波/2。'},
+  {name:'桥式整流', paramL:'滤波电容 C（对数）',
+   note:'<b>桥式：</b>四管两两轮流值班，负半周也被翻上来：纹波频率 100Hz、同样的 C 纹波直接减半；代价是两管串联压降 1.4V。波形里能数出导通角集中在每个半波峰值——上电瞬间给空电容充电的浪涌全从这里过（IFSM 的意义）。'},
+  {name:'齐纳稳压', paramL:'输入电压 Vin', 
+   note:'<b>齐纳：</b>输入叠了 2kHz 的纹波，R 把波动吃掉、Dz 把电压锁在 5.1V——上面黄线晃、下面绿线平，这就是稳压两个字的画面。拖低 Vin：当 Iz 触零（R 上的电流全部喂给负载），齐纳退出击穿区，输出开始跟着跌——06 节计算器的两端校验就是防这个。'},
+  {name:'无续流', paramL:'电感 L（对数）',
+   note:'<b>灾难现场：</b>SW 每次断开，电感电流无处可去，V=L·di/dt 把开关节点电压打到 350V 雪崩钳位（现实里是 MOS 雪崩或电弧），每周期的磁场能量 ½LI² 全部砸进开关——平均功率轻松上瓦。绿线是电感电流（断流干脆），青线是开关电压（高高在上的尖峰）。'},
+  {name:'有续流', paramL:'电感 L（对数）',
+   note:'<b>正解：</b>反向并联一颗二极管（阴极接开关节点）。SW 断开后电流改走 D 继续流动、缓缓衰减，开关节点被钳在 5+0.75V——尖峰消失，能量在 D 与 R 上温和耗散。对比上一格：同一颗电感、同一个开关频率，一颗二极管决定炸与不炸。'},
+];
+const CC3 = {
+  cir:0, playing:true, t:0,
+  vC:0, iL:0, iD:0, iZ:0, vout:5.1, vin:12, iDi:0, vsw:0,
+  C:470e-6, Vin0:12, L:2e-3,
+  psw:true, iOff0:0, eAcc:0, evt:[],
+};
+const CC3N = 560;
+const CC3_F = 50, CC3_VPK = 15, CC3_RL = 100, CC3_RS = 1.2;
+const CC3_ZR = 150, CC3_ZRZ = 3, CC3_ZVZ = 5.1, CC3_ZRL = 1000, CC3_ZC = 4.7e-6, CC3_ZFRIP = 2000, CC3_ZARIP = 1.2;
+const CC3_FW_VS = 5, CC3_FW_F = 20000, CC3_FW_R = 5, CC3_FW_VFD = 0.75, CC3_FW_VAVL = 350;
+const CC3HIST = [];
+
+function cc3Window(){
+  if (CC3.cir===0) return 3/CC3_F;
+  if (CC3.cir===1) return 1.5/CC3_F;
+  if (CC3.cir===2) return 5/CC3_ZFRIP;
+  return 3/CC3_FW_F;
+}
+function cc3Step(h){
+  if (CC3.cir<=1){
+    const two = CC3.cir===1;
+    let vs = CC3_VPK*Math.sin(2*Math.PI*CC3_F*CC3.t);
+    if (two) vs = Math.abs(vs);
+    const vf = two?1.5:0.75;
+    let iD=0;
+    if (vs-CC3.vC > vf) iD=(vs-CC3.vC-vf)/CC3_RS;
+    CC3.vC += (iD - CC3.vC/CC3_RL)/CC3.C*h;
+    if (CC3.vC<0) CC3.vC=0;
+    CC3.iD=iD; CC3.vin=vs;
+  } else if (CC3.cir===2){
+    const vin = CC3.Vin0 + CC3_ZARIP*Math.sin(2*Math.PI*CC3_ZFRIP*CC3.t);
+    const iR = Math.max(0,(vin-CC3.vout))/CC3_ZR;
+    const iZ = CC3.vout>CC3_ZVZ ? (CC3.vout-CC3_ZVZ)/CC3_ZRZ : 0;
+    CC3.vout += (iR - iZ - CC3.vout/CC3_ZRL)/CC3_ZC*h;
+    CC3.vin=vin; CC3.iZ=iZ; CC3.iDi=iR;
+  } else {
+    const sw = ((CC3.t % (1/CC3_FW_F))/(1/CC3_FW_F)) < 0.5;
+    if (sw !== CC3.psw){                       /* 开关沿：记录断开瞬间的电感电流 */
+      if (!sw) CC3.iOff0 = CC3.iL;
+      CC3.psw = sw;
+    }
+    const hasD = CC3.cir===4;
+    if (sw){
+      CC3.iL += (CC3_FW_VS - CC3.iL*CC3_FW_R)/CC3.L*h;
+      CC3.vsw = CC3.iL*0.05;
+    } else if (hasD){
+      CC3.iL += (-CC3_FW_VFD - CC3.iL*CC3_FW_R)/CC3.L*h;
+      if (CC3.iL<0) CC3.iL=0;
+      CC3.vsw = CC3_FW_VS + CC3_FW_VFD;
+    } else {
+      if (CC3.iL>0){
+        CC3.iL += (CC3_FW_VS-CC3_FW_VAVL)/CC3.L*h;   /* 雪崩钳位下的快速衰减 */
+        if (CC3.iL<=0){
+          const e=0.5*CC3.L*CC3.iOff0*CC3.iOff0;     /* ½L·I²off 全部砸进开关 */
+          CC3.eAcc+=e; CC3.evt.push({t:CC3.t,e});
+          if (CC3.evt.length>400) CC3.evt.shift();
+          CC3.iL=0;
+        }
+        CC3.vsw = CC3_FW_VAVL;
+      } else {
+        CC3.vsw = CC3_FW_VS;
+      }
+    }
+    CC3.vin=CC3_FW_VS;
+  }
+  CC3.t += h;
+}
+function cc3Advance(){
+  const W=cc3Window();
+  const dts=W/CC3N*3.4;
+  let sub=24;
+  const h=dts/sub;
+  for (let i=0;i<sub;i++) cc3Step(h);
+  let vi,vo,il;
+  if (CC3.cir<=1){ vi=CC3.vin; vo=CC3.vC; il=CC3.iD; }
+  else if (CC3.cir===2){ vi=CC3.vin; vo=CC3.vout; il=CC3.iZ; }
+  else { vi=CC3.iL; vo=CC3.vsw; il=CC3.iL; }
+  CC3HIST.push({t:CC3.t, vi, vo, il});
+  if (CC3HIST.length>2600) CC3HIST.splice(0,CC3HIST.length-2600);
+}
+function cc3Prefill(){
+  CC3HIST.length=0;
+  CC3.t=0; CC3.eAcc=0; CC3.evt=[]; CC3.psw=true; CC3.iOff0=0;
+  if (CC3.cir<=1){ CC3.vC=0; }
+  else if (CC3.cir===2){ CC3.vout=CC3_ZVZ; }
+  else { CC3.iL=0; }
+  const dts=cc3Window()/CC3N*3.4;
+  const iters=Math.min(6000,Math.ceil(cc3Window()*2.2/dts));
+  for (let k=0;k<iters;k++) cc3Advance();
+}
+function cc3ApplyParam(){
+  const v=(+$('cc3Param').value)/100;
+  if (CC3.cir<=1)      CC3.C    = 47e-6*Math.pow(4700/47, v);
+  else if (CC3.cir===2) CC3.Vin0 = 5.5 + 9.5*v;
+  else                  CC3.L    = 0.5e-3*Math.pow(20, v);
+}
+function cc3Measure(){
+  const W=cc3Window();
+  let omin=1e9,omax=-1e9,imin=1e9,imax=-1e9,sum=0,n=0,cond=0;
+  for (let i=CC3HIST.length-1;i>=0;i--){
+    const h=CC3HIST[i];
+    if (h.t<CC3.t-W) break;
+    if (h.vo<omin)omin=h.vo; if (h.vo>omax)omax=h.vo;
+    if (h.vi<imin)imin=h.vi; if (h.vi>imax)imax=h.vi;
+    sum+=h.vo; n++;
+    if (h.il>1e-3) cond++;
+  }
+  if (!n) return null;
+  return {vmin:omin, vmax:omax, vpp:omax-omin, avg:sum/n, imin, imax, cond:n?cond/n:0};
+}
+function cc3Readout(){
+  const m=cc3Measure()||{vpp:0,avg:0,imin:0,imax:0,cond:0};
+  let rows='';
+  if (CC3.cir===0){
+    rows = `<span class="k">滤波电容</span><b>${fmtF(CC3.C)}</b>`
+      + `<span class="k">Vdc 均值</span><b>${m.avg.toFixed(2)} V</b>`
+      + `<span class="k">纹波 Vpp</span><b>${m.vpp.toFixed(2)} V</b>`
+      + `<span class="k">峰值充电流</span><b>${fmtA(m.imax)}</b>`
+      + `<span class="k">纹波频率</span><b class="g">50 Hz</b>`;
+  } else if (CC3.cir===1){
+    rows = `<span class="k">滤波电容</span><b>${fmtF(CC3.C)}</b>`
+      + `<span class="k">Vdc 均值</span><b>${m.avg.toFixed(2)} V</b>`
+      + `<span class="k">纹波 Vpp</span><b>${m.vpp.toFixed(2)} V</b>`
+      + `<span class="k">峰值充电流</span><b>${fmtA(m.imax)}</b>`
+      + `<span class="k">纹波频率</span><b class="g">100 Hz</b>`;
+  } else if (CC3.cir===2){
+    const stable = m.avg > 4.9 && m.vpp < 0.25;
+    const pR=Math.pow(CC3.Vin0-CC3_ZVZ,2)/CC3_ZR;
+    rows = `<span class="k">Vin 设定</span><b>${CC3.Vin0.toFixed(1)} V（+1.2V 纹波）</b>`
+      + `<span class="k">Vout 均值</span><b>${m.avg.toFixed(2)} V</b>`
+      + `<span class="k">Vout 纹波</span><b>${(m.vpp*1000).toFixed(1)} mV</b>`
+      + `<span class="k">R 功耗</span><b>${fmtW(pR)}</b>`
+      + `<span class="k">状态</span><b class="${stable?'g':''}">${stable?'稳压中 ✓':'Iz 触零 · 失稳'}</b>`;
+  } else if (CC3.cir===3){
+    const W=cc3Window();
+    const recent=CC3.evt.filter(ev=>ev.t>CC3.t-2*W);
+    const pav=recent.length? recent.reduce((s,ev)=>s+ev.e,0)/(2*W) : 0;
+    const eLast=CC3.evt.length? CC3.evt[CC3.evt.length-1].e : 0;
+    rows = `<span class="k">电感 L</span><b>${fmtLx(CC3.L)}</b>`
+      + `<span class="k">开关节点尖峰</span><b class="g">350 V（雪崩钳位）</b>`
+      + `<span class="k">每周期砸进开关</span><b>${fmtE2(eLast)}</b>`
+      + `<span class="k">平均雪崩功率</span><b>${fmtW(pav)}</b>`
+      + `<span class="k">状态</span><b style="color:var(--red)">MOS 正在被折磨</b>`;
+  } else {
+    const iOff=(1-0.5);
+    const iDavg=Math.max(0,(m.imin+m.imax)/2)*iOff;
+    const pd=CC3_FW_VFD*iDavg;
+    rows = `<span class="k">电感 L</span><b>${fmtLx(CC3.L)}</b>`
+      + `<span class="k">开关节点钳位</span><b class="g">5.75 V</b>`
+      + `<span class="k">IL 范围</span><b>${fmtA(m.imin)} – ${fmtA(m.imax)}</b>`
+      + `<span class="k">D 平均电流</span><b>${fmtA(iDavg)}</b>`
+      + `<span class="k">D 损耗</span><b>${fmtW(pd)}</b>`;
+  }
+  $('cc3Read').innerHTML=rows;
+  $('cc3Note').innerHTML=CC3CFG[CC3.cir].note;
+}
+function fmtLx(v){                        /* 简易电感格式 */
+  if (v>=1) return trim3(v)+' H';
+  if (v>=1e-3) return trim3(v/1e-3)+' mH';
+  return trim3(v/1e-6)+' µH';
+}
+function fmtE2(e){
+  if (e>=1e-3) return trim3(e/1e-3)+' mJ';
+  return trim3(e/1e-6)+' µJ';
+}
+
+/* ---------- 画布：原理图（左） + 示波器（右） ---------- */
+const CC3CV = $('cc3Canvas');
+const CC3CTX = CC3CV ? CC3CV.getContext('2d') : null;
+const CC3H = 300;
+let CC3W = 640;
+function cc3Resize(){
+  if (!CC3CV) return;
+  const r=CC3CV.parentElement.getBoundingClientRect();
+  CC3W=Math.max(320,r.width);
+  const dpr=Math.min(devicePixelRatio||1,2);
+  CC3CV.width=CC3W*dpr; CC3CV.height=CC3H*dpr; CC3CV.style.height=CC3H+'px';
+  CC3CTX.setTransform(dpr,0,0,dpr,0,0);
+}
+if (CC3CV && CC3CTX){
+  new ResizeObserver(cc3Resize).observe(CC3CV.parentElement);
+  cc3Resize();
+}
+function cc3Wire(x1,y1,x2,y2){
+  CC3CTX.strokeStyle='rgba(220,235,225,.5)'; CC3CTX.lineWidth=1.6;
+  CC3CTX.beginPath(); CC3CTX.moveTo(x1,y1); CC3CTX.lineTo(x2,y2); CC3CTX.stroke();
+}
+function cc3Zig(x,y,len,vert){
+  CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=2;
+  const segs=6, a=7;
+  CC3CTX.beginPath(); CC3CTX.moveTo(x,y);
+  if (!vert){
+    for (let i=1;i<segs;i++) CC3CTX.lineTo(x+len*i/segs, y+(i%2?-a:a));
+    CC3CTX.lineTo(x+len,y);
+  } else {
+    for (let i=1;i<segs;i++) CC3CTX.lineTo(x+(i%2?-a:a), y+len*i/segs);
+    CC3CTX.lineTo(x,y+len);
+  }
+  CC3CTX.stroke();
+}
+function cc3CapV(x,y){
+  CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=2.6;
+  CC3CTX.beginPath();
+  CC3CTX.moveTo(x-12,y); CC3CTX.lineTo(x+12,y);
+  CC3CTX.moveTo(x-12,y+9); CC3CTX.lineTo(x+12,y+9);
+  CC3CTX.stroke();
+}
+function cc3Gnd(x,y){
+  CC3CTX.strokeStyle='rgba(220,235,225,.55)'; CC3CTX.lineWidth=1.8;
+  CC3CTX.beginPath();
+  CC3CTX.moveTo(x-9,y); CC3CTX.lineTo(x+9,y);
+  CC3CTX.moveTo(x-6,y+5); CC3CTX.lineTo(x+6,y+5);
+  CC3CTX.moveTo(x-3,y+10); CC3CTX.lineTo(x+3,y+10);
+  CC3CTX.stroke();
+}
+function cc3Lbl(t,x,y,c,align){
+  CC3CTX.font='10px "IBM Plex Mono"'; CC3CTX.fillStyle=c||'#5c7264';
+  CC3CTX.textAlign=align||'center'; CC3CTX.fillText(t,x,y);
+}
+function cc3Node(x,y){
+  CC3CTX.fillStyle='#dcebe1'; CC3CTX.beginPath(); CC3CTX.arc(x,y,2.6,0,Math.PI*2); CC3CTX.fill();
+}
+function cc3DiodeH(x,y){                      /* 水平朝右 */
+  CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=2;
+  CC3CTX.beginPath();
+  CC3CTX.moveTo(x-8,y-9); CC3CTX.lineTo(x-8,y+9); CC3CTX.lineTo(x+9,y); CC3CTX.closePath();
+  CC3CTX.stroke();
+  CC3CTX.beginPath(); CC3CTX.moveTo(x+9,y-9); CC3CTX.lineTo(x+9,y+9); CC3CTX.stroke();
+}
+function cc3DiodeSeg(x1,y1,x2,y2){            /* 沿任意方向：三角指向 (x2,y2) */
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy);
+  if (L<24) return;
+  const ux=dx/L, uy=dy/L;                     /* 单位向量 */
+  const bx=x1+ux*(L/2+9), by=y1+uy*(L/2+9);   /* 杆位置 */
+  const px=-uy, py=ux;                        /* 垂直向量 */
+  CC3CTX.strokeStyle='rgba(220,235,225,.5)'; CC3CTX.lineWidth=1.6;
+  CC3CTX.beginPath(); CC3CTX.moveTo(x1,y1); CC3CTX.lineTo(bx-ux*18,by-uy*18); CC3CTX.stroke();
+  CC3CTX.beginPath(); CC3CTX.moveTo(bx+ux*9,by+uy*9); CC3CTX.lineTo(x2,y2); CC3CTX.stroke();
+  CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=2;
+  CC3CTX.beginPath();
+  CC3CTX.moveTo(bx-px*9,by-py*9); CC3CTX.lineTo(bx+px*9,by+py*9); CC3CTX.lineTo(bx+ux*14,by+uy*14); CC3CTX.closePath();
+  CC3CTX.stroke();
+  CC3CTX.beginPath(); CC3CTX.moveTo(bx+px*9,by+py*9); CC3CTX.lineTo(bx-px*9,by-py*9); CC3CTX.stroke();
+}
+function cc3DiodeV(x,y,up){                   /* 竖直：up=true 时阴极在上 */
+  CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=2;
+  CC3CTX.beginPath();
+  if (up){ CC3CTX.moveTo(x-9,y+8); CC3CTX.lineTo(x+9,y+8); CC3CTX.lineTo(x,y-9); CC3CTX.closePath(); }
+  else { CC3CTX.moveTo(x-9,y-8); CC3CTX.lineTo(x+9,y-8); CC3CTX.lineTo(x,y+9); CC3CTX.closePath(); }
+  CC3CTX.stroke();
+  CC3CTX.beginPath();
+  if (up){ CC3CTX.moveTo(x-9,y-11); CC3CTX.lineTo(x+9,y-11); }
+  else { CC3CTX.moveTo(x-9,y+11); CC3CTX.lineTo(x+9,y+11); }
+  CC3CTX.stroke();
+}
+function cc3ZenerV(x,y,up){                   /* 齐纳符号（Z 型杆） */
+  CC3CTX.strokeStyle='#ff6478'; CC3CTX.lineWidth=2;
+  CC3CTX.beginPath();
+  if (up){ CC3CTX.moveTo(x-9,y+8); CC3CTX.lineTo(x+9,y+8); CC3CTX.lineTo(x,y-9); CC3CTX.closePath(); }
+  else { CC3CTX.moveTo(x-9,y-8); CC3CTX.lineTo(x+9,y-8); CC3CTX.lineTo(x,y+9); CC3CTX.closePath(); }
+  CC3CTX.stroke();
+  CC3CTX.beginPath();
+  if (up){ CC3CTX.moveTo(x-9,y-11); CC3CTX.lineTo(x+9,y-11); CC3CTX.lineTo(x+2,y-11); CC3CTX.moveTo(x+9,y-11); CC3CTX.lineTo(x+9,y-4); }
+  else { CC3CTX.moveTo(x-9,y+11); CC3CTX.lineTo(x+9,y+11); CC3CTX.lineTo(x+2,y+11); CC3CTX.moveTo(x+9,y+11); CC3CTX.lineTo(x+9,y+4); }
+  CC3CTX.stroke();
+}
+function cc3AcSrc(x,y){
+  CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=1.8;
+  CC3CTX.beginPath(); CC3CTX.arc(x,y,11,0,Math.PI*2); CC3CTX.stroke();
+  CC3CTX.lineWidth=1.4; CC3CTX.beginPath();
+  CC3CTX.moveTo(x-6,y); CC3CTX.quadraticCurveTo(x-3,y-6,x,y);
+  CC3CTX.quadraticCurveTo(x+3,y+6,x+6,y); CC3CTX.stroke();
+}
+function cc3Switch(x,y,horiz){
+  CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=2;
+  CC3CTX.beginPath(); CC3CTX.arc(x,y,2.4,0,Math.PI*2); CC3CTX.stroke();
+  CC3CTX.beginPath(); CC3CTX.moveTo(x,y);
+  if (horiz) CC3CTX.lineTo(x+22,y-12); else CC3CTX.lineTo(x+12,y+22);
+  CC3CTX.stroke();
+}
+function pathLen(P){ let L=0; for (let i=1;i<P.length;i++) L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]); return L; }
+function pathPoint(P,d){
+  for (let i=1;i<P.length;i++){
+    const seg=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);
+    if (d<=seg){ const f=d/seg;
+      return [P[i-1][0]+(P[i][0]-P[i-1][0])*f, P[i-1][1]+(P[i][1]-P[i-1][1])*f]; }
+    d-=seg;
+  }
+  return P[P.length-1];
+}
+const CC3DOTS={a:[],b:[],c:[]};
+for (const k in CC3DOTS) for (let i=0;i<7;i++) CC3DOTS[k].push({p:i/7});
+let CC3DT=0.016;
+function drawDots(P,key,speed,color){
+  const L=pathLen(P); if (L<=0 || speed<=0.0005) return;
+  for (const d of CC3DOTS[key]){
+    d.p=((d.p+speed*CC3DT)%1+1)%1;
+    const pt=pathPoint(P,d.p*L);
+    CC3CTX.beginPath(); CC3CTX.arc(pt[0],pt[1],2.4,0,Math.PI*2);
+    CC3CTX.fillStyle=color; CC3CTX.shadowColor=color; CC3CTX.shadowBlur=7;
+    CC3CTX.fill(); CC3CTX.shadowBlur=0;
+  }
+}
+function cc3Sparks(x,y){                      /* 无续流时的电弧 */
+  CC3CTX.strokeStyle='rgba(255,100,120,.85)'; CC3CTX.lineWidth=1.6;
+  for (let k=0;k<3;k++){
+    const a=-Math.PI/2 + (k-1)*0.8;
+    CC3CTX.beginPath(); CC3CTX.moveTo(x,y);
+    CC3CTX.lineTo(x+Math.cos(a)*10, y+Math.sin(a)*10);
+    CC3CTX.lineTo(x+Math.cos(a)*17, y+Math.sin(a)*15);
+    CC3CTX.stroke();
+  }
+}
+function cc3Schematic(){
+  if (CC3W<560 || !CC3CTX) return;
+  if (CC3.cir===0){                          /* 半波：AC → D → (C∥RL) */
+    cc3AcSrc(34,190);
+    cc3Wire(34,179,34,140); cc3Wire(34,140,88,140);
+    cc3DiodeH(98,140); cc3Lbl('D 0.75V',98,120,'#8aa294');
+    cc3Wire(107,140,150,140); cc3Node(150,140);
+    cc3Lbl('Vout',158,128,'#34e08a');
+    cc3Wire(150,140,150,162); cc3CapV(150,162); cc3Lbl('C',174,170);
+    cc3Wire(150,171,150,240); cc3Node(150,240);
+    cc3Wire(150,140,206,140);
+    cc3Wire(206,140,206,158);
+    cc3Zig(206,158,42,true); cc3Lbl('RL 100Ω',232,182,'#5c7264','end');
+    cc3Wire(206,200,206,240); cc3Gnd(206,240);
+    cc3Wire(34,240,206,240); cc3Node(34,240);
+    cc3Wire(34,201,34,240);
+    cc3Lbl('AC 15Vpk',52,196);
+    const cond = CC3.vin-CC3.vC > 0.75;
+    if (cond) drawDots([[34,140],[206,140],[206,240],[34,240],[34,140]],'a',0.5*Math.max(0.06,CC3.iD/0.6),'rgba(52,224,138,.95)');
+  } else if (CC3.cir===1){                   /* 桥式 */
+    cc3AcSrc(34,190);
+    cc3Wire(34,179,34,190); cc3Wire(34,190,118,190);
+    cc3Wire(34,201,34,268); cc3Wire(34,268,226,268); cc3Wire(226,268,226,190); cc3Wire(226,190,194,190);
+    const cx=156, cy=190, r=38;
+    const L=[cx-r,cy], R=[cx+r,cy], T=[cx,cy-r], B=[cx,cy+r];
+    cc3DiodeSeg(L[0],L[1],T[0],T[1]);        /* 左 → 上 */
+    cc3DiodeSeg(R[0],R[1],T[0],T[1]);        /* 右 → 上 */
+    cc3DiodeSeg(B[0],B[1],L[0],L[1]);        /* 下 → 左 */
+    cc3DiodeSeg(B[0],B[1],R[0],R[1]);        /* 下 → 右 */
+    cc3Lbl('⌐ 整流桥 ¬',cx,cy+8,'#5c7264');
+    cc3Wire(T[0],T[1],T[0],118); cc3Node(T[0],118); cc3Wire(T[0],118,200,118);
+    cc3Lbl('Vout',206,106,'#34e08a');
+    cc3Wire(200,118,200,138); cc3CapV(200,138); cc3Lbl('C',224,146);
+    cc3Wire(200,147,200,180); cc3Gnd(200,180); cc3Node(200,180);
+    cc3Wire(200,118,246,118);
+    cc3Wire(246,118,246,136);
+    cc3Zig(246,136,42,true); cc3Lbl('RL',272,160,'#5c7264','end');
+    cc3Wire(246,178,246,268); cc3Gnd(246,268);
+    cc3Wire(B[0],B[1],B[0],268); cc3Node(B[0],268);
+    const pos = CC3.vin>=0;
+    if (pos) drawDots([[118,190],[T[0],T[1]],[200,118],[246,118],[246,268],[B[0],268],[B[0],B[1]],[R[0],R[1]],[226,190],[226,268],[34,268],[34,201]],'a',0.4*Math.max(0.06,CC3.iD/0.6),'rgba(52,224,138,.95)');
+    else drawDots([[194,190],[R[0],R[1]],[T[0],T[1]],[200,118],[246,118],[246,268],[B[0],268],[B[0],B[1]],[L[0],L[1]],[118,190],[34,190],[34,179]],'b',0.4*Math.max(0.06,CC3.iD/0.6),'rgba(255,176,46,.9)');
+    cc3Lbl('AC 15Vpk',60,176);
+  } else if (CC3.cir===2){                   /* 齐纳 */
+    cc3AcSrc(34,128);
+    cc3Lbl('Vin',34,104,'#8aa294');
+    cc3Wire(34,139,34,86); cc3Wire(34,86,60,86);
+    cc3Zig(60,86,40,false); cc3Lbl('R 150Ω',80,68,'#5c7264');
+    cc3Wire(100,86,150,86); cc3Node(150,86);
+    cc3Lbl('Vout',158,74,'#34e08a');
+    cc3Wire(150,86,150,110); cc3ZenerV(150,118,true); cc3Lbl('Dz 5V1',124,120,'#8aa294','end');
+    cc3Wire(150,132,150,170); cc3Node(150,170);
+    cc3Wire(150,86,206,86);
+    cc3Wire(206,86,206,104);
+    cc3Zig(206,104,42,true); cc3Lbl('RL 1k',232,128,'#5c7264','end');
+    cc3Wire(206,146,206,170); cc3Gnd(206,170);
+    cc3Wire(34,170,206,170); cc3Wire(34,170,34,139); cc3Gnd(120,170);
+    const iR=Math.max(0,(CC3.vin-CC3.vout))/CC3_ZR;
+    drawDots([[34,86],[206,86],[206,170],[34,170],[34,86]],'a',0.45*Math.max(0.05,iR/0.05),'rgba(52,224,138,.95)');
+    if (CC3.iZ>0.0005) drawDots([[150,86],[150,170]],'b',0.3*Math.max(0.05,CC3.iZ/0.03),'rgba(255,176,46,.9)');
+  } else {                                    /* 续流（无/有） */
+    CC3CTX.strokeStyle='rgba(220,235,225,.5)'; CC3CTX.lineWidth=1.6;
+    CC3CTX.beginPath(); CC3CTX.arc(34,128,11,0,Math.PI*2); CC3CTX.stroke();
+    cc3Lbl('Vin 5V',34,156,'#8aa294');
+    cc3Wire(34,117,34,86); cc3Wire(34,86,60,86);
+    cc3Switch(62,86,true); cc3Lbl('SW 20kHz',72,66,'#ffb02e');
+    cc3Wire(86,86,120,86); cc3Node(120,86);
+    /* L 线圈 */
+    CC3CTX.strokeStyle='#dcebe1'; CC3CTX.lineWidth=2.2;
+    CC3CTX.beginPath(); CC3CTX.moveTo(120,86);
+    for (let i=0;i<4;i++) CC3CTX.arc(127+i*14, 86, 7, Math.PI, 0, false);
+    CC3CTX.lineTo(182,86);
+    CC3CTX.stroke();
+    cc3Lbl('L '+fmtLx(CC3.L),148,64);
+    cc3Zig(182,86,40,false); cc3Lbl('R 5Ω',202,68,'#5c7264');
+    cc3Wire(222,86,226,86); cc3Node(226,86);
+    cc3Wire(226,86,226,170);
+    cc3Wire(34,170,226,170); cc3Wire(34,170,34,139); cc3Gnd(120,170);
+    if (CC3.cir===4){
+      cc3Wire(120,86,120,110); cc3DiodeV(120,118,true); cc3Lbl('D 续流',96,120,'#8aa294','end');
+      cc3Wire(120,132,120,170); cc3Node(120,170);
+      cc3Lbl('Vsw',132,52,'#57d8f2');
+    } else {
+      CC3CTX.strokeStyle='rgba(255,100,120,.5)'; CC3CTX.lineWidth=1.4;
+      CC3CTX.setLineDash([4,4]);
+      CC3CTX.strokeRect(108,106,24,30);
+      CC3CTX.setLineDash([]);
+      cc3Lbl('无 D ✕',120,98,'rgba(255,100,120,.8)');
+      cc3Lbl('Vsw',132,52,'#57d8f2');
+      if (CC3.vsw>200) cc3Sparks(120,86);
+    }
+    const sw = ((CC3.t % (1/CC3_FW_F))/(1/CC3_FW_F)) < 0.5;
+    if (sw){
+      drawDots([[34,86],[226,86],[226,170],[34,170],[34,86]],'a',0.5*Math.max(0.06,CC3.iL/1.5),'rgba(52,224,138,.95)');
+    } else if (CC3.cir===4 && CC3.iL>0.01){
+      drawDots([[120,86],[226,86],[226,170],[120,170],[120,86]],'b',0.5*Math.max(0.06,CC3.iL/1.5),'rgba(255,176,46,.9)');
+    }
+  }
+}
+
+function cc3Draw(){
+  if (!CC3CTX) return;
+  CC3CTX.clearRect(0,0,CC3W,CC3H);
+  cc3Schematic();
+  const g=CC3CTX;
+  const x0 = CC3W<560 ? 16 : 304, x1 = CC3W-14;
+  const W=cc3Window();
+  function trace(ch,y0,y1,lo,hi,color,wd){
+    g.strokeStyle='#1d2c22'; g.lineWidth=1; g.strokeRect(x0,y0,x1-x0,y1-y0);
+    const yv=v=>y1-(Math.min(hi,Math.max(lo,v))-lo)/(hi-lo)*(y1-y0);
+    g.setLineDash([3,4]); g.strokeStyle='rgba(140,162,148,.3)';
+    g.beginPath(); g.moveTo(x0,yv(0)); g.lineTo(x1,yv(0)); g.stroke();
+    g.setLineDash([]);
+    g.strokeStyle=color; g.lineWidth=wd; g.beginPath();
+    let started=false;
+    for (const h of CC3HIST){
+      if (h.t<CC3.t-W) continue;
+      const x=x0+(h.t-(CC3.t-W))/W*(x1-x0);
+      const y=yv(h[ch]);
+      if (!started){ g.moveTo(x,y); started=true; } else g.lineTo(x,y);
+    }
+    g.stroke();
+  }
+  g.font='10px "IBM Plex Mono"'; g.textAlign='left';
+  if (CC3.cir<=1){
+    trace('vi',26,132,-17,17,'rgba(255,176,46,.5)',1.5);
+    const m=cc3Measure()||{vmin:0,vmax:15,vpp:1};
+    const lo=Math.max(0,m.vmin-2), hi=m.vmax+2;
+    trace('vo',158,264,lo,hi,'#34e08a',2.2);
+    g.fillStyle='rgba(255,176,46,.8)'; g.fillText('Vin 交流', x0+8, 20);
+    g.fillStyle='#34e08a'; g.fillText(`Vout 滤波后（Vdc≈${m.vmax>0?((m.vmin+m.vmax)/2).toFixed(1):0}V）`, x0+8, 152);
+  } else if (CC3.cir===2){
+    const m=cc3Measure()||{vmin:5,vmax:5,vpp:0};
+    trace('vi',26,132,0,Math.max(9,m.vmax+2),'rgba(255,176,46,.55)',1.6);
+    trace('vo',158,264,m.vmin-0.4,m.vmax+0.4,'#34e08a',2.4);
+    g.fillStyle='rgba(255,176,46,.85)'; g.fillText(`Vin = ${CC3.Vin0.toFixed(1)}V + 1.2V 纹波`, x0+8, 20);
+    g.fillStyle='#34e08a'; g.fillText('Vout 被齐纳锁住', x0+8, 152);
+  } else {
+    const m=cc3Measure()||{imin:0,imax:1};
+    trace('vi',26,132,0,Math.max(2,m.imax*1.2),'#34e08a',2.2);
+    trace('vo',158,264,0,CC3.cir===3?400:8,'#57d8f2',2.0);
+    g.fillStyle='#34e08a'; g.fillText(`IL 电感电流 ${fmtA(CC3.iL)}`, x0+8, 20);
+    g.fillStyle='#57d8f2'; g.fillText(CC3.cir===3?`Vsw 开关电压（尖峰 ${Math.round(CC3.vsw)}V）`:`Vsw 开关电压（钳位 5.75V）`, x0+8, 152);
+  }
+  g.font='10px "IBM Plex Mono"'; g.fillStyle='#5c7264'; g.textAlign='left';
+  g.fillText(`窗口 ${fmtT(W)}`, x0+8, CC3H-6);
+}
+let cc3Last=performance.now(), cc3LastR=0;
+function cc3Frame(now){
+  const dt=Math.min(.05,((now-cc3Last)/1000)||0); cc3Last=now; CC3DT=dt;
+  if (CC3.playing) cc3Advance();
+  cc3Draw();
+  if (now-cc3LastR>150){ cc3LastR=now; cc3Readout(); }
+  requestAnimationFrame(cc3Frame);
+}
+function cc3SetCircuit(i){
+  CC3.cir=i;
+  $('cc3ParamL').textContent=CC3CFG[i].paramL;
+  $('cc3Cir').querySelectorAll('button').forEach((b,k)=>b.classList.toggle('on',k===i));
+  cc3ApplyParam();
+  cc3Prefill();
+  cc3Draw(); cc3Readout();
+}
+$('cc3Cir').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  cc3SetCircuit(+b.dataset.i);
+});
+$('cc3Param').addEventListener('input',()=>{ cc3ApplyParam(); cc3Prefill(); cc3Readout(); });
+$('cc3Play').addEventListener('click',()=>{
+  CC3.playing=!CC3.playing;
+  $('cc3Play').classList.toggle('on',CC3.playing);
+  $('cc3Play').textContent=CC3.playing?'❚❚':'▶';
+});
+cc3SetCircuit(0);
+cc3Last=performance.now();
+requestAnimationFrame(cc3Frame);
+
+/* ================================================================
+   ⑦ 反向恢复实验室：trr 的形状
+================================================================ */
+const TRRD = [
+  {name:'1N4007 工频整流', trr:30e-6, irr:1.0,
+   note:'<b>工频管：</b>少子储存最重，反向恢复 30µs 量级（手册常不标）。把它放进 100kHz 电路，每周期 30µs 在「反向导通」——Qrr 高达微库仑级，恢复损耗按几十瓦计。<b>这不是降额问题，是直接否决。</b>'},
+  {name:'FR107 快恢复', trr:500e-9, irr:1.0,
+   note:'<b>快恢复：</b>掺金让少子寿命缩短到亚微秒。Qrr 还有 250nC，100kHz 下恢复损耗约 0.75W——能用但不轻松，得算热账。频率再往上就该让位了。'},
+  {name:'UF4007 超快恢复', trr:75e-9, irr:1.0,
+   note:'<b>超快恢复：</b>trr 75ns、Qrr ≈ 37nC，同样条件下恢复损耗降到约 0.11W——高频高压整流的标准答案。1kV 耐压 + 快关断，鱼与熊掌兼得。'},
+  {name:'SS34 肖特基', trr:0, irr:0.06,
+   note:'<b>肖特基：</b>多子器件没有少子储存——所谓「恢复」只是给结电容充放电，反向电流只有几十 mA 的小尖峰（Qrr ≈ nC 级），损耗毫瓦级。<b>trr ≈ 0 就是它统治低压高频续流位的理由。</b>'},
+];
+const TRR = { dev:0, cursor:0, last:0 };
+const TRRCV = $('trrCanvas');
+const TRRCTX = TRRCV ? TRRCV.getContext('2d') : null;
+const TRRH = 240;
+let TRRW = 640;
+function trrResize(){
+  if (!TRRCV) return;
+  const r=TRRCV.parentElement.getBoundingClientRect();
+  TRRW=Math.max(320,r.width);
+  const dpr=Math.min(devicePixelRatio||1,2);
+  TRRCV.width=TRRW*dpr; TRRCV.height=TRRH*dpr; TRRCV.style.height=TRRH+'px';
+  TRRCTX.setTransform(dpr,0,0,dpr,0,0);
+}
+if (TRRCV && TRRCTX){
+  new ResizeObserver(trrResize).observe(TRRCV.parentElement);
+  trrResize();
+}
+function trrTimes(){
+  const d=TRRD[TRR.dev];
+  if (d.trr>0){
+    const t0=d.trr*2;                 /* 换向开始 */
+    const ramp=d.trr*1.2;             /* 电流下坡（含反向抽取） */
+    return {t0, ramp, snap:d.trr*0.25, total:t0+ramp+d.trr*0.25+d.trr*1.2};
+  }
+  return {t0:160e-9, ramp:60e-9, snap:25e-9, total:400e-9};   /* 肖特基：仅结电容小尖峰 */
+}
+function trrIofT(t){
+  const d=TRRD[TRR.dev];
+  const {t0,ramp,snap}=trrTimes();
+  if (t<t0) return 1.0;
+  if (t<t0+ramp){
+    const f=(t-t0)/ramp;
+    return 1.0-(1.0+d.irr)*f;
+  }
+  if (t<t0+ramp+snap){
+    const f=(t-t0-ramp)/snap;
+    return -d.irr*(1-f);
+  }
+  return 0;
+}
+function trrReadout(){
+  const d=TRRD[TRR.dev];
+  const qrr = d.trr>0 ? 0.5*d.irr*d.trr : 0.06*60e-9;
+  const p = 30*qrr*100e3;
+  $('trrRead').innerHTML =
+    `<span class="k">trr</span><b>${d.trr>0?fmtT(d.trr):'≈ 0'}</b>`+
+    `<span class="k">Irr</span><b>${fmtA(d.irr)}</b>`+
+    `<span class="k">Qrr ≈ ½·Irr·trr</span><b>${trim3(qrr*1e9)} nC</b>`+
+    `<span class="k">恢复损耗 @30V·100kHz</span><b>${fmtW(p)}</b>`+
+    `<span class="k">频率上限经验</span><b class="g">${d.trr>10e-6?'工频专用 ✕':(d.trr>100e-9?'≤ ~200kHz':'数百 kHz+')}</b>`;
+  $('trrNote').innerHTML=d.note;
+}
+function trrDraw(){
+  if (!TRRCTX) return;
+  const d=TRRD[TRR.dev];
+  const g=TRRCTX;
+  g.clearRect(0,0,TRRW,TRRH);
+  const x0=54, x1=TRRW-18, yTop=28, yBot=206;
+  const {total}=trrTimes();
+  const xOf=t=>x0+t/total*(x1-x0);
+  const iMax=1.25, iMin=-1.25;
+  const yOf=i=>yBot-(i-iMin)/(iMax-iMin)*(yBot-yTop);
+  g.strokeStyle='#1d2c22'; g.lineWidth=1; g.strokeRect(x0,yTop,x1-x0,yBot-yTop);
+  g.setLineDash([3,4]); g.strokeStyle='rgba(140,162,148,.3)';
+  g.beginPath(); g.moveTo(x0,yOf(0)); g.lineTo(x1,yOf(0)); g.stroke();
+  g.beginPath(); g.moveTo(x0,yOf(1)); g.lineTo(x1,yOf(1)); g.stroke();
+  g.setLineDash([]);
+  /* Qrr 阴影：反向电流与时间轴围成的面积 */
+  const {t0,ramp,snap}=trrTimes();
+  g.fillStyle='rgba(255,100,120,.13)';
+  g.beginPath();
+  g.moveTo(xOf(t0+ramp*(1/(1+d.irr))),yOf(0));
+  for (let k=0;k<=60;k++){
+    const t=t0+ramp*(1/(1+d.irr))+ (ramp*(d.irr/(1+d.irr))+snap)*k/60;
+    g.lineTo(xOf(t),yOf(Math.min(0,trrIofT(t))));
+  }
+  g.lineTo(xOf(t0+ramp+snap),yOf(0));
+  g.closePath(); g.fill();
+  /* 电流波形 */
+  g.strokeStyle='#34e08a'; g.lineWidth=2.4; g.beginPath();
+  let started=false;
+  for (let k=0;k<=420;k++){
+    const t=total*k/420;
+    const x=xOf(t), y=yOf(trrIofT(t));
+    if (!started){ g.moveTo(x,y); started=true; } else g.lineTo(x,y);
+  }
+  g.stroke();
+  /* 时间标注 */
+  const tZero=t0+ramp/(1+d.irr);
+  const tSnap=t0+ramp+snap;
+  g.strokeStyle='rgba(255,176,46,.5)'; g.setLineDash([2,3]);
+  [[tZero,'I=0'],[tSnap,'关断完成']].forEach(([tv,txt])=>{
+    const x=xOf(Math.min(tv,total));
+    g.beginPath(); g.moveTo(x,yTop); g.lineTo(x,yBot); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle='rgba(255,176,46,.85)'; g.font='9.5px "IBM Plex Mono"'; g.textAlign='center';
+    g.fillText(txt, x, yTop+10);
+    g.setLineDash([2,3]);
+  });
+  g.setLineDash([]);
+  /* 游标 */
+  const xc=xOf(TRR.cursor*total);
+  g.strokeStyle='#dcebe1'; g.lineWidth=1; g.setLineDash([2,3]);
+  g.beginPath(); g.moveTo(xc,yTop); g.lineTo(xc,yBot); g.stroke();
+  g.setLineDash([]);
+  g.beginPath(); g.arc(xc,yOf(trrIofT(TRR.cursor*total)),3.6,0,Math.PI*2);
+  g.fillStyle='#dcebe1'; g.fill();
+  /* 轴标签 */
+  g.font='10px "IBM Plex Mono"'; g.fillStyle='#5c7264'; g.textAlign='left';
+  g.fillText('IF 正向 1A → 反向换向', x0+8, yTop-6);
+  g.fillStyle='rgba(255,100,120,.8)';
+  g.fillText('Qrr（少子库存）', xOf(t0+ramp*0.7), yOf(-d.irr*0.45));
+  g.fillStyle='#34e08a'; g.textAlign='left';
+  g.fillText(`窗口 ${fmtT(total)}`, x0+8, TRRH-8);
+  g.textAlign='right'; g.fillStyle='#5c7264';
+  g.fillText('+1A', x0-6, yOf(1)+3);
+  g.fillText('0', x0-6, yOf(0)+3);
+  g.fillText('−1A', x0-6, yOf(-1)+3);
+}
+function trrFrame(now){
+  const dt=Math.min(.05,((now-TRR.last)/1000)||0); TRR.last=now;
+  TRR.cursor += dt*0.5;
+  if (TRR.cursor>=1) TRR.cursor=0;
+  trrDraw();
+  requestAnimationFrame(trrFrame);
+}
+$('trrSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  $('trrSeg').querySelectorAll('button').forEach((x,k)=>x.classList.toggle('on',k===+b.dataset.i));
+  TRR.dev=+b.dataset.i; TRR.cursor=0;
+  trrReadout();
+});
+trrReadout();
+TRR.last=performance.now();
+requestAnimationFrame(trrFrame);
+
+/* ================================================================
+   ⑧ 选型五步
+================================================================ */
+const SEL=[
+  {t:'定类型',
+   v:'<b>按电路位定家族，而不是先看电流电压。</b>工频整流 1N4007；20kHz 以上一律快恢复/超快恢复（trr 上限见 08 节）；低压高频续流/防反接选肖特基（VF 省一半）；信号钳位检波用 1N4148；基准与钳位是齐纳；接口防护是 TVS。家族错了，参数再漂亮也白搭。',
+   a:[['cmt','# 按拓扑定家族'],
+      ['hl','工频整流 → 1N4007 / DB107 桥'],
+      ['hl','高频高压 → UF4007 / FR107'],
+      ['hl','低压高频 → 肖特基 SS/B 系列'],
+      ['out','信号位 → 1N4148 / BAT54'],
+      ['cmt','# 基准→齐纳 · 接口→TVS']],
+   b:[['cmt','# 例：Buck 12V→3.3V @2A 续流位'],
+      ['out','fsw 500kHz → 排除工频管'],
+      ['out','反压 12V → 肖特基 40V 够用'],
+      ['out','候选：SS34 / SK34 / B340A'],
+      ['cmt','# 若是反激 600V 输出整流位'],
+      ['cmt','# → UF4007 / FR107 这一支']]},
+  {t:'定电流',
+   v:'<b>平均电流留 50%，浪涌看 IFSM。</b>整流位按平均正向电流；续流位按 ID=(1−D)·Iout 再叠纹波峰值；上电给滤波电容的充电半波与容性负载的启动冲击全算 IFSM（不重复、半个工频周波）。温度升额见 05 节曲线。',
+   a:[['cmt','# 电流三笔账'],
+      ['hl','ID_avg = (1−D)×Iout（续流）'],
+      ['hl','IF(AV) 选 ≥ 2× 平均值'],
+      ['out','峰值 = Iout + ΔIL/2'],
+      ['out','上电浪涌 → IFSM 扛'],
+      ['cmt','# SMA 塑封 3A 已是风冷上限'],
+      ['cmt','# 更大电流 → SMC / 桥堆 / MOS']],
+   b:[['cmt','# 例：Buck 2A 续流（D=0.275）'],
+      ['out','ID = 0.725×2 = 1.45A'],
+      ['out','峰值 ≈ 2.3A（含纹波）'],
+      ['out','选 SS34（3A）→ 余量 2× ✓'],
+      ['cmt','# 上电浪涌评估：软启动/NTC'],
+      ['cmt','# 若 IFSM 不够 → 加 NTC 预热']]},
+  {t:'定电压',
+   v:'<b>VRRM ≥ 1.5~2× 工作反压，振铃另算。</b>整流位反压 = √2×Vac；续流位反压 = Vin；反激位还有漏感振铃尖峰（可再乘 1.5）。击穿短路是一连串事故的开始：变压器、保险丝、甚至下游芯片一起陪葬。',
+   a:[['cmt','# 反压核算清单'],
+      ['hl','桥整：√2 × Vac + 裕量'],
+      ['hl','续流：Vin + 振铃（示波器看）'],
+      ['out','VRRM ≥ 2× 最坏反压'],
+      ['out','感性节点加 RC 吸收回路'],
+      ['cmt','# 裕量不是越大越好：'],
+      ['cmt','# VF 与漏电常随耐压上升']],
+   b:[['cmt','# 例：反激 600V 输出整流'],
+      ['out','反压 ≈ Vout + Vin×N 反射'],
+      ['out','+ 漏感振铃 ≈ 1.3×'],
+      ['out','→ VRRM ≥ 1200V 档'],
+      ['cmt','# 例：24V 总线防反接'],
+      ['cmt','# SS54（40V）裕量偏紧 → 用 60V']]},
+  {t:'算损耗与热',
+   v:'<b>三笔损耗加起来过热设计这关。</b>导通 P=VF×I_avg、反向 P=V×IR（肖特基高温下不可忽略）、恢复 P≈V·Qrr·f（高频场合主导）。然后 TJ = TA + P×RθJA < 150°C：SMA 的 RθJA 由铜箔面积决定——贴片二极管的热设计就是 PCB 铺铜设计。',
+   a:[['cmt','# 损耗三笔账（06 节计算器）'],
+      ['hl','导通：Pc = VF × I_avg'],
+      ['hl','反向：Pv = Vrev × IR'],
+      ['hl','恢复：Prr = V·Qrr·f'],
+      ['out','TJ = TA + ΣP × RθJA &lt; 150°C'],
+      ['cmt','# 肖特基 IR 每 10°C 翻倍要迭代']],
+   b:[['cmt','# 例：SS34 @ ID=1.45A · 环境 50°C'],
+      ['out','Pc = 0.5×1.45 = 0.73W'],
+      ['out','Pv = 12×0.2mA×0.275 ≈ 0.7mW'],
+      ['out','RθJA(铺铜) ≈ 60°C/W → ΔT 44°C'],
+      ['out','TJ ≈ 94°C ✓'],
+      ['cmt','# 无铺铜 90°C/W → ΔT 66°C 擦边'],
+      ['cmt','# 结论：阴极焊盘铺铜是硬需求']]},
+  {t:'封装与布局',
+   v:'<b>极性与散热是上板前的最后一关。</b>插件认色环（阴极）、SMA 认带线端、桥堆认 ~ / + / −——万用表二极管档复核两分钟救命。大电流管的热主要从阴极端焊盘走：铺铜 + 过孔阵列到内层；整流管到电容的大电流环路压到最短。',
+   a:[['cmt','# 上板核查清单'],
+      ['hl','极性：丝印 + 二极管档双检'],
+      ['hl','阴极焊盘铺铜 + 过孔阵列'],
+      ['out','整流→滤波电容环路最短'],
+      ['out','TVS 靠接口 · 齐纳靠近负载'],
+      ['cmt','# 桥堆 ~ + − 脚位再对一遍'],
+      ['cmt','# 车规场景认 AEC-Q101']],
+   b:[['cmt','# 典型型号风格（以手册为准）'],
+      ['out','肖特基：SS34 / SK34 / B340A'],
+      ['out','超快：UF4007 / MUR120'],
+      ['out','齐纳：MMSZ / BZT52 / 1N47xx'],
+      ['out','TVS：SMAJ / SMBJ / 5.0SMDJ'],
+      ['cmt','# 选型页必看：VF-IF 曲线 + 降额曲线'],
+      ['cmt','# 高可靠场合看 IFSM 与热阻细节']]},
+];
+(function initSel(){
+  const stepsEl=$('selSteps'); if(!stepsEl) return;
+  const verdict=$('selVerdict'), bodyA=$('selBodyA'), bodyB=$('selBodyB');
+  const clsMap={out:'t-out',cmt:'t-cmt',hl:'t-hl',tag:'t-tag'};
+  const render=lines=>lines.map(([k,t])=>`<div class="${clsMap[k]||'t-out'}">${escHtml(t)}</div>`).join('');
+  const select=idx=>{
+    stepsEl.querySelectorAll('.dbg-step').forEach((b,i)=>b.classList.toggle('on',i===idx));
+    verdict.innerHTML=SEL[idx].v;
+    bodyA.innerHTML=render(SEL[idx].a);
+    bodyB.innerHTML=render(SEL[idx].b);
+  };
+  SEL.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='dbg-step'; b.type='button';
+    b.innerHTML=`<span class="n">${String(i+1).padStart(2,'0')}</span><span>${d.t}</span>`;
+    b.addEventListener('click',()=>select(i));
+    stepsEl.appendChild(b);
+  });
+  select(0);
+})();
+
+/* ---------------- ⑨ 命令点击复制（事件委托） ---------------- */
+document.addEventListener('click', async e=>{
+  const el = e.target.closest('.t-cmd');
+  if (!el) return;
+  const txt = el.dataset.copy || el.textContent;
+  let okFlag = false;
+  try { await navigator.clipboard.writeText(txt); okFlag = true; }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { okFlag = document.execCommand('copy'); } catch {}
+    ta.remove();
+  }
+  const old = el.textContent;
+  el.classList.add('copied');
+  el.textContent = okFlag ? '已复制 ✓' : '复制失败';
+  setTimeout(()=>{ el.classList.remove('copied'); el.textContent = old; }, 900);
+});
+
+/* ---------------- 滚动显现 ---------------- */
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script src="component-nav.js" defer></script>
+</body>
+</html>

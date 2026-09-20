@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>硬件器件图解 · HW Component Lab</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23070b09'/><path d='M2 16 h4 l2-6 4 12 4-12 4 12 2-6 h8' stroke='%2334e08a' stroke-width='2.5' fill='none'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b09;
+  --panel:#0d1510;
+  --panel2:#101a13;
+  --line:#1d2c22;
+  --ink:#dcebe1;
+  --dim:#8aa294;
+  --faint:#5c7264;
+  --green:#34e08a;
+  --amber:#ffb02e;
+  --cyan:#57d8f2;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --disp:'Chakra Petch','Noto Sans SC',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:
+    radial-gradient(1200px 600px at 70% -10%, rgba(52,224,138,.06), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(87,216,242,.05), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(52,224,138,.035) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(52,224,138,.035) 39px 40px),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Noto Sans SC',-apple-system,sans-serif;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+header{padding:72px 24px 40px;max-width:960px;margin:0 auto;width:100%;text-align:center}
+.tag{
+  font-family:var(--mono);font-size:12px;letter-spacing:.35em;color:var(--green);
+  border:1px solid rgba(52,224,138,.35);display:inline-block;padding:6px 14px;border-radius:3px;
+  margin-bottom:24px;text-transform:uppercase;
+}
+h1{
+  font-family:var(--disp);font-size:clamp(30px,5vw,48px);font-weight:700;letter-spacing:.02em;line-height:1.15;
+}
+h1 .en{display:block;font-size:.42em;font-weight:500;color:var(--dim);letter-spacing:.28em;margin-top:10px;text-transform:uppercase}
+.sub{color:var(--dim);font-size:15px;line-height:1.9;margin-top:20px;font-weight:300;max-width:560px;margin-left:auto;margin-right:auto}
+main{flex:1;width:100%;max-width:960px;margin:0 auto;padding:24px 24px 72px;display:grid;gap:20px}
+a.card{
+  display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:center;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:10px;padding:26px 28px;
+  text-decoration:none;color:var(--ink);
+  transition:border-color .2s, transform .2s, box-shadow .2s;
+}
+a.card:hover{border-color:rgba(52,224,138,.5);transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.wave{width:64px;height:40px;border:1px solid var(--line);border-radius:5px;background:#0a0f0c;overflow:hidden}
+.wave svg{display:block;width:100%;height:100%}
+.card h2{font-family:var(--disp);font-size:21px;font-weight:600;letter-spacing:.03em}
+.card p{color:var(--dim);font-size:13.5px;margin-top:6px;line-height:1.7;font-weight:300}
+.card .go{
+  font-family:var(--mono);font-size:13px;color:var(--green);letter-spacing:.15em;white-space:nowrap;
+}
+.card .accent{color:var(--green)}
+.card .go::after{content:' →'}
+div.card.ghost{
+  display:grid;grid-template-columns:64px 1fr;gap:20px;align-items:center;
+  background:transparent;border:1px dashed var(--line);border-radius:10px;padding:22px 28px;
+}
+div.card.ghost .dots{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.2em;text-align:center}
+div.card.ghost p{color:var(--faint);font-size:12.5px;line-height:1.8;font-weight:300}
+div.card.ghost b{color:var(--dim);font-weight:500}
+footer{
+  border-top:1px solid var(--line);padding:22px 24px;text-align:center;
+  font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.12em;
+}
+@media(max-width:640px){
+  a.card,div.card.ghost{grid-template-columns:1fr;gap:12px;padding:22px}
+  .card .go{justify-self:start}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="tag">HW COMPONENT LAB</div>
+  <h1>硬件器件图解<span class="en">Interactive Hardware Component Guides</span></h1>
+  <p class="sub">以交互式动画、解码实验室与计算器，图解电阻等基础电子器件的原理、参数、标记体系与实战用法——风格延续 <b>HW Protocol Lab</b>。</p>
+</header>
+<main>
+  <a class="card" href="resistor.html">
+    <div class="wave"><svg viewBox="0 0 64 40"><path d="M4 20 h5 l3-9 5 16 5-16 5 16 3-9 h5 l3-9 5 16 5-16 5 16 3-9 h4" stroke="#34e08a" stroke-width="2.5" fill="none"/></svg></div>
+    <div>
+      <h2><span class="accent">电阻</span>器件详解</h2>
+      <p>最平凡也最多的器件：欧姆定律与电路五大角色、四/五环逐环解码动画、SMD 丝印与 EIA-96 解码器、LED 限流与 ADC 分压计算器、特殊电阻家族与选型五步实战。</p>
+    </div>
+    <span class="go">ENTER</span>
+  </a>
+  <a class="card" href="capacitor.html">
+    <div class="wave"><svg viewBox="0 0 64 40"><path d="M4 20 h18 M42 20 h18 M24 6 v28 M38 6 v28" stroke="#34e08a" stroke-width="2.5" fill="none"/><path d="M31 6 v28" stroke="#34e08a" stroke-width="1.2" opacity=".5"/></svg></div>
+    <div>
+      <h2><span class="accent">电容</span>器件详解</h2>
+      <p>隔直通交的储能容器：Q=CV 与 i=C·dv/dt 图解、RC 充放电逐段动画实验室、三位码/R 记法/极性丝印解码器、容抗与掉电保持时间计算器、经典电路演示（低通/高通/整流/555）、MLCC 阻抗曲线实验室。</p>
+    </div>
+    <span class="go">ENTER</span>
+  </a>
+  <a class="card" href="inductor.html">
+    <div class="wave"><svg viewBox="0 0 64 40"><path d="M4 20 h6 a4.5 7.5 0 0 1 9 0 a4.5 7.5 0 0 1 9 0 a4.5 7.5 0 0 1 9 0 a4.5 7.5 0 0 1 9 0 h10" stroke="#34e08a" stroke-width="2.5" fill="none"/></svg></div>
+    <div>
+      <h2><span class="accent">电感</span>器件详解</h2>
+      <p>稳流抗变的储能元件：V=L·di/dt 与 τ=L/R 图解、RL 逐段动画实验室、三位码/R 记法/色环电感解码器与实验室、感抗与 Buck 电感计算器、磁芯家族与直流饱和实验室、Buck/Boost/LC 谐振/磁珠经典电路演示、选型五步与踩坑指南。</p>
+    </div>
+    <span class="go">ENTER</span>
+  </a>
+  <a class="card" href="diode.html">
+    <div class="wave"><svg viewBox="0 0 64 40"><path d="M4 20 h12 L30 10 V30 L18 20 M32 8 V32 M32 20 h28" stroke="#34e08a" stroke-width="2.5" fill="none"/><path d="M18 10 V30 L30 20 Z" fill="#34e08a" stroke="none"/></svg></div>
+    <div>
+      <h2><span class="accent">二极管</span>器件详解</h2>
+      <p>单向导电的 PN 结阀门：Shockley 方程与 VI 逐段扫描实验室（硅/肖特基/齐纳/LED 四线对比）、丝印与极性翻转解码器、齐纳稳压与续流功耗计算器、半波/桥式/齐纳/续流经典电路实验室、反向恢复 trr 实验室、选型五步与踩坑指南。</p>
+    </div>
+    <span class="go">ENTER</span>
+  </a>
+  <a class="card" href="transistor.html">
+    <div class="wave"><svg viewBox="0 0 64 40"><circle cx="30" cy="20" r="12" fill="none" stroke="#34e08a" stroke-width="2"/><line x1="25" y1="10" x2="25" y2="30" stroke="#34e08a" stroke-width="2.4"/><line x1="10" y1="20" x2="25" y2="20" stroke="#34e08a" stroke-width="2"/><line x1="25" y1="15" x2="38" y2="8" stroke="#34e08a" stroke-width="2"/><line x1="25" y1="24" x2="38" y2="31" stroke="#34e08a" stroke-width="2"/><path d="M34 29 L38 31 L36.6 27 Z" fill="#34e08a" stroke="none"/><line x1="38" y1="8" x2="54" y2="8" stroke="#34e08a" stroke-width="1.6" fill="none"/><line x1="38" y1="31" x2="54" y2="31" stroke="#34e08a" stroke-width="1.6" fill="none"/></svg></div>
+    <div>
+      <h2><span class="accent">三极管</span>器件详解</h2>
+      <p>小电流控制大电流的电流阀门：β=IC/IB 与三工作区、输出特性曲线族与负载线实验室、三引脚万用表判别实验室与丝印解码器、开关驱动 Rb 与放大偏置计算器、欠饱和/恒流/共射放大/达林顿经典电路实验室、储存时间 ts 实验室、选型五步与踩坑指南。</p>
+    </div>
+    <span class="go">ENTER</span>
+  </a>
+  <a class="card" href="battery.html">
+    <div class="wave"><svg viewBox="0 0 64 40"><rect x="6" y="12" width="42" height="16" rx="2" fill="none" stroke="#34e08a" stroke-width="2.4"/><rect x="48" y="17" width="5" height="6" rx="1" fill="#34e08a"/><path d="M14 16 v8 M22 14 v12 M30 16 v8" stroke="#34e08a" stroke-width="2" fill="none"/></svg></div>
+    <div>
+      <h2><span class="accent">电池</span>器件详解</h2>
+      <p>化学能仓库与设备的心跳：OCV−I·r 与一次/二次电池、十大化学体系家族谱系、六体系放电曲线逐段实验室（倍率压降/Peukert）、IEC/ANSI/圆柱型号解码器（CR2032/18650/ER…）、续航与串并联 Pack 计算器、RTC 备份/反接保护/分压漏电/UVLO 电路实验室、CC-CV 充电逐段动画、选型五步与踩坑指南。</p>
+    </div>
+    <span class="go">ENTER</span>
+  </a>
+  <div class="card ghost">
+    <div class="dots">···</div>
+    <p><b>更多器件编写中</b> · MOSFET/运放 · 按 STYLE_GUIDE.md 规范逐个上线</p>
+  </div>
+</main>
+<footer>HW-BASIC · MAINTAINED WITH ♥ FOR EMBEDDED ENGINEERS</footer>
+</body>
+</html>
