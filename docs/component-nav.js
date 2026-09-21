@@ -13,7 +13,11 @@
     ]},
     { group: '分立半导体', items: [
       ['diode.html', '二极管'],
-      ['transistor.html', '三极管']
+      ['transistor.html', '三极管'],
+      ['mosfet.html', 'MOSFET']
+    ]},
+    { group: '集成电路', items: [
+      ['opamp.html', '运算放大器']
     ]},
     { group: '电源与储能', items: [
       ['battery.html', '电池']
