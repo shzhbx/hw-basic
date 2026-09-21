@@ -96,6 +96,14 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
    全绿才算交付。canvas 电路图的 8 类典型错误（电池极性画反、导线端点不落引脚、
    栅极参考接错、负载无回路、抽头从电阻身上引、波形模型碰不到自己的阈值线、
    电流动画方向反、回路缺口/导线短路器件）见项目记忆 hw-basic-site-conventions。
+6. **canvas 读数/标注里的物理量禁止硬编码，必须与模型参数对账**：
+   读数栏的 τ、f、Q、V 等一律由模型常量计算生成（`(R*C*1e3).toFixed(0)+' ms'`），
+   不要手写 `"τ = RC = 100 µs"` 这类字面量——曾因手写单位差过 1000 倍而全部自动化关卡放行。
+   hero 等封闭 IIFE 动画的读数也要纳入冒烟：rAF 用队列式 stub + 末段泵帧，
+   ctxProxy 记录 `fillText` 后，从画面标注（"R = 1k" "C = 100µF"）解析参数
+   断言读数 τ=RC、Q=C·V 逐帧一致（范例见 `.check/capacitor_smoke_test.js` hero 段）。
+   所画拓扑必须支撑所算行为：常驻直流源旁边不能出现周期性放电反向电流——
+   周期充放电要画方波源（低电平=0V 短接）或开关，源电平随状态切换显示。
 
 ## 交付报告格式
 
