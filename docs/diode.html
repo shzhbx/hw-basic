@@ -1032,7 +1032,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
           <path d="M46 41 L140 41 L322 178" fill="none" stroke="#57d8f2" stroke-width="2.4"/>
           <text x="150" y="150" fill="#57d8f2" font-size="9">SMA · 1in² 铜箔 · 50°C 起降额更快</text>
           <path d="M46 41 L104 41 L322 206" fill="none" stroke="#ff6478" stroke-width="2.4" stroke-dasharray="6 4"/>
-          <text x="200" y="190" fill="#ff6478" font-size="9">SMA · 无铜箔 · 35°C 就开始弯腰</text>
+          <text x="200" y="184" fill="#ff6478" font-size="9">SMA · 无铜箔<tspan x="200" dy="11">35°C 就开始弯腰</tspan></text>
         </g>
       </svg>
       <div class="db">曲线就是热欧姆定律：<b>IF_allowed = (TJ_max − TA) / (RθJA × VF)</b>。同一颗 SMA 贴片，铺 1 in² 铜箔与裸焊盘的可用电流差近一倍——
@@ -1171,53 +1171,66 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   <div class="fmt-grid">
     <div class="fmt-card t-do reveal"><div class="fh"><span class="tag">HALF</span><h4>半波整流 = 削掉负半周</h4><span class="en">50 Hz</span></div>
       <svg viewBox="0 0 300 96">
-        <circle cx="40" cy="50" r="14" fill="none" stroke="#dcebe1" stroke-width="2"/>
-        <path d="M32 50 a8 5 0 0 1 16 0" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
-        <path d="M54 50 h16 M70 42 L84 50 L70 58 Z" fill="#dcebe1"/>
-        <path d="M84 42 V58" stroke="#dcebe1" stroke-width="2.4"/>
-        <path d="M84 50 h30 M114 42 v16 M124 42 v16 M124 50 h24" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
-        <path d="M158 50 h20 M178 44 h16 M178 50 v8" stroke="#dcebe1" stroke-width="1.6" fill="none"/>
+        <circle cx="36" cy="50" r="12" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <path d="M28 50 a8 5 0 0 1 16 0" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
+        <path d="M48 50 h14" stroke="#dcebe1" stroke-width="2" fill="none"/>
+        <path d="M62 42 L76 50 L62 58 Z M76 42 V58" fill="#dcebe1" stroke="#dcebe1" stroke-width="2"/>
+        <path d="M76 50 h22" stroke="#dcebe1" stroke-width="2" fill="none"/>
+        <circle cx="98" cy="50" r="2.4" fill="#dcebe1"/>
+        <path d="M98 50 v6 M91 56 h14 M91 62 h14 M98 62 v10" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <path d="M98 50 h20 M118 50 h3 l5 -8 8 16 8 -16 8 16 5 -8 h3 M158 50 h20 M178 50 v22" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <path d="M36 62 v10 M36 72 h142" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <path d="M67 72 v6 M60 78 h14 M63 82 h8 M65.5 85.5 h3" stroke="#9aa79d" stroke-width="1.6" fill="none"/>
         <path d="M148 18 h14 v10 h14" fill="none" stroke="#ffb02e" stroke-width="1.4"/>
         <path d="M148 28 h14" fill="none" stroke="#34e08a" stroke-width="2"/>
-        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">导通角只有峰值附近</text>
+        <text x="150" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">导通角只有峰值附近</text>
       </svg>
       <div class="fb">正半周且 Vs &gt; Vout+VF 时才导通：<b>导通角集中在峰值附近</b>，电容在谷底撑住——纹波频率 50 Hz、Vdc ≈ 峰值−纹波/2。只利用一半波形，效率低但只需一颗管。</div></div>
     <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">BRIDGE</span><h4>桥式整流 = 两个半周都用</h4><span class="en">100 Hz</span></div>
       <svg viewBox="0 0 300 96">
-        <rect x="104" y="24" width="44" height="44" fill="none" stroke="#8aa294" stroke-width="1.6" transform="rotate(45 126 46)"/>
-        <path d="M92 46 h16 M136 46 h24" stroke="#9aa79d" stroke-width="2"/>
-        <path d="M126 12 v10 M126 70 v10 M160 50 h30" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
-        <path d="M126 22 m-6 0 h12 M126 80 m-6 0 h12" stroke="#34e08a" stroke-width="1.6"/>
-        <text x="66" y="40" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">AC</text>
-        <text x="240" y="44" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">DC</text>
-        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">四管轮流值班 · 纹波翻倍到 100Hz</text>
+        <rect x="110" y="30" width="40" height="40" fill="none" stroke="#8aa294" stroke-width="1.6" transform="rotate(45 130 48)"/>
+        <g stroke="#9aa79d" stroke-width="1.4" fill="none">
+          <g transform="translate(144.2 33.9) rotate(45)"><path d="M-8 0 h4"/><path d="M-4 -5 L4 0 L-4 5 Z" fill="#9aa79d" stroke="none"/><path d="M4 -5 V5" stroke-width="1.7"/><path d="M4 0 h4"/></g>
+          <g transform="translate(144.2 62.1) rotate(-45)"><path d="M-8 0 h4"/><path d="M-4 -5 L4 0 L-4 5 Z" fill="#9aa79d" stroke="none"/><path d="M4 -5 V5" stroke-width="1.7"/><path d="M4 0 h4"/></g>
+          <g transform="translate(115.9 33.9) rotate(-45)"><path d="M-8 0 h4"/><path d="M-4 -5 L4 0 L-4 5 Z" fill="#9aa79d" stroke="none"/><path d="M4 -5 V5" stroke-width="1.7"/><path d="M4 0 h4"/></g>
+          <g transform="translate(115.9 62.1) rotate(45)"><path d="M-8 0 h4"/><path d="M-4 -5 L4 0 L-4 5 Z" fill="#9aa79d" stroke="none"/><path d="M4 -5 V5" stroke-width="1.7"/><path d="M4 0 h4"/></g>
+        </g>
+        <path d="M130 8 v12 M130 76 v12 M158 48 h14 M102 48 h-14" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
+        <text x="137" y="15" fill="#ffb02e" font-size="10" font-family="IBM Plex Mono,monospace">~</text>
+        <text x="137" y="88" fill="#ffb02e" font-size="10" font-family="IBM Plex Mono,monospace">~</text>
+        <text x="178" y="52" fill="#34e08a" font-size="10" font-family="IBM Plex Mono,monospace">+</text>
+        <text x="74" y="52" fill="#9aa79d" font-size="10" font-family="IBM Plex Mono,monospace">−</text>
+        <text x="215" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">四管轮流值班 · 纹波翻倍到 100Hz</text>
       </svg>
       <div class="fb">四颗管两两轮流值班，负半周也被翻上来：<b>纹波频率 100 Hz</b>、同样的电容纹波减半，Vdc 比半波多约 0.7 V（两管压降 1.4 V 换来的）。反激与前级电源的标配，桥堆把它打包成四个脚。</div></div>
     <div class="fmt-card t-zn reveal"><div class="fh"><span class="tag">ZENER</span><h4>齐纳稳压 = 住在击穿区</h4><span class="en">SHUNT REG</span></div>
       <svg viewBox="0 0 300 96">
-        <circle cx="36" cy="50" r="12" fill="none" stroke="#dcebe1" stroke-width="2"/>
-        <text x="36" y="54" text-anchor="middle" fill="#dcebe1" font-size="9" font-family="IBM Plex Mono,monospace">Vin</text>
-        <path d="M48 50 h20 M68 44 h16 M68 50 v12 M68 56 h16" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
-        <path d="M84 40 h20 M100 40 V60 M106 44 a4 8 0 0 0 12 0" stroke="none"/>
-        <path d="M94 38 L110 46 L94 54 Z" fill="#ff6478"/>
-        <path d="M110 38 h-5 v5 M110 62 h-5 v-5 M110 38 V62" stroke="#ff6478" stroke-width="2" fill="none"/>
-        <path d="M110 50 h30 M140 42 v16 M150 42 v16 M150 50 h30" stroke="#dcebe1" stroke-width="1.8" fill="none"/>
-        <path d="M96 24 h24 l-6 8 M120 24 v10" fill="none" stroke="#ffb02e" stroke-width="1.4"/>
-        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">R 吸收波动 · Dz 锁住电压</text>
+        <circle cx="34" cy="50" r="12" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <text x="34" y="53" text-anchor="middle" fill="#dcebe1" font-size="8" font-family="IBM Plex Mono,monospace">Vin</text>
+        <path d="M46 50 h16" stroke="#dcebe1" stroke-width="2" fill="none"/>
+        <path d="M62 50 h4 l5 -9 9 18 9 -18 9 18 5 -9 h4" fill="none" stroke="#dcebe1" stroke-width="1.8"/>
+        <path d="M107 50 h15 M122 50 h26" stroke="#dcebe1" stroke-width="2" fill="none"/>
+        <circle cx="122" cy="50" r="2.4" fill="#dcebe1"/>
+        <text x="152" y="46" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">Vout=Vz</text>
+        <path d="M122 50 v8 M115 58 h14 M115 58 v-3 M129 58 v-3" stroke="#ff6478" stroke-width="1.8" fill="none"/>
+        <path d="M115 70 L129 70 L122 58 Z" fill="#ff6478"/>
+        <path d="M122 70 v6 M115 76 h14 M118 80 h8 M120.5 83.5 h3" stroke="#ff6478" stroke-width="1.6" fill="none"/>
+        <path d="M122 34 v10 M118 40 l4 5 4 -5" fill="none" stroke="#ffb02e" stroke-width="1.4"/>
+        <text x="205" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">R 吸收波动 · Dz 锁住电压</text>
       </svg>
       <div class="fb">串联电阻吃掉 Vin 的波动，齐纳把多余电流<b>并联泄放</b>到地：负载轻时 Iz 大、负载重时 Iz 小，只要 Iz 不触零输出就锁在 Vz。<b>从空载到满载、从 Vin 最低到最高，两端都要校验</b>（06 节计算器）。</div></div>
     <div class="fmt-card t-sod reveal"><div class="fh"><span class="tag">FLYBACK</span><h4>续流二极管 = 泄洪道</h4><span class="en">FREEWHEEL</span></div>
       <svg viewBox="0 0 300 96">
-        <rect x="46" y="30" width="34" height="30" rx="4" fill="none" stroke="#8aa294" stroke-width="1.8"/>
-        <text x="63" y="49" text-anchor="middle" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">SW</text>
-        <path d="M80 45 h14 M94 37 a4 8 0 0 1 8 0 a4 8 0 0 1 8 0 a4 8 0 0 1 8 0 M118 45 h14" fill="none" stroke="#dcebe1" stroke-width="1.8"/>
-        <path d="M132 45 h44 M176 45 v10 M170 55 h12 v10" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
-        <path d="M94 68 L110 58 L94 48 Z" fill="#34e08a" opacity=".9"/>
-        <path d="M110 58 h-5 v5 M110 48 h5 v-5 M110 48 V58" stroke="#34e08a" stroke-width="1.8" fill="none"/>
-        <path d="M94 58 v14 h16" fill="none" stroke="#9aa79d" stroke-width="1.6"/>
-        <path d="M14 45 h32 M132 45 v0" stroke="#9aa79d" stroke-width="1.6" fill="none"/>
-        <path d="M238 24 l6 8 M246 24 l-6 8 M252 30 l6 8 M260 30 l-6 8" stroke="#ff6478" stroke-width="1.8"/>
-        <text x="150" y="88" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">SW 断开瞬间 · 无 D = 千伏尖峰</text>
+        <path d="M14 50 h30 M14 50 v8 M8 58 h12 M11 64 h6 M14 64 v8 M14 72 h189" fill="none" stroke="#9aa79d" stroke-width="1.6"/>
+        <path d="M44 50 h14" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <rect x="58" y="37" width="36" height="26" rx="4" fill="none" stroke="#8aa294" stroke-width="1.8"/>
+        <text x="76" y="54" text-anchor="middle" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">SW</text>
+        <path d="M94 50 h16 M110 50 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 M140 50 h16" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <circle cx="110" cy="50" r="2.4" fill="#dcebe1"/>
+        <path d="M156 50 h3 l4 -8 7 16 7 -16 7 16 4 -8 h3 M191 50 h12 M203 50 v22" fill="none" stroke="#dcebe1" stroke-width="1.8"/>
+        <path d="M103 24 l6 8 M111 24 l-6 8 M115 32 l6 8 M123 32 l-6 8" stroke="#ff6478" stroke-width="1.8"/>
+        <text x="97" y="16" fill="#ff6478" font-size="8" font-family="IBM Plex Mono,monospace">v=L·di/dt</text>
+        <text x="150" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">SW 断开瞬间 · 无 D = 千伏尖峰</text>
       </svg>
       <div class="fb">V = L·di/dt（<a href="inductor.html">电感页</a>）：开关断开瞬间电流无处可去，电压冲向数百伏打穿开关；反向并联一颗二极管，电流改走它继续流动、电压被钳在 −0.7 V。<b>右边的实验室就是有无对比的现场</b>。</div></div>
   </div>

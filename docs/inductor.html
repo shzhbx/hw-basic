@@ -1140,31 +1140,37 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   <div class="fmt-grid">
     <div class="fmt-card t-3d reveal"><div class="fh"><span class="tag">BUCK</span><h4>降压 = 逐袋搬运能量</h4><span class="en">STEP-DOWN</span></div>
       <svg viewBox="0 0 300 96">
-        <rect x="60" y="30" width="44" height="30" rx="4" fill="none" stroke="#8aa294" stroke-width="1.8"/>
-        <text x="82" y="49" text-anchor="middle" fill="#8aa294" font-size="11" font-family="IBM Plex Mono,monospace">SW</text>
-        <path d="M104 45 h14 M118 33 a5.5 11 0 0 1 11 0 a5.5 11 0 0 1 11 0 a5.5 11 0 0 1 11 0" fill="none" stroke="#dcebe1" stroke-width="2"/>
-        <path d="M162 45 v10 M154 55 h16 M156 63 h12 M158 71 h8 M162 71 v8" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
-        <path d="M196 45 L212 55 L196 65 M212 45 h0 M214 38 L214 70" stroke="#34e08a" stroke-width="1.8" fill="none"/>
-        <text x="30" y="49" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">12V</text>
-        <text x="234" y="49" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">3.3V</text>
-        <text x="150" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">导通充磁 · 关断续流</text>
+        <text x="22" y="46" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">12V</text>
+        <path d="M40 50 h20" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <rect x="60" y="37" width="36" height="26" rx="4" fill="none" stroke="#8aa294" stroke-width="1.8"/>
+        <text x="78" y="54" text-anchor="middle" fill="#8aa294" font-size="11" font-family="IBM Plex Mono,monospace">SW</text>
+        <path d="M96 50 h18 M114 50 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 M154 50 h28" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <circle cx="114" cy="50" r="2.4" fill="#dcebe1"/>
+        <path d="M114 50 v6" fill="none" stroke="#34e08a" stroke-width="1.8"/>
+        <path d="M107 56 h14" stroke="#34e08a" stroke-width="2.2"/>
+        <path d="M107 66 L121 66 L114 56 Z" fill="#34e08a"/>
+        <path d="M114 66 v4 M106 70 h16 M109 74 h10 M111.5 77.5 h5" fill="none" stroke="#34e08a" stroke-width="1.6"/>
+        <text x="188" y="53" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">3.3V</text>
+        <text x="205" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">导通充磁 · 关断续流</text>
       </svg>
       <div class="fb">SW 闭合时 Vin 给 L 充磁（i 上爬），断开时 L 经二极管续流放磁（i 下滑）——能量按 f<sub>sw</sub> 逐袋从高压搬到低压，C 把三角纹波滤平。L 由纹波比定：<code>L = Vout(1−D)/(f·ΔIL)</code>，06 节直接算。</div></div>
     <div class="fmt-card t-rn reveal"><div class="fh"><span class="tag">BOOST</span><h4>升压 = 反电动势的正面应用</h4><span class="en">STEP-UP</span></div>
       <svg viewBox="0 0 300 96">
-        <path d="M60 45 h10 M70 33 a5.5 11 0 0 1 11 0 a5.5 11 0 0 1 11 0 a5.5 11 0 0 1 11 0 h8" fill="none" stroke="#dcebe1" stroke-width="2"/>
-        <rect x="116" y="30" width="40" height="30" rx="4" fill="none" stroke="#8aa294" stroke-width="1.8"/>
-        <text x="136" y="49" text-anchor="middle" fill="#8aa294" font-size="11" font-family="IBM Plex Mono,monospace">SW</text>
-        <path d="M166 38 L166 70 M160 45 L166 38 L172 45" stroke="#34e08a" stroke-width="1.8" fill="none"/>
-        <path d="M166 45 h24 v10 M182 55 h16" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
-        <text x="26" y="49" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">5V</text>
-        <text x="220" y="49" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">12V</text>
-        <text x="150" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">接地充磁 · 断开泵升</text>
+        <text x="22" y="46" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">5V</text>
+        <path d="M40 50 h14 M54 50 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 M84 50 h16" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <circle cx="100" cy="50" r="2.4" fill="#dcebe1"/>
+        <path d="M100 50 h12 M112 42 L112 58 L126 50 Z M126 42 V58 M126 50 h30" fill="none" stroke="#34e08a" stroke-width="1.8"/>
+        <text x="162" y="53" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">12V</text>
+        <path d="M100 50 v12" fill="none" stroke="#9aa79d" stroke-width="1.8"/>
+        <rect x="86" y="62" width="28" height="20" rx="4" fill="none" stroke="#8aa294" stroke-width="1.8"/>
+        <text x="100" y="76" text-anchor="middle" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">SW</text>
+        <path d="M100 82 v4 M92 86 h16 M95 90 h10" fill="none" stroke="#9aa79d" stroke-width="1.6"/>
+        <text x="205" y="90" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">接地充磁 · 断开泵升</text>
       </svg>
       <div class="fb">SW 闭合把 L 并在 Vin 上充磁储能；断开瞬间电流无处可去、VL 反向<b>叠加</b>在 Vin 上把电荷泵向更高电压：<code>Vout = Vin/(1−D)</code>。输入电流连续、输出断续——与 Buck 正好相反。</div></div>
     <div class="fmt-card t-vx reveal"><div class="fh"><span class="tag">TANK</span><h4>LC 谐振 = 能量正弦舞</h4><span class="en">f₀ = 1/(2π√LC)</span></div>
       <svg viewBox="0 0 300 96">
-        <path d="M96 40 h14 M110 30 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 h14" fill="none" stroke="#dcebe1" stroke-width="2"/>
+        <path d="M96 40 h14 M110 40 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 a5 9 0 0 1 10 0 h14" fill="none" stroke="#dcebe1" stroke-width="2"/>
         <path d="M96 40 v10 M90 50 h12 M92 58 h8 M96 58 v10 M96 70 h84" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
         <path d="M180 50 v-8 M174 50 h12 v-8" fill="none" stroke="#dcebe1" stroke-width="1.6"/>
         <path d="M76 44 v-14 l6 4 6 -8 6 8 6 -4 6 14" fill="none" stroke="#ffb02e" stroke-width="1.6"/>
@@ -1209,8 +1215,8 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
     <div class="fact"><div class="f-no">CMC / B</div><div class="sym"><svg viewBox="0 0 240 56">
       <rect x="92" y="8" width="56" height="40" rx="14" fill="none" stroke="#57d8f2" stroke-width="2.2"/>
       <path d="M14 16 h78 M14 40 h78 M148 16 h78 M148 40 h78" stroke="#5c7264" stroke-width="1.8"/>
-      <path d="M100 12 a6 16 0 0 1 12 0 a6 16 0 0 1 12 0 a6 16 0 0 1 12 0" fill="none" stroke="#c9a253" stroke-width="2.4"/>
-      <path d="M100 44 a6 -16 0 0 0 12 0 a6 -16 0 0 0 12 0 a6 -16 0 0 0 12 0" fill="none" stroke="#34e08a" stroke-width="2.4"/>
+        <path d="M100 16 a6 12 0 0 1 12 0 a6 12 0 0 1 12 0 a6 12 0 0 1 12 0" fill="none" stroke="#c9a253" stroke-width="2.4"/>
+        <path d="M100 40 a6 -12 0 0 0 12 0 a6 -12 0 0 0 12 0 a6 -12 0 0 0 12 0" fill="none" stroke="#34e08a" stroke-width="2.4"/>
     </svg></div><h4>共模扼流 <code>CMC</code></h4><p>双绕组对向绕在同一磁芯：差模电流磁通<b>抵消</b>（不饱和、近乎 0 Ω），共模噪声磁通<b>叠加</b>呈高阻。USB、以太网、AC 入口的 EMI 标配，常与 X/Y 电容搭成 π 滤波。</p></div>
     <div class="fact"><div class="f-no">XFMR / C</div><div class="sym"><svg viewBox="0 0 240 56">
       <line x1="14" y1="16" x2="92" y2="16" stroke="#8aa294" stroke-width="2"/><line x1="14" y1="40" x2="92" y2="40" stroke="#8aa294" stroke-width="2"/>
@@ -1220,9 +1226,8 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       <text x="120" y="32" text-anchor="middle" fill="#5c7264" font-size="12" font-family="IBM Plex Mono,monospace">→→</text>
     </svg></div><h4>变压器 / 耦合电感 <code>XFMR</code></h4><p>共用磁芯的两套绕组按匝比变换电压电流：反激、正激、隔离通信（CAN 隔离、PoE）都用它。<b>同名端（点）标出绕向</b>——接反就是负压输出甚至炸管（10 节有坑例）。</p></div>
     <div class="fact"><div class="f-no">CT / D</div><div class="sym"><svg viewBox="0 0 240 56">
-      <path d="M70 12 h100 M70 44 h100" stroke="none"/>
       <rect x="96" y="10" width="48" height="36" rx="10" fill="none" stroke="#ffb02e" stroke-width="2"/>
-      <path d="M14 28 h240" stroke="#34e08a" stroke-width="3" opacity=".8"/>
+      <path d="M20 28 h200" stroke="#34e08a" stroke-width="3" opacity=".8"/>
       <path d="M96 28 a8 8 0 0 1 48 0" fill="none" stroke="#dcebe1" stroke-width="1.8"/>
       <text x="120" y="52" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">一次线穿心 · 二次量电流</text>
     </svg></div><h4>电流互感器 <code>CT</code></h4><p>载流导线穿心作为单匝一次侧，二次按匝比输出电流信号（I₂ = I₁/N）：AC 电流检测的零损耗方案。电能表、逆变器、漏电保护全靠它——只测交流，直流用霍尔。</p></div>

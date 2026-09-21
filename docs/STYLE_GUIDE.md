@@ -88,6 +88,14 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
 2. 写个小脚本检查：页内所有 `href="*.html"` 的目标都在 `protocol-nav.js` 的 `PROTOCOLS` 清单中（外加 `index.html`）；所有 `href="#xxx"` 都有对应 `id="xxx"`。
 3. 若本机有 node：提取 `<script>` 内容存临时文件跑 `node --check`。
 4. `git status`：你的产出必须只有一个新增 untracked 文件，不得出现对已跟踪文件的改动。
+5. **页面含 canvas 电路图/波形实验室时（§07/§08 等），电路检查是必做项**：
+   把每个场景×模式的断言注册进 `.check/circuit_check.py` 的 `PAGES`
+   （轨迹必须真的压到自己画的阈值线且不越界、关键连线/抽头位置用游程断言、
+   ⏸ 暂停必须真冻结画面），并在冒烟测试里补场景 readout 的数值/单位断言；
+   然后跑 `python3 .check/verify_all.py <page>`，一条命令串完 结构 → node --check → 冒烟 → 电路检查，
+   全绿才算交付。canvas 电路图的 8 类典型错误（电池极性画反、导线端点不落引脚、
+   栅极参考接错、负载无回路、抽头从电阻身上引、波形模型碰不到自己的阈值线、
+   电流动画方向反、回路缺口/导线短路器件）见项目记忆 hw-basic-site-conventions。
 
 ## 交付报告格式
 

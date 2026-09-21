@@ -922,7 +922,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
     </div>
     <div class="fmt-card t-cyl reveal">
       <div class="fh"><span class="tag">锂电圆柱</span><h4>五位数 = 直径 + 高度</h4><span class="en">CYLINDRICAL</span></div>
-      <svg viewBox="0 0 300 128">
+      <svg viewBox="0 0 320 140">
         <rect x="30" y="14" width="26" height="86" rx="4" fill="none" stroke="#57d8f2" stroke-width="2.2"/>
         <rect x="39" y="8" width="8" height="6" rx="1.5" fill="#57d8f2"/>
         <text x="46" y="112" text-anchor="middle" fill="#8aa294" font-size="9" font-family="IBM Plex Mono">14500</text>
@@ -1019,7 +1019,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   <div class="param-grid">
     <div class="derating reveal">
       <div class="dh"><h4>能量密度地图</h4><span>Wh/kg · 数量级示意</span></div>
-      <svg viewBox="0 0 520 300">
+      <svg viewBox="0 0 560 300">
         <g font-family="IBM Plex Mono" font-size="11">
           <text x="150" y="34" text-anchor="end" fill="#8aa294">铅酸 VRLA</text>
           <rect x="160" y="22" width="40" height="16" rx="2" fill="#b8a06a" opacity=".85"/><text x="208" y="35" fill="#b8a06a">35</text>
@@ -1607,8 +1607,8 @@ function fitCanvas(cv,h){
 ================================================================ */
 (function(){
   const cv=$('heroScope'); if (!cv) return;
-  const ctx=fitCanvas(cv,150);
-  const H=150;
+  const ctx=fitCanvas(cv,170);
+  const H=170;
   const NCM=[[1,4.20],[.9,3.95],[.75,3.82],[.5,3.72],[.3,3.65],[.15,3.58],[.07,3.48],[.02,3.30],[0,3.05]];
   const rInt=soc=>.05+(.12-.05)*Math.pow(Math.max(0,(0.18-soc)/0.18),2);
   const I=0.55;                       /* 负载电流 0.55A ≈ 0.2C */
@@ -1616,6 +1616,19 @@ function fitCanvas(cv,h){
   let last=performance.now();
   /* 回路粒子 */
   const dots=[]; for (let i=0;i<16;i++) dots.push({p:i/16});
+  function arcPt(pts,t){                    /* 沿折线按弧长取点，t∈[0,1) */
+    let L=0; const seg=[];
+    for (let i=1;i<pts.length;i++){ const l=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]); seg.push(l); L+=l; }
+    let d=t*L;
+    for (let i=0;i<seg.length;i++){
+      if (d<=seg[i]||i===seg.length-1){
+        const k=Math.min(1,d/seg[i]);
+        return [pts[i][0]+(pts[i+1][0]-pts[i][0])*k,pts[i][1]+(pts[i+1][1]-pts[i][1])*k];
+      }
+      d-=seg[i];
+    }
+    return pts[pts.length-1];
+  }
   function vterm(s){ return interp(NCM,s)-I*rInt(s); }
   function frame(now){
     const dt=Math.min(.05,(now-last)/1000); last=now;
@@ -1624,44 +1637,51 @@ function fitCanvas(cv,h){
       soc-=dt*(0.9/85);                /* ~85s 一条完整曲线，慢速演示 */
       if (soc<=0.02) soc=1;
     }
-    const g={x0:Math.max(70,W*0.13),x1:W-120,y0:30,y1:100};
-    const cX=(g.x0+g.x1)/2;
+    const g={x0:Math.max(74,W*0.13),x1:W-120,y0:38,y1:104};
+    const ym=(g.y0+g.y1)/2;
     ctx.clearRect(0,0,W,H);
-    /* ---- 顶部：回路 ---- */
+    /* ---- 顶部：回路（电芯串在左侧回路里，不是被导线短路） ---- */
     ctx.strokeStyle='rgba(220,235,225,.4)'; ctx.lineWidth=1.6;
     ctx.beginPath();
-    ctx.moveTo(g.x0,g.y0); ctx.lineTo(cX-120,g.y0);
-    ctx.moveTo(cX+120,g.y0); ctx.lineTo(g.x1,g.y0);
-    ctx.lineTo(g.x1,g.y1); ctx.lineTo(g.x0,g.y1); ctx.lineTo(g.x0,g.y0);
+    ctx.moveTo(g.x0,g.y0); ctx.lineTo(g.x1,g.y0);      /* 顶边：一路通到负载（无缺口） */
+    ctx.lineTo(g.x1,g.y1);                             /* 右边：负载串在其中 */
+    ctx.lineTo(g.x0,g.y1);                             /* 底边：回电芯 − */
+    ctx.lineTo(g.x0,ym+9);
+    ctx.moveTo(g.x0,ym-9); ctx.lineTo(g.x0,g.y0);      /* 电芯 + → 顶边 */
     ctx.stroke();
-    /* 电池（左，电芯示意） */
-    ctx.fillStyle='#0a100c'; ctx.fillRect(g.x0-13,g.y0+8,26,g.y1-g.y0-16);
-    ctx.strokeStyle='#34e08a'; ctx.lineWidth=2;
-    ctx.strokeRect(g.x0-13,g.y0+8,26,g.y1-g.y0-16);
-    ctx.fillStyle='#34e08a';
-    ctx.fillRect(g.x0+13,(g.y0+g.y1)/2-7,4,14);          /* 正极凸头 */
+    /* 电芯（竖直符号：长板 = + 在上） */
+    ctx.strokeStyle='#34e08a'; ctx.lineWidth=2.6;
+    ctx.beginPath();
+    ctx.moveTo(g.x0-19,ym-9); ctx.lineTo(g.x0+19,ym-9);
+    ctx.moveTo(g.x0-9,ym+9);  ctx.lineTo(g.x0+9,ym+9);
+    ctx.stroke();
+    ctx.fillStyle='#34e08a'; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('+',g.x0+13,ym-12);
+    ctx.fillText('−',g.x0+13,ym+19);
     /* 电量条（按 SOC） */
-    const bh=(g.y1-g.y0-16-10);
+    const bw=9, bx=g.x0-42, by0=ym-11, bhh=22;
+    ctx.strokeStyle='#27392d'; ctx.lineWidth=1; ctx.strokeRect(bx,by0,bw,bhh);
     ctx.fillStyle=soc>.25?'#34e08a':'#ff6478';
-    ctx.fillRect(g.x0-10,g.y0+13+5+bh*(1-soc),16,bh*soc);
-    /* 负载（右，MCU 方块） */
-    const mx=g.x1, my=(g.y0+g.y1)/2;
-    ctx.fillStyle='#0a100c'; ctx.fillRect(mx-24,my-16,48,32);
-    ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.8;
-    ctx.strokeRect(mx-24,my-16,48,32);
-    ctx.fillStyle='#57d8f2'; ctx.font='10px "IBM Plex Mono"';
-    ctx.textAlign='center'; ctx.fillText('3V3 LOAD',mx,my+4);
-    /* 电子流动：顶部（左→右经缺口两侧），底部（右→左回电池），放电方向 */
+    ctx.fillRect(bx+1,by0+1+(bhh-2)*(1-soc),bw-2,(bhh-2)*soc);
+    ctx.fillStyle='#5c7264'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillText('SOC',bx+bw/2,by0+bhh+12);
+    /* 电流粒子：沿回路一圈（+ → 顶边 → 负载 → 底边 → 电芯 −） */
+    const P=[[g.x0,ym-9],[g.x0,g.y0],[g.x1,g.y0],[g.x1,g.y1],[g.x0,g.y1],[g.x0,ym+9]];
     ctx.fillStyle='#ffb02e';
     for (const d of dots){
-      const p=(d.p+(play?now/2400:0))%1;
-      if (p<.5){ const t=p/.5; ctx.beginPath(); ctx.arc(g.x0+((cX-120)-g.x0)*t,g.y0,2.4,0,7); ctx.fill(); }
-      else{ const t=(p-.5)/.5; ctx.beginPath(); ctx.arc((cX+120)+(mx-(cX+120))*t,g.y0,2.4,0,7); ctx.fill(); }
-      const t=p;
-      ctx.beginPath(); ctx.arc(g.x1-(g.x1-g.x0)*t,g.y1,2.4,0,7); ctx.fill();
+      const p=((d.p+(play?now/2600:0))%1+1)%1;
+      const pt=arcPt(P,p);
+      ctx.beginPath(); ctx.arc(pt[0],pt[1],2.4,0,7); ctx.fill();
     }
+    /* 负载（右，串在回路里；方块盖住回路右段，电流看起来进出负载） */
+    const mx=g.x1, my=ym;
+    ctx.fillStyle='#0a100c'; ctx.fillRect(mx-26,my-16,52,32);
+    ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.8;
+    ctx.strokeRect(mx-26,my-16,52,32);
+    ctx.fillStyle='#57d8f2'; ctx.font='10px "IBM Plex Mono"';
+    ctx.textAlign='center'; ctx.fillText('3V3 LOAD',mx,my+4);
     /* ---- 下部：端电压轨迹（函数式完整曲线：soc'∈[soc,1]，游标在左端推进） ---- */
-    const gx0=g.x0, gx1=g.x1, gy0=112, gy1=144;
+    const gx0=g.x0, gx1=g.x1, gy0=134, gy1=166;
     ctx.strokeStyle='#27392d'; ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(gx0,gy1); ctx.lineTo(gx1,gy1); ctx.stroke();
     ctx.strokeStyle='#34e08a'; ctx.lineWidth=1.8;
@@ -1676,12 +1696,13 @@ function fitCanvas(cv,h){
     /* 当前工作点 */
     ctx.fillStyle='#ffb02e';
     ctx.beginPath(); ctx.arc(gx0,gy1-(vterm(soc)-3.0)/1.25*(gy1-gy0),4,0,7); ctx.fill();
-    /* 实时读数（左：公式与 SOC；右：电压值，互不重叠） */
+    /* 实时读数（画在回路内部：左=公式、中=SOC、右=端电压，互不压线） */
+    const ty=120;                     /* 读数行：回路底线之下、轨迹之上 */
     ctx.font='12px "IBM Plex Mono"'; ctx.textAlign='left';
-    ctx.fillStyle='#5c7264'; ctx.fillText('V(term) = OCV − I·r',gx0+4,gy0-2);
-    ctx.fillStyle='#8aa294'; ctx.fillText('SOC '+Math.round(soc*100)+'%',gx0+270,gy0-2);
+    ctx.fillStyle='#5c7264'; ctx.fillText('V(term) = OCV − I·r',gx0+4,ty);
+    ctx.fillStyle='#8aa294'; ctx.fillText('SOC '+Math.round(soc*100)+'%',gx0+270,ty);
     ctx.textAlign='right';
-    ctx.fillStyle='#ffb02e'; ctx.fillText(vterm(soc).toFixed(2)+' V',gx1,gy0-2);
+    ctx.fillStyle='#ffb02e'; ctx.fillText(vterm(soc).toFixed(2)+' V',gx1,ty);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -2061,46 +2082,93 @@ function chemR(c,soc){ return c.r0+(c.rE-c.r0)*Math.pow(Math.max(0,(0.2-soc)/0.2
   const cv=$('scScope'); if (!cv) return;
   const ctx=fitCanvas(cv,330);
   const H=330;
-  let scene='rtc', mode=0, playing=true, t0=performance.now();
+  let scene='rtc', mode=0, playing=true, t0=performance.now(), frozen=t0;
   /* 通用绘图工具 */
-  function chip(x,y,w,h,label,color,fill){
-    ctx.fillStyle=fill||'#0a100c';
-    ctx.fillRect(x-w/2,y-h/2,w,h);
-    ctx.strokeStyle=color; ctx.lineWidth=2;
-    ctx.strokeRect(x-w/2,y-h/2,w,h);
-    ctx.fillStyle=color; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='center';
-    ctx.fillText(label,x,y+3.5);
+  /* 符号画法约定：每个符号自带引脚，导线端点一律落在引脚坐标上（不留缝、不穿体） */
+  function chip(x,y,w,h,label,color,sub){
+    ctx.fillStyle='#0a100c'; ctx.fillRect(x-w/2,y-h/2,w,h);
+    ctx.strokeStyle=color; ctx.lineWidth=1.8; ctx.strokeRect(x-w/2,y-h/2,w,h);
+    ctx.fillStyle=color; ctx.font='11px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillText(label,x,y+(sub?1:4));
+    if (sub){ ctx.fillStyle='#8aa294'; ctx.font='9px "IBM Plex Mono"'; ctx.fillText(sub,x,y+13); }
   }
-  function bat(x,y,vLabel,color){
-    ctx.strokeStyle=color; ctx.lineWidth=2.2;
+  /* 竖直电芯：+ 长板在上、− 短板在下；引脚 = (x,y∓24)；flip=true 极性反转（+ 朝下） */
+  function cell(x,y,color,flip,label){
+    const s=flip?-1:1;
+    ctx.strokeStyle=color; ctx.lineWidth=2.6;
     ctx.beginPath();
-    ctx.moveTo(x-26,y-11); ctx.lineTo(x-7,y-11);
-    ctx.moveTo(x-26,y+11); ctx.lineTo(x-3,y+11);
+    ctx.moveTo(x-20,y-8*s); ctx.lineTo(x+20,y-8*s);
+    ctx.moveTo(x-10,y+8*s); ctx.lineTo(x+10,y+8*s);
+    ctx.moveTo(x,y-8*s); ctx.lineTo(x,y-24*s);
+    ctx.moveTo(x,y+8*s); ctx.lineTo(x,y+24*s);
     ctx.stroke();
-    ctx.fillStyle=color; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='center';
-    ctx.fillText(vLabel,x-15,y-20);
+    ctx.fillStyle=color; ctx.font='11px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('+',x+14,y-11*s+4);
+    ctx.fillText('−',x+14,y+13*s+4);
+    if (label){ ctx.fillStyle='#8aa294'; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='center';
+      ctx.fillText(label,x,y+44); }
   }
-  function diode(x,y,dir,color){        /* dir=1 右向导通 */
+  /* 竖直电阻：引脚 = (x,y∓k)，标签在右侧 */
+  function res(x,y,label,color,k){
+    k=k||26;
+    ctx.strokeStyle=color; ctx.lineWidth=1.8;
+    ctx.beginPath();
+    ctx.moveTo(x,y-k); ctx.lineTo(x,y-14);
+    ctx.moveTo(x,y+14); ctx.lineTo(x,y+k);
+    ctx.stroke();
+    ctx.fillStyle='#0a100c'; ctx.fillRect(x-8,y-14,16,28);
+    ctx.strokeRect(x-8,y-14,16,28);
+    ctx.fillStyle='#8aa294'; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText(label,x+12,y+4);
+  }
+  function gnd(x,y,color){
+    ctx.strokeStyle=color; ctx.lineWidth=1.8;
+    ctx.beginPath();
+    ctx.moveTo(x,y-9); ctx.lineTo(x,y);
+    ctx.moveTo(x-11,y); ctx.lineTo(x+11,y);
+    ctx.moveTo(x-7,y+5); ctx.lineTo(x+7,y+5);
+    ctx.moveTo(x-3,y+10); ctx.lineTo(x+3,y+10);
+    ctx.stroke();
+  }
+  function node(x,y,color){ ctx.fillStyle=color||'#8aa294'; ctx.beginPath(); ctx.arc(x,y,3.4,0,7); ctx.fill(); }
+  function diode(x,y,dir,color,schottky){   /* dir=1 右向（阳极在左） */
     ctx.strokeStyle=color; ctx.lineWidth=2.2;
     ctx.beginPath(); ctx.moveTo(x-26,y); ctx.lineTo(x-8,y);
     ctx.moveTo(x+8,y); ctx.lineTo(x+26,y);
     ctx.stroke();
-    const s=dir;
     ctx.beginPath();
-    ctx.moveTo(x-8*s,y-9); ctx.lineTo(x-8*s,y+9); ctx.lineTo(x+8*s,y); ctx.closePath();
+    ctx.moveTo(x-8*dir,y-9); ctx.lineTo(x-8*dir,y+9); ctx.lineTo(x+8*dir,y); ctx.closePath();
     ctx.fillStyle=color; ctx.fill();
-    ctx.beginPath(); ctx.moveTo(x+8*s,y-9); ctx.lineTo(x+8*s,y+9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+8*dir,y-9); ctx.lineTo(x+8*dir,y+9); ctx.stroke();
+    if (schottky){                       /* 肖特基：阴极板两端折钩 */
+      const cx=x+8*dir;
+      ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx-dir*5,y-9); ctx.lineTo(cx-dir*5,y-4); ctx.lineTo(cx,y-4);
+      ctx.moveTo(cx+dir*5,y+9); ctx.lineTo(cx+dir*5,y+4); ctx.lineTo(cx,y+4);
+      ctx.stroke();
+    }
   }
-  function mos(x,y,color){
+  /* P-MOS 高边（盒符号）：左引脚 D=电池侧、右引脚 S=负载侧，栅极引脚自底部 (x,y+36) */
+  function pmos(x,y,color,label){
+    ctx.fillStyle='#0a100c'; ctx.fillRect(x-32,y-19,64,38);
+    ctx.strokeStyle=color; ctx.lineWidth=1.8; ctx.strokeRect(x-32,y-19,64,38);
     ctx.strokeStyle=color; ctx.lineWidth=2.2;
-    ctx.beginPath(); ctx.moveTo(x-30,y); ctx.lineTo(x-14,y);
-    ctx.moveTo(x+14,y); ctx.lineTo(x+30,y); ctx.stroke();
-    ctx.strokeRect(x-14,y-14,28,28);
-    ctx.beginPath(); ctx.moveTo(x-14,y-7); ctx.lineTo(x-4,y-7); ctx.moveTo(x-14,y+7); ctx.lineTo(x-4,y+7);
-    ctx.moveTo(x-4,y-11); ctx.lineTo(x-4,y+11); ctx.stroke();
-    /* 体二极管 */
-    ctx.beginPath(); ctx.moveTo(x+4,y+6); ctx.lineTo(x+4,y-6); ctx.lineTo(x-6,y); ctx.closePath();
-    ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x-54,y); ctx.lineTo(x-32,y);
+    ctx.moveTo(x+32,y); ctx.lineTo(x+54,y);
+    ctx.moveTo(x,y+19); ctx.lineTo(x,y+36);
+    ctx.stroke();
+    ctx.fillStyle=color; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillText('P-MOS',x,y-3);
+    /* 体二极管（D→S 为导通方向；反接时反偏） */
+    ctx.beginPath();
+    ctx.moveTo(x-12,y+12); ctx.lineTo(x+2,y+12);
+    ctx.moveTo(x+2,y+6); ctx.lineTo(x+2,y+18); ctx.lineTo(x+12,y+12); ctx.closePath();
+    ctx.fillStyle=color; ctx.fill();
+    ctx.fillStyle='#8aa294'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('D',x-50,y-6); ctx.fillText('S',x+45,y-6); ctx.fillText('G',x+6,y+33);
+    if (label){ ctx.textAlign='center'; ctx.fillText(label,x,y+51); }
   }
   function wire(pts,color,dash){
     ctx.strokeStyle=color; ctx.lineWidth=1.6;
@@ -2127,49 +2195,54 @@ function chemR(c,soc){ return c.r0+(c.rE-c.r0)*Math.pow(Math.max(0,(0.2-soc)/0.2
   /* ---- 各场景 ---- */
   const SCN={
     rtc:{modes:['二极管·主电在','二极管·主电掉','直连·主电在 ⚠','直连·主电掉'],
-      note:'<b>场景 ①：</b>主电源 3.3V 与 CR2032 经二极管「或」到 RTC 的 VBAT。二极管模式：主电在线时 D1 压降后 3.0V 供 RTC、D2 反偏电池零电流；主电掉电瞬间无扰切换到电池（3.0−0.3=2.7V，RTC 可接受 1.2–5.5V）。<b>直连（危险）模式：主电 3.3V 直接灌进 3.0V 锂一次电池——约 15mA 反向充电，析气鼓壳漏液，产品召回级错误。</b>',
+      note:'<b>场景 ①：</b>主电源 3.3V 与 CR2032 经二极管「或」到 RTC 的 VBAT。二极管模式：主电在线时 D1 压降后 3.0V 供 RTC、D2 两端 0V 不导通、电池零电流；主电掉电瞬间无扰切换到电池（3.0−0.3=2.7V，RTC 可接受 1.2–5.5V）。<b>直连（危险）模式：主电 3.3V 直接灌进 3.0V 锂一次电池——约 15mA 反向充电，析气鼓壳漏液，产品召回级错误。</b>',
       draw(now,W){
-        const midY=104, bx=W*0.52;
-        const direct=mode>=2, mainOn=mode%2===0;
-        const jam=direct&&mainOn;
-        chip(W*0.12,midY,84,50,'VMAIN','#57d8f2');
-        ctx.fillStyle='#57d8f2'; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='center';
-        ctx.fillText('3.3V',W*0.12,midY+30);
-        bat(W*0.12,midY+96,'CR2032 3.0V','#34e08a');
-        chip(W*0.88,midY,84,50,'RTC','#34e08a');
-        ctx.fillStyle='#34e08a';
-        ctx.fillText('VBAT',W*0.88,midY+30);
-        const mainX=W*0.12+42, rtcX=W*0.88-42;
-        const d1x=bx-22, d2x=bx-22, byY=midY+80;
-        const mainColor=mainOn?'#57d8f2':'#5c7264';
-        /* 主电路径 */
+        const yM=104, yB2=184, yRail=298;
+        const xL=Math.max(74,W*0.12), xR=W-Math.max(74,W*0.12);
+        const xD1=W*0.40, xJ=W*0.55, xD2=W*0.25;
+        const direct=mode>=2, mainOn=mode%2===0, jam=direct&&mainOn;
+        const cellY=242;
+        chip(xL,yM,84,44,'VMAIN','#57d8f2','3.3V');
+        chip(xR,yM,84,44,'RTC','#34e08a','VBAT');
+        cell(xL,cellY,jam?'#ff6478':'#34e08a',false);
+        ctx.fillStyle='#8aa294'; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='left';
+        ctx.fillText('CR2032 3.0V',xL+26,cellY+4);
+        /* 公共地：VMAIN −、CR2032 −、RTC − 同一条地母线 */
+        wire([[xL-26,yM+22],[xL-26,yRail]],'#5c7264');
+        wire([[xR,yM+22],[xR,yRail]],'#5c7264');
+        wire([[xL,cellY+24],[xL,yRail]],'#5c7264');
+        wire([[xL-26,yRail],[xR,yRail]],'#5c7264');
+        node(xL,yRail,'#5c7264'); node(xR,yRail,'#5c7264');
+        gnd(xL+96,yRail,'#5c7264');
+        /* 主电路径 + 电池支路 */
         if (!direct){
-          wire([[mainX,midY],[d1x-26,midY]],mainColor);
-          diode(d1x,midY,1,mainOn?'#ffb02e':'#5c7264');
-          wire([[d1x+26,midY],[rtcX,midY]],mainOn?'#57d8f2':'#5c7264');
-          /* 电池路径 → D2 → 汇入主线 */
-          wire([[W*0.12,midY+85],[d2x-26,byY]],mainOn?'#5c7264':'#34e08a');
-          diode(d2x,byY,1,mainOn?'#5c7264':'#ffb02e');
-          wire([[d2x+26,byY],[bx+16,byY],[bx+16,midY]],mainOn?'#5c7264':'#34e08a');
+          wire([[xL+42,yM],[xD1-26,yM]],mainOn?'#57d8f2':'#5c7264');
+          diode(xD1,yM,1,mainOn?'#ffb02e':'#5c7264',true);
+          wire([[xD1+26,yM],[xR-42,yM]],mainOn?'#57d8f2':'#5c7264');
+          wire([[xL,cellY-24],[xL,yB2],[xD2-26,yB2]],mainOn?'#5c7264':'#34e08a');
+          diode(xD2,yB2,1,mainOn?'#5c7264':'#ffb02e',true);
+          wire([[xD2+26,yB2],[xJ,yB2],[xJ,yM]],mainOn?'#5c7264':'#34e08a');
+          node(xJ,yM,mainOn?'#57d8f2':'#34e08a');
         } else {
-          wire([[mainX,midY],[rtcX,midY]],mainColor);
-          /* 电池直连：一根竖线接主线 */
-          wire([[W*0.12,midY+85],[d2x,midY+85],[d2x,midY]],'#8aa294');
+          wire([[xL+42,yM],[xR-42,yM]],mainOn?'#57d8f2':'#5c7264');
+          wire([[xL,cellY-24],[xL,yB2],[xJ,yB2],[xJ,yM]],'#8aa294');
+          node(xJ,yM,'#8aa294');
         }
-        /* 电流动画 */
         if (mainOn){
-          flowPath([[mainX,midY],[rtcX,midY]],now,'#57d8f2',1100);
+          flowPath([[xL+42,yM],[xR-42,yM]],now,'#57d8f2',1100);
           if (jam){
-            flowPath([[W*0.12,midY+85],[d2x,midY+85],[d2x,midY]],now,'#ff6478',550);
-            ctx.fillStyle='rgba(255,100,120,.1)'; ctx.fillRect(d2x-80,midY+58,160,72);
+            /* 电流方向注意：主电经支路「灌入」电芯，所以红点自主线经接点向下走 */
+            flowPath([[xJ,yM],[xJ,yB2],[xL,yB2],[xL,cellY-24]],now,'#ff6478',520);
+            ctx.fillStyle='rgba(255,100,120,.09)';
+            ctx.fillRect(xD2-96,yB2-34,200,72);
             ctx.fillStyle='#ff6478'; ctx.font='11px "IBM Plex Mono"'; ctx.textAlign='center';
-            ctx.fillText('⚠ 反向充电 ≈15mA',d2x,midY+112);
-            ctx.fillText('一次电池被充电 → 析气鼓壳',d2x,midY+126);
+            ctx.fillText('⚠ 反向充电 ≈15mA',xD2,yB2-16);
+            ctx.fillText('一次电池被充电 → 析气鼓壳',xD2,yB2+26);
           }
         } else {
           const pth=direct
-            ? [[W*0.12,midY+85],[d2x,midY+85],[d2x,midY],[rtcX,midY]]
-            : [[W*0.12,midY+85],[d2x-26,byY],[d2x+26,byY],[bx+16,byY],[bx+16,midY],[rtcX,midY]];
+            ? [[xL,cellY-24],[xL,yB2],[xJ,yB2],[xJ,yM],[xR-42,yM]]
+            : [[xL,cellY-24],[xL,yB2],[xD2+26,yB2],[xJ,yB2],[xJ,yM],[xR-42,yM]];
           flowPath(pth,now,'#34e08a',2400);
         }
         const vrtc=direct?(mainOn?3.3:3.0):(mainOn?3.0:2.70);
@@ -2183,178 +2256,218 @@ function chemR(c,soc){ return c.r0+(c.rE-c.r0)*Math.pow(Math.max(0,(0.2-soc)/0.2
         ]);
       }},
     rev:{modes:['肖特基·正接','肖特基·反接','P-MOS·正接','P-MOS·反接'],
-      note:'<b>场景 ②：</b>7.4V 电池组进 5V Buck 前的反接保护。串联肖特基：压降 0.35V 白白发热（0.5A×0.35V=175mW），反接可靠断。P-MOS 高边：正接时体二极管先把源极抬到电池电压、Vgs<0 导通，压降仅 I×Rds(on)≈10mV；反接时 Vgs>0 且体二极管反偏——关得同样彻底，还不发热。<b>大电流场合用 P-MOS，小电流图省事用二极管。</b>',
+      note:'<b>场景 ②：</b>7.4V 电池组进 5V Buck 前的反接保护。串联肖特基：压降 0.35V 白白发热（0.5A×0.35V=175mW），反接可靠断。P-MOS 高边：正接时体二极管先把源极抬到电池电压、栅极经 100k 接 GND 得到 Vgs=−Vbat 而导通，压降仅 I×Rds(on)≈10mV；反接时 Vgs>0 且体二极管反偏——关得同样彻底，还不发热。<b>大电流场合用 P-MOS，小电流图省事用二极管。</b>',
       draw(now,W){
-        const midY=100, bx=W*0.5;
-        bat(W*0.13,midY,'2S 锂 7.4V','#34e08a');
-        chip(bx,midY,96,54,'5V BUCK','#57d8f2');
-        chip(W*0.87,midY,86,54,'负载 0.5A','#ffb02e');
+        const yM=104, yRail=288;
+        const xB=Math.max(72,W*0.11), xD=W*0.30, xBk=W*0.57, xLd=W-Math.max(72,W*0.11);
         const useMos=mode>=2, rev=mode%2===1;
-        wire([[W*0.13+28,midY],[bx-48,midY]],'#8aa294');
-        if (!useMos) diode(bx-26,midY,1,'#ffb02e');
-        else mos(bx-26,midY,'#34e08a');
-        wire([[bx+48,midY],[W*0.87-43,midY]],'#8aa294');
-        wire([[bx,midY+27],[bx,midY+70],[W*0.13,midY+70],[W*0.13,midY+13]],'#8aa294');
-        /* 栅极分阻（MOS） */
-        if (useMos&&!rev){
-          wire([[bx-26,midY-14],[bx-26,midY-42],[W*0.13+6,midY-42],[W*0.13+6,midY-6]],'#5c7264');
-          ctx.fillStyle='#5c7264'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
-          ctx.fillText('100k',bx-26,midY-48);
-        }
-        const vbat=rev?-7.4:7.4;
-        const drop=rev?0:(useMos?0.01:0.35);
-        const vin=vbat-drop*(vbat>0?1:0);
-        const vout=rev?0:5.0;
+        const dw=useMos?54:26;
+        const cellY=yM+24;                    /* + 引脚（反转时为 −）落在主线 (xB,yM) */
+        cell(xB,cellY,rev?'#ff6478':'#34e08a',rev);
+        ctx.fillStyle='#8aa294'; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='left';
+        ctx.fillText('2S 锂 7.4V',xB+26,cellY);
+        if (rev){ ctx.fillStyle='#ff6478'; ctx.fillText('电池反接',xB+26,cellY+16); }
+        chip(xBk,yM,96,54,'5V BUCK','#57d8f2');
+        chip(xLd,yM,86,54,'负载 0.5A','#ffb02e');
+        /* 主线：电池 →[保护器件]→ Buck → 负载 */
+        wire([[xB,yM],[xD-dw,yM]],'#8aa294');
+        if (!useMos) diode(xD,yM,1,rev?'#ff6478':'#ffb02e',true);
+        else pmos(xD,yM,rev?'#ff6478':'#34e08a');
+        wire([[xD+dw,yM],[xBk-48,yM]],'#8aa294');
+        wire([[xBk+48,yM],[xLd-43,yM]],'#8aa294');
         if (!rev){
-          flowPath([[W*0.13+28,midY],[bx-48,midY]],now,'#34e08a',700);
-          flowPath([[bx+48,midY],[W*0.87-43,midY]],now,'#57d8f2',700);
-          flowPath([[bx,midY+27],[bx,midY+70],[W*0.13,midY+70],[W*0.13,midY+13]],now,'#34e08a',900);
+          ctx.fillStyle='#8aa294'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
+          ctx.fillText(useMos?'正接：Vgs=−Vbat → 导通':'正接：肖特基正偏 → 导通',xD,yM-34);
         } else {
-          ctx.fillStyle='#ff6478'; ctx.font='11px "IBM Plex Mono"'; ctx.textAlign='center';
-          ctx.fillText('反接：'+(useMos?'Vgs>0 关断 + 体二极管反偏':'二极管反偏截止'),bx,midY+40);
+          ctx.fillStyle='#ff6478'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
+          ctx.fillText(useMos?'反接：Vgs>0 关断 + 体二极管反偏':'反接：二极管反偏截止',xD,yM-34);
         }
+        /* 地母线：电池 −、Buck 回、负载回 */
+        wire([[xB,cellY+24],[xB,yRail]],'#5c7264');
+        wire([[xBk,yM+27],[xBk,yRail]],'#5c7264');
+        wire([[xLd,yM+27],[xLd,yRail]],'#5c7264');
+        wire([[xB,yRail],[xLd,yRail]],'#5c7264');
+        node(xBk,yRail,'#5c7264'); node(xLd,yRail,'#5c7264');
+        gnd(xB+30,yRail,'#5c7264');
+        /* P-MOS 栅极：经 100k 接 GND（Vgs 的参考点） */
+        if (useMos){
+          wire([[xD,yM+36],[xD,yM+62]],'#5c7264');
+          res(xD,yM+88,'100k','#5c7264',26);
+          wire([[xD,yM+114],[xD,yRail]],'#5c7264');
+          node(xD,yRail,'#5c7264');
+          ctx.fillStyle='#5c7264'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='left';
+          ctx.fillText('栅极参考 → GND',xD+16,yM+138);
+        }
+        if (!rev){
+          flowPath([[xB,yM],[xD-dw,yM]],now,'#34e08a',700);
+          flowPath([[xD+dw,yM],[xBk-48,yM]],now,'#34e08a',700);
+          flowPath([[xBk+48,yM],[xLd-43,yM]],now,'#57d8f2',700);
+          flowPath([[xLd,yM+27],[xLd,yRail],[xB,yRail],[xB,cellY+24]],now,'#5c7264',1000);
+          flowPath([[xBk,yM+27],[xBk,yRail],[xB,yRail]],now,'#5c7264',1000);
+        }
+        const vin=7.4-(useMos?0.01:0.35);
         const loss=rev?0:(useMos?0.5*0.5*0.02:0.5*0.35)*1000;
         readout([
-          ['Vin(buck)',vin.toFixed(2)+' V',rev?'r':'g'],
-          ['Vout',vout.toFixed(1)+' V',rev?'r':'g'],
+          ['Vin(buck)',(rev?-7.40:vin).toFixed(2)+' V',rev?'r':'g'],
+          ['Vout',(rev?0:5.0).toFixed(1)+' V',rev?'r':'g'],
           ['保护压降',rev?'—':(useMos?'≈10mV':'0.35V'),useMos&&!rev?'g':''],
           ['损耗',Math.round(loss)+' mW',useMos&&!rev?'g':'r'],
           ['方案',useMos?'P-MOS 高边':'串联肖特基','c']
         ]);
       }},
     div:{modes:['常闭分压（漏电）','PMOS 采样（省电）'],
-      note:'<b>场景 ③：</b>ADC 测电池电压的两条路。<b>常闭 100k+100k：</b>电路最简单，但分压链常年挂着 Vbat/200k ≈ 19.5µA——一年漏 171mAh，吃掉 CR2032 的 78%！<b>PMOS 高边开关 + 10M 高阻：</b>每分钟只导通几十毫秒采样，平均漏电降到 nA 级。低功耗设备的「电池活不过保质期」，先查这里。',
+      note:'<b>场景 ③：</b>ADC 测电池电压的两条路。<b>常闭 100k+100k：</b>电路最简单，但分压链常年挂着 Vbat/200k ≈ 19.5µA——一年漏 171mAh，吃掉 CR2032 的 78%！<b>PMOS 高边开关 + 10M 高阻：</b>每 60 秒只导通 10ms 采样（占空 1/6000），平均漏电降到 33pA 级——相对电池自身每年 ≈1%（约 2mAh）的自放电，彻底可以忽略。低功耗设备的「电池活不过保质期」，先查这里。',
       draw(now,W){
-        const midY=96, bx=W*0.5;
-        bat(W*0.14,midY+40,'Vbat 3.9V','#34e08a');
-        chip(W*0.86,midY+20,92,54,'ADC IN','#57d8f2');
+        const xB=Math.max(68,W*0.13), xD=W*0.50, xA=W-Math.max(84,W*0.16);
+        const xM=W*0.28, yTop=96, yN=164, yBot=252;
         const smart=mode===1;
-        const rTop=smart?40:76, rBot=smart?62:98;    /* y 坐标 */
+        cell(xB,120,'#34e08a',false);
+        ctx.fillStyle='#8aa294'; ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='left';
+        ctx.fillText('Vbat 3.9V',xB+26,124);
+        chip(xA,yN,92,54,'ADC IN','#57d8f2');
+        /* 分压链：R1 — 抽取节点 — R2 — 地，退回电芯 − */
+        wire([[xD,yTop],[xD,104]],'#8aa294');
+        res(xD,130,smart?'10M':'100k','#8aa294');
+        wire([[xD,156],[xD,172]],'#8aa294');
+        res(xD,198,smart?'10M':'100k','#8aa294');
+        wire([[xD,224],[xD,yBot],[xB,yBot],[xB,144]],'#8aa294');
+        node(xD,yN,'#8aa294');
+        /* ADC 抽头：从两电阻之间的节点取出（÷2），不是从电阻身上取 */
+        wire([[xD,yN],[xA-46,yN]],'#8aa294');
+        ctx.fillStyle='#5c7264'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='right';
+        ctx.fillText('分压中点 → ADC',xD-14,yN+4);
+        /* 顶部供电：常闭直连 / 智能经 PMOS */
         if (!smart){
-          /* 常闭 100k + 100k */
-          wire([[W*0.14,midY+29],[bx,midY+29],[bx,midY-rTop+16]],'#8aa294');
-          ctx.strokeStyle='#8aa294'; ctx.lineWidth=1.6;
-          ctx.strokeRect(bx-14,midY-rTop,28,26);
-          ctx.fillStyle='#8aa294'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
-          ctx.fillText('100k',bx,midY-rTop+14);
-          ctx.strokeRect(bx-14,midY+rBot-26,28,26);
-          ctx.fillText('100k',bx,midY+rBot-12);
-          wire([[bx,midY-rTop],[bx,midY+rBot-26]],'#8aa294');
-          wire([[bx,midY+rBot-26],[bx,midY+rBot]],'#8aa294');
-          wire([[bx,midY+rBot],[W*0.14,midY+rBot],[W*0.14,midY+51]],'#8aa294');
-          wire([[bx,midY+rBot-13],[W*0.86-46,midY+rBot-13],[W*0.86-46,midY+20]],smart?'#5c7264':'#8aa294');
-          flowPath([[W*0.14,midY+29],[bx,midY+29],[bx,midY-rTop+16],[bx,midY+rBot-13],[W*0.86-46,midY+rBot-13]],now,'#ff6478',1500);
+          wire([[xB,96],[xD,yTop]],'#8aa294');
           ctx.fillStyle='#ff6478'; ctx.font='11px "IBM Plex Mono"'; ctx.textAlign='center';
-          ctx.fillText('持续漏电 19.5µA',bx,midY-40);
+          ctx.fillText('持续漏电 19.5µA',xD+96,yTop-14);
+          flowPath([[xB,96],[xD,96]],now,'#ff6478',1500);
+          flowPath([[xD,yN],[xA-46,yN]],now,'#ff6478',1500);
+          flowPath([[xD,224],[xD,yBot],[xB,yBot],[xB,144]],now,'#ff6478',1600);
         } else {
-          /* PMOS 开关 + 10M/10M */
-          mos(bx-70,midY-6,'#34e08a');
-          wire([[W*0.14,midY+29],[bx-100,midY+29],[bx-100,midY-6],[bx-96,midY-6]],'#8aa294');
-          ctx.strokeStyle='#8aa294'; ctx.lineWidth=1.6;
-          ctx.strokeRect(bx-30,midY-rTop,28,26);
-          ctx.fillStyle='#8aa294'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
-          ctx.fillText('10M',bx-16,midY-rTop+14);
-          ctx.strokeRect(bx-30,midY+rBot-26,28,26);
-          ctx.fillText('10M',bx-16,midY+rBot-12);
-          wire([[bx-56,midY-6],[bx-16,midY-6],[bx-16,midY-rTop],[bx-16,midY+rBot-26]],'#8aa294');
-          wire([[bx-16,midY+rBot-26],[bx-16,midY+rBot]],'#8aa294');
-          wire([[bx-16,midY+rBot],[W*0.14,midY+rBot],[W*0.14,midY+51]],'#8aa294');
-          wire([[bx-16,midY+rBot-13],[W*0.86-46,midY+rBot-13],[W*0.86-46,midY+20]],'#8aa294');
-          /* 采样窗口：每 3.6s 导通 0.5s */
-          const cyc=(now%3600)/3600;
-          const on=cyc<0.14;
-          if (on) flowPath([[W*0.14,midY+29],[bx-100,midY+29],[bx-100,midY-6],[bx-16,midY-6],[bx-16,midY+rBot-13],[W*0.86-46,midY+rBot-13]],now,'#34e08a',400);
+          wire([[xB,96],[xM-54,96]],'#8aa294');
+          pmos(xM,96,'#34e08a');
+          wire([[xM+54,96],[xD,96]],'#8aa294');
+          wire([[xM,132],[xM,144]],'#5c7264');
+          chip(xM,160,86,30,'MCU GPIO','#ffb02e');
+          ctx.fillStyle='#5c7264'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
+          ctx.fillText('栅极：采样脉冲驱动',xM,204);
+          /* 导通窗口：每 3.6s 导通 0.5s（示意放大，实际 10ms/60s） */
+          const on=((now%3600)/3600)<0.14;
+          if (on){
+            flowPath([[xB,96],[xM-54,96]],now,'#34e08a',420);
+            flowPath([[xM+54,96],[xD,96]],now,'#34e08a',420);
+            flowPath([[xD,yN],[xA-46,yN]],now,'#34e08a',420);
+            flowPath([[xD,224],[xD,yBot],[xB,yBot],[xB,144]],now,'#34e08a',500);
+            node(xM+54,96,'#34e08a');
+          }
           ctx.fillStyle=on?'#34e08a':'#5c7264'; ctx.font='11px "IBM Plex Mono"'; ctx.textAlign='center';
-          ctx.fillText(on?'● 采样中（10ms/60s 等效）':'○ 待机（分压链断开）',bx,midY-44);
-          /* 占空条 */
-          ctx.strokeStyle='#27392d'; ctx.strokeRect(bx-90,midY+62,180,8);
-          ctx.fillStyle='rgba(52,224,138,.6)';
-          for (let i=0;i<5;i++) ctx.fillRect(bx-90+i*36+2,midY+63,5,6);
+          ctx.fillText(on?'● 采样中（等效放大）':'○ 待机：分压链彻底断开',xD+96,yTop-14);
+          /* 占空示意条：60s 周期里的 10ms 导通 */
+          const bw=210, bx0=xD-96, by0=282;
+          ctx.strokeStyle='#27392d'; ctx.lineWidth=1; ctx.strokeRect(bx0,by0,bw,10);
+          ctx.fillStyle='rgba(52,224,138,.75)'; ctx.fillRect(bx0+1,by0+1,(on?7:3),8);
+          ctx.fillStyle='#5c7264'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='left';
+          ctx.fillText('每 60s 导通 10ms（示意放大）',bx0,by0+24);
         }
-        const leak=smart?0.0004:19.5;
-        const yr=leak*8760/1000;
+        /* 漏电账：常闭 100k+100k 常年 19.5µA；10M+10M 只在导通时 195nA，占空 1/6000 */
+        const leakOn=3.9/200000*1e6;                 /* µA */
+        const leakOn10=3.9/20e6*1e6;                 /* µA（0.195） */
+        const leakAvg=leakOn10*(0.01/60);            /* µA（3.25e-5 = 32.5pA） */
+        const yrOn=leakOn*8760/1000;                 /* mAh（170.8） */
+        const yrAvg=leakAvg*8760;                    /* µAh（0.285） */
         readout([
           ['分压链',(smart?'10M + 10M（开关后）':'100k + 100k 常闭')],
-          ['漏电流',smart?'≈0.4µA 均值':'19.5µA','r'],
-          ['一年漏掉',trim3(yr)+' Ah',smart?'g':'r'],
-          ['CR2032 占比',Math.round(yr/0.22*100)+'%',smart?'g':'r'],
+          ['漏电流',smart?('≈'+trim3(leakAvg*1e6)+' pA 均值（导通时 195nA）'):(trim3(leakOn)+' µA'),smart?'g':'r'],
+          ['一年漏掉',(smart?trim3(yrAvg)+' µAh':Math.round(yrOn)+' mAh'),smart?'g':'r'],
+          ['CR2032 占比',smart?'≈0.0001%（比自放电还小 4 个量级）':Math.round(yrOn/220*100)+'%',smart?'g':'r'],
           ['ADC 读数',(3.9/2).toFixed(2)+' V（÷2 分压）','c']
         ]);
       }},
     uvlo:{modes:['带迟滞（正确）','无迟滞（振荡）'],
-      note:'<b>场景 ④：</b>锂电池放到 3.0V 必须断载保护（UVLO）。<b>无迟滞：</b>断载瞬间内阻压降消失、电压反弹回 3.3V，比较器立刻重新接通负载——电压再跌、再断……负载在 1–2Hz 上电掉电打嗝，Flash 写一半断电。<b>带 200mV 迟滞：</b>断开后要等电压回到 3.2V 才重开（正常静置反弹到不了），干净利落保持断电。示波器上「打嗝」与「一刀两断」的区别一目了然。',
+      note:'<b>场景 ④：</b>锂电池放到 3.0V 必须断载保护（UVLO）。<b>无迟滞：</b>断载瞬间 I·r 压降消失、端电压回弹到 3.10V，比较器立刻重新接通负载——电压再跌、再断……负载在 1–2Hz 上电掉电打嗝，Flash 写一半断电。<b>带 200mV 迟滞：</b>断开后要等电压回到 3.2V 才重开（回弹只到 3.10V，够不着），干净利落保持断电。示波器上「打嗝」与「一刀两断」的区别一目了然。',
       draw(now,W){
-        const c=CHEMS.ncm, Iload=0.52, r=0.06;
+        const c=CHEMS.ncm, Iload=0.52, r=0.19;      /* 近空 DCIR 飙升：I·r ≈ 100mV */
         const hyst=mode===0;
-        /* 自演进 soc：从 30% 起 */
-        const period=hyst?9000:4600;
-        const tt=(now-t0)%period/1000;
-        let soc,loaded,reboots=0,vb,hist=[];
-        if (hyst){
-          /* 模型：0-7s 放电 3.55→3.0，7s 断载反弹，稳定 */
-          const tEnd=6.4;
-          if (tt<tEnd){
-            soc=0.3-(tt/tEnd)*0.065;
-            loaded=true; vb=interp(c.pts,soc)-Iload*r;
-          } else {
-            soc=0.3-(tEnd/tEnd)*0.065;
-            loaded=false; vb=interp(c.pts,soc);
+        const socHi=0.0230, socLo=0.0031;           /* OCV 3.331V → 3.100V */
+        const TEND=6.0, PER=9;                      /* 放电 6s + 反弹，窗口 9s */
+        const vOn=s=>interp(c.pts,s)-Iload*r;       /* 带载端电压 */
+        const vOff=s=>interp(c.pts,s);              /* 断载回弹电压 */
+        function stateAt(tt){
+          if (hyst){
+            if (tt<TEND){ const s=socHi+(socLo-socHi)*(tt/TEND); return {on:true,v:vOn(s),n:0}; }
+            const k=Math.min(1,(tt-TEND)/0.36);
+            return {on:false,v:vOn(socLo)+(vOff(socLo)-vOn(socLo))*k,n:0};
           }
-          for (let i=0;i<=240;i++){
-            const q=i/240*tt;
-            if (q<tEnd){ const s=0.3-(q/tEnd)*0.065; hist.push(interp(c.pts,s)-Iload*r); }
-            else hist.push(interp(c.pts,0.3-0.065));
-          }
-        } else {
-          /* 振荡：周期 1.15s，0.6 放/0.55 弹 */
-          const cyc=1.15, n=Math.floor(tt/cyc), ph=tt-n*cyc;
-          soc=0.235-n*0.0004;
-          if (ph<0.6){ loaded=true; vb=interp(c.pts,soc)-Iload*r; }
-          else { loaded=false; vb=interp(c.pts,soc); }
-          reboots=n;
-          for (let i=0;i<=240;i++){
-            const q=i/240*tt, k=Math.floor(q/cyc), p=q-k*cyc;
-            const s0=0.235-k*0.0004;
-            hist.push(p<0.6?interp(c.pts,s0)-Iload*r:interp(c.pts,s0));
-          }
+          const cyc=0.58, n=Math.floor(tt/cyc), ph=tt-n*cyc;
+          if (ph<0.32){ const k=ph/0.32; return {on:true,v:vOff(socLo)+(vOn(socLo)-vOff(socLo))*k,n:n}; }
+          const k=Math.min(1,(ph-0.32)/0.26);
+          return {on:false,v:vOn(socLo)+(vOff(socLo)-vOn(socLo))*k,n:n};
         }
-        /* 示波器 */
-        const M={l:56,r:14,t:20,b:34}, gy0=M.t, gy1=H-M.b-64;
-        const vT=3.7,vB=2.9;
-        const px=q=>M.l+(W-M.l-M.r)*Math.min(1,q/(period/1000));
+        const M={l:66,r:16,t:26}, gy0=M.t, gy1=232, vT=3.34, vB=2.96;
+        const px=q=>M.l+(W-M.l-M.r)*Math.min(1,q/PER);
         const py=v=>gy0+(gy1-gy0)*(1-(v-vB)/(vT-vB));
-        ctx.font='10px "IBM Plex Mono"'; ctx.fillStyle='#5c7264';
-        for (let v=3.0;v<=3.6;v+=0.2){
-          ctx.strokeStyle='rgba(52,224,138,.07)'; ctx.beginPath();
+        /* 迟滞带 */
+        if (hyst){
+          ctx.fillStyle='rgba(255,176,46,.07)';
+          ctx.fillRect(M.l,py(3.20),W-M.l-M.r,py(3.00)-py(3.20));
+        }
+        /* 网格与坐标 */
+        ctx.font='10px "IBM Plex Mono"';
+        for (let v=3.0;v<=3.31;v+=0.1){
+          ctx.strokeStyle='rgba(52,224,138,.07)'; ctx.lineWidth=1; ctx.beginPath();
           ctx.moveTo(M.l,py(v)); ctx.lineTo(W-M.r,py(v)); ctx.stroke();
-          ctx.textAlign='right'; ctx.fillText(v.toFixed(1),M.l-6,py(v)+3);
+          ctx.fillStyle='#5c7264'; ctx.textAlign='right'; ctx.fillText(v.toFixed(1),M.l-6,py(v)+3);
         }
+        ctx.fillStyle='#5c7264'; ctx.textAlign='center';
+        ctx.fillText('时间 → 9s 窗口',(M.l+W-M.r)/2,gy1+46);
         /* 阈值线 */
-        ctx.strokeStyle='#ff6478'; ctx.setLineDash([7,5]); ctx.lineWidth=1.4;
-        ctx.beginPath(); ctx.moveTo(M.l,py(3.0)); ctx.lineTo(W-M.r,py(3.0)); ctx.stroke();
-        if (hyst){ ctx.strokeStyle='#ffb02e';
-          ctx.beginPath(); ctx.moveTo(M.l,py(3.2)); ctx.lineTo(W-M.r,py(3.2)); ctx.stroke();
+        ctx.strokeStyle='#ff6478'; ctx.lineWidth=1.4; ctx.setLineDash([7,5]);
+        ctx.beginPath(); ctx.moveTo(M.l,py(3.00)); ctx.lineTo(W-M.r,py(3.00)); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle='#ff6478'; ctx.textAlign='left'; ctx.font='10px "IBM Plex Mono"';
+        ctx.fillText('断载 3.00V',M.l+8,py(3.00)+18);
+        if (hyst){
+          ctx.strokeStyle='#ffb02e'; ctx.setLineDash([7,5]);
+          ctx.beginPath(); ctx.moveTo(M.l,py(3.20)); ctx.lineTo(W-M.r,py(3.20)); ctx.stroke();
           ctx.setLineDash([]);
-          ctx.fillStyle='#ffb02e'; ctx.textAlign='left'; ctx.fillText('重开 3.2V（迟滞带 200mV）',M.l+8,py(3.2)-6);
-        } else { ctx.setLineDash([]);
-          ctx.fillStyle='#ff6478'; ctx.textAlign='left'; ctx.fillText('断/开同电位 3.0V → 打嗝振荡',M.l+8,py(3.0)-6);
+          ctx.fillStyle='#ffb02e';
+          ctx.fillText('重开 3.20V（迟滞带 200mV）',M.l+8,py(3.20)-20);
         }
-        /* 波形 */
+        /* 波形：Vbat(t) */
         ctx.strokeStyle='#34e08a'; ctx.lineWidth=2.2;
         ctx.beginPath();
-        hist.forEach((v,i)=>{ const x=M.l+(W-M.l-M.r)*(i/240)*(tt/(period/1000)); i?ctx.lineTo(x,py(v)):ctx.moveTo(x,py(v)); });
+        for (let i=0;i<=540;i++){
+          const tt=PER*i/540, s=stateAt(tt), x=px(tt), y=py(s.v);
+          i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+        }
         ctx.stroke();
-        /* 负载条 */
-        ctx.fillStyle=loaded?'#34e08a':'#ff6478';
-        ctx.fillRect(M.l,H-M.b-46,W-M.l-M.r,10);
-        ctx.fillStyle='#080d0a'; ctx.font='9px "IBM Plex Mono"';
-        ctx.textAlign='right'; ctx.fillText('LOAD '+(loaded?'ON':'OFF'),W-M.r-6,H-M.b-38.5);
+        /* 右侧说明：放在阈值带下方、轨迹上方的空白区 */
+        const rb=vOff(socLo)-vOn(socLo);
+        ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='right';
+        ctx.fillStyle='#8aa294';
+        ctx.fillText('回弹 = I·r ≈ '+Math.round(rb*1000)+'mV',W-M.r-8,py(3.20)+12);
+        ctx.fillStyle=hyst?'#ffb02e':'#ff6478';
+        ctx.fillText(hyst?'回弹 3.10V < 3.20V → 保持断电':'回弹 3.10V > 3.00V → 立刻重开',W-M.r-8,py(3.20)+28);
+        /* 负载通断条 */
+        const sy=gy1+12, sh=9;
+        ctx.strokeStyle='#27392d'; ctx.lineWidth=1; ctx.strokeRect(M.l,sy,W-M.l-M.r,sh);
+        for (let i=0;i<=540;i++){
+          const tt=PER*i/540, s=stateAt(tt);
+          if (s.on){ ctx.fillStyle='rgba(52,224,138,.85)'; ctx.fillRect(px(tt),sy+1,1.6,sh-1); }
+        }
+        ctx.fillStyle='#5c7264'; ctx.textAlign='right';
+        ctx.fillText('负载',M.l-8,sy+9);
+        /* 当前工作点 */
+        const tt=(Math.max(0,now-t0)/1000)%PER, st=stateAt(tt);
+        ctx.fillStyle=st.on?'#ffb02e':'#57d8f2';
+        ctx.beginPath(); ctx.arc(px(tt),py(st.v),5,0,7); ctx.fill();
         readout([
-          ['Vbat',vb.toFixed(2)+' V',vb<=3.01?'r':'g'],
-          ['负载',loaded?'接通':'切断',loaded?'g':'r'],
+          ['Vbat',st.v.toFixed(2)+' V',st.v<=3.01?'r':'g'],
+          ['负载',st.on?'接通':'切断',st.on?'g':'r'],
           ['方案',hyst?'迟滞比较器':'单阈值比较器','c'],
-          ['重启次数',hyst?'0 次（一刀两断）':reboots+' 次（打嗝中）',hyst?'g':'r'],
-          ['保护动作','soc≈23% 即断，防深放','']
+          ['重启次数',hyst?'0 次（一刀两断）':'≈'+Math.floor(PER/0.58)+' 次 / 9s（1.7Hz 打嗝）',hyst?'g':'r'],
+          ['保护动作',hyst?'跌到 3.00V 断，回弹 3.10V < 3.20V → 保持断电':'跌到 3.00V 断，回弹 3.10V > 3.00V → 立即重开','']
         ]);
       }}
   };
@@ -2365,12 +2478,13 @@ function chemR(c,soc){ return c.r0+(c.rE-c.r0)*Math.pow(Math.max(0,(0.2-soc)/0.2
   $('scSel').addEventListener('click',e=>{
     const b=e.target.closest('button'); if (!b) return;
     $('scSel').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); scene=b.dataset.sc; mode=0; t0=performance.now();
+    b.classList.add('on'); scene=b.dataset.sc; mode=0;
+    t0=performance.now(); frozen=t0;
     buildToggle();
   });
   $('scToggle').addEventListener('click',e=>{
     const b=e.target.closest('button'); if (!b) return;
-    mode=+b.dataset.m; t0=performance.now();
+    mode=+b.dataset.m; t0=performance.now(); frozen=t0;
     buildToggle();
   });
   buildToggle();
@@ -2380,13 +2494,19 @@ function chemR(c,soc){ return c.r0+(c.rE-c.r0)*Math.pow(Math.max(0,(0.2-soc)/0.2
   function loop(now){
     const W=cv.width/Math.min(devicePixelRatio||1,2);
     ctx.clearRect(0,0,W,H);
-    if (playing) SCN[scene].draw(now,W);
-    else SCN[scene].draw(now-1,W);
+    /* 窄屏：整幅示意按比例缩小（宁可略小，也不让符号互相压叠）；宽屏 W≥920 时 s=1 不变 */
+    const VW=Math.max(920,W), s=W/VW;
+    ctx.save();
+    if (s<1){ ctx.translate(0,(H-H*s)/2); ctx.scale(s,s); }
+    SCN[scene].draw(playing?now:frozen,VW);       /* 暂停时冻结在 frozen 时刻 */
+    ctx.restore();
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
   $('scPlay').addEventListener('click',()=>{
-    playing=!playing; t0=performance.now();
+    playing=!playing;
+    if (playing) t0+=performance.now()-frozen;   /* 续播：补回暂停期间的时间轴 */
+    else frozen=performance.now();
     $('scPlay').classList.toggle('on',playing);
     $('scPlay').textContent=playing?'▶':'⏸';
   });
