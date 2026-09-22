@@ -1,0 +1,2381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电源 · 交互式图解</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23070b09'/><path d='M4 16 h8 M20 16 h8 M16 4 v8 M16 20 v8' stroke='%2334e08a' stroke-width='2'/><circle cx='16' cy='16' r='4.6' fill='none' stroke='%23ffb02e' stroke-width='2.2'/><path d='M15 13.6 l-2 2.8 h2 l-.6 2 2-2.8 h-2 Z' fill='%2357d8f2'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b09;
+  --bg2:#0a100c;
+  --panel:#0d1510;
+  --panel2:#101a13;
+  --line:#1d2c22;
+  --line2:#27392d;
+  --ink:#dcebe1;
+  --dim:#8aa294;
+  --faint:#5c7264;
+  --green:#34e08a;
+  --green-dim:#1d8a55;
+  --amber:#ffb02e;
+  --cyan:#57d8f2;
+  --red:#ff6478;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --disp:'Chakra Petch','Noto Sans SC',sans-serif;
+  --sans:'Noto Sans SC',-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:300;
+  line-height:1.8;
+  letter-spacing:.01em;
+  overflow-x:hidden;
+}
+/* 全局网格纸背景 */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(rgba(52,224,138,.014) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.014) 1px,transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 0%,transparent 60%,rgba(0,0,0,.5));
+}
+main{position:relative;z-index:1}
+::selection{background:rgba(52,224,138,.3)}
+
+/* ============ 导航 ============ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;gap:22px;
+  padding:0 26px;height:52px;flex-wrap:wrap;
+  background:rgba(7,11,9,.82);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+nav .logo{font-family:var(--disp);font-weight:700;font-size:17px;color:var(--green);letter-spacing:.04em}
+nav .logo b{color:var(--dim);font-weight:700}
+nav a{
+  color:var(--dim);text-decoration:none;font-size:12.5px;
+  font-family:var(--mono);letter-spacing:.05em;
+  transition:color .2s;
+}
+nav a:hover{color:var(--green)}
+nav .spacer{flex:1}
+nav .live{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+nav .live i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ============ Hero ============ */
+.hero{
+  min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  padding:110px 6vw 40px;position:relative;
+}
+.hero .eyebrow{
+  font-family:var(--mono);font-size:12px;color:var(--amber);
+  letter-spacing:.32em;margin-bottom:22px;
+  display:flex;align-items:center;gap:14px;
+}
+.hero .eyebrow::before{content:"";width:44px;height:1px;background:var(--amber)}
+.hero h1{
+  font-family:var(--disp);font-weight:700;
+  font-size:clamp(44px,9vw,116px);
+  line-height:.98;letter-spacing:-.01em;
+  color:var(--ink);
+}
+.hero h1 .en{
+  display:block;font-family:var(--mono);font-weight:500;
+  font-size:clamp(11px,1.6vw,17px);color:var(--dim);
+  letter-spacing:.34em;margin-top:18px;
+}
+.hero p.lede{
+  max-width:680px;margin-top:32px;font-size:16px;color:var(--dim);
+}
+.hero p.lede b{color:var(--ink);font-weight:500}
+.hero .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.hero .chips span{
+  font-family:var(--mono);font-size:11.5px;padding:5px 12px;
+  border:1px solid var(--line2);border-radius:3px;color:var(--dim);
+  background:rgba(13,21,16,.6);
+}
+.hero .chips span b{color:var(--green);font-weight:500}
+.hero .scope-wrap{
+  margin-top:52px;border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;background:rgba(9,14,11,.75);position:relative;
+}
+.hero .scope-wrap::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px);
+}
+.hero canvas{display:block;width:100%;height:170px;cursor:pointer}
+.hero .scroll-hint{
+  margin-top:40px;font-family:var(--mono);font-size:11px;color:var(--faint);
+  letter-spacing:.2em;display:flex;align-items:center;gap:10px;
+}
+.hero .scroll-hint svg{animation:bounce 1.8s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* ============ 通用 section ============ */
+section{padding:96px 6vw;max-width:1280px;margin:0 auto;position:relative}
+section a{color:var(--green);text-decoration:none;border-bottom:1px dotted var(--green-dim)}
+section a:hover{border-bottom-style:solid}
+.sec-head{display:flex;align-items:baseline;gap:20px;margin-bottom:16px}
+.sec-head .no{
+  font-family:var(--mono);font-size:13px;color:var(--green);
+  letter-spacing:.1em;border:1px solid var(--green-dim);
+  padding:3px 10px;border-radius:3px;white-space:nowrap;
+}
+.sec-head h2{
+  font-family:var(--disp);font-weight:600;font-size:clamp(26px,3.6vw,40px);
+  letter-spacing:.01em;
+}
+.sec-head .en{
+  font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.24em;
+  text-transform:uppercase;margin-left:auto;white-space:nowrap;
+}
+.sec-sub{color:var(--dim);max-width:800px;margin-bottom:44px;font-size:15px}
+.sec-sub b{color:var(--ink);font-weight:500}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ §01/§02 ============ */
+.two-col{display:grid;grid-template-columns:1.25fr .9fr;gap:44px;align-items:start}
+.prose p{margin-bottom:18px;color:var(--dim);font-size:15px}
+.prose p b{color:var(--ink);font-weight:500}
+.prose .kw{color:var(--green);font-family:var(--mono);font-size:.92em}
+.prose .kw2{color:var(--amber);font-family:var(--mono);font-size:.92em}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th{
+  font-family:var(--mono);font-weight:500;color:var(--faint);text-align:left;
+  padding:9px 12px;border-bottom:1px solid var(--line2);font-size:11.5px;letter-spacing:.06em;
+}
+.cmp-table td{
+  padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top;
+}
+.cmp-table td:first-child{color:var(--ink);font-weight:400;white-space:nowrap}
+.cmp-table .yes{color:var(--green)}
+.cmp-table .no{color:var(--red)}
+.cmp-table .mid{color:var(--amber)}
+.fact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:36px}
+.fact{
+  border:1px solid var(--line);border-radius:6px;padding:20px 20px 18px;
+  background:linear-gradient(160deg,var(--panel) 0%,rgba(13,21,16,.4) 100%);
+  transition:border-color .25s,transform .25s;
+}
+.fact:hover{border-color:var(--green-dim);transform:translateY(-3px)}
+.fact .f-no{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.14em}
+.fact h4{font-family:var(--disp);font-size:16.5px;font-weight:600;margin:8px 0 8px}
+.fact h4 code{font-family:var(--mono);font-size:.85em;color:var(--green)}
+.fact p{font-size:12.8px;color:var(--dim);line-height:1.7}
+
+/* ============ 家族卡片 ============ */
+.fmt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.fmt-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.fmt-card .fh{
+  display:flex;align-items:baseline;gap:12px;padding:16px 20px 12px;border-bottom:1px solid var(--line);
+}
+.fmt-card .fh .tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:3px 8px;border-radius:3px;
+}
+.fmt-card .fh h4{font-family:var(--disp);font-size:17px;font-weight:600}
+.fmt-card .fh .en{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-left:auto}
+.fmt-card svg{display:block;width:100%;height:auto;background:#080d0a}
+.fmt-card .fb{padding:14px 20px 18px;font-size:12.8px;color:var(--dim);line-height:1.75}
+.fmt-card .fb b{color:var(--ink);font-weight:500}
+.fmt-card .fb code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+.t-lin .tag{color:var(--green);border:1px solid var(--green-dim);background:rgba(52,224,138,.07)}
+.t-swk .tag{color:var(--cyan);border:1px solid rgba(87,216,242,.3);background:rgba(87,216,242,.06)}
+.t-ref .tag{color:var(--amber);border:1px solid rgba(255,176,46,.35);background:rgba(255,176,46,.06)}
+.t-pmic .tag{color:var(--red);border:1px solid rgba(255,100,120,.35);background:rgba(255,100,120,.06)}
+.fmt-note{
+  margin-top:26px;padding:18px 22px;border-left:2px solid var(--red);
+  background:rgba(255,100,120,.05);border-radius:0 6px 6px 0;font-size:13.5px;color:var(--dim);
+}
+.fmt-note b{color:var(--red);font-weight:500}
+.fmt-note code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* ============ 实验室通用 ============ */
+.lab{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  overflow:hidden;
+}
+.lab-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:18px;
+  padding:16px 20px;border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+}
+.ctrl{display:flex;align-items:center;gap:9px}
+.ctrl label{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
+.ctrl .val{font-family:var(--mono);font-size:11px;color:var(--green)}
+.seg{display:flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden}
+.seg button{
+  font-family:var(--mono);font-size:12px;padding:7px 13px;border:none;cursor:pointer;
+  background:transparent;color:var(--dim);border-right:1px solid var(--line2);
+  transition:all .18s;letter-spacing:.02em;
+}
+.seg button:last-child{border-right:none}
+.seg button:hover{color:var(--ink);background:rgba(52,224,138,.06)}
+.seg button.on{background:var(--green);color:#052013;font-weight:600}
+.icon-btn{
+  width:32px;height:32px;border:1px solid var(--line2);border-radius:5px;background:transparent;
+  color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:14px;
+  transition:all .18s;display:flex;align-items:center;justify-content:center;
+}
+.icon-btn:hover{color:var(--green);border-color:var(--green-dim)}
+.icon-btn.play.on{color:var(--green);border-color:var(--green-dim);background:rgba(52,224,138,.08)}
+input[type=range]{
+  -webkit-appearance:none;width:120px;height:2px;background:var(--line2);border-radius:2px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--green);
+  cursor:pointer;box-shadow:0 0 8px rgba(52,224,138,.5);
+}
+.lab-body{display:grid;grid-template-columns:1fr 292px;gap:0}
+.scope-main{position:relative;background:#080d0a;min-width:0}
+.scope-main::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.14) 3px 4px);
+}
+.scope-main canvas{display:block;width:100%}
+.readout{
+  border-left:1px solid var(--line);background:#0a110d;
+  padding:18px 18px 14px;display:flex;flex-direction:column;gap:0;min-width:0;
+}
+.readout .r-title{
+  font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.22em;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.readout .r-title::before{content:"";width:6px;height:6px;background:var(--red);border-radius:50%;animation:blink 1.4s infinite}
+.r-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--mono);padding:7px 0;border-bottom:1px dashed var(--line);
+}
+.r-row .k{font-size:11px;color:var(--faint);letter-spacing:.08em}
+.r-row .v{font-size:13px;color:var(--ink);text-align:right}
+.r-row .v.g{color:var(--green)} .r-row .v.a{color:var(--amber)} .r-row .v.c{color:var(--cyan)} .r-row .v.r{color:var(--red)}
+.r-note{font-size:11px;color:var(--faint);line-height:1.65;margin-top:12px;font-family:var(--mono)}
+.r-note b{color:var(--dim);font-weight:500}
+.cc-formula{
+  margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--green);
+  padding:10px 12px;background:rgba(52,224,138,.06);
+  border-left:2px solid var(--green-dim);border-radius:0 3px 3px 0;line-height:1.7;
+}
+.lab-foot{
+  padding:14px 20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 28px;
+  background:rgba(10,16,12,.6);
+}
+.legend{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.legend i{width:12px;height:12px;border-radius:2px;display:inline-block;flex:none}
+.rule-callout{
+  margin-top:26px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;
+  border:1px solid rgba(255,176,46,.3);border-radius:8px;padding:20px 26px;
+  background:linear-gradient(120deg,rgba(255,176,46,.06),transparent 60%);
+}
+.rule-callout .mnemonic{
+  font-family:var(--disp);font-weight:700;font-size:clamp(19px,2.6vw,26px);
+  color:var(--amber);letter-spacing:.08em;white-space:nowrap;
+}
+.rule-callout .mnemonic small{display:block;font-size:11px;font-weight:500;color:var(--faint);letter-spacing:.24em;margin-top:6px;font-family:var(--mono)}
+.rule-callout p{font-size:13.5px;color:var(--dim)}
+.rule-callout p b{color:var(--ink);font-weight:500}
+
+/* ============ 全宽示波器实验室 ============ */
+.cc2-body{position:relative;background:#080d0a;min-width:0}
+.cc2-body::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.14) 3px 4px);
+}
+.cc2-body canvas{display:block;width:100%;height:300px}
+.cc2-read{
+  display:flex;flex-wrap:wrap;gap:8px 28px;align-items:baseline;
+  padding:13px 20px;border-top:1px solid var(--line);background:rgba(10,16,12,.6);
+  font-family:var(--mono);font-size:12px;color:var(--dim);
+}
+.cc2-read .k{font-size:10.5px;color:var(--faint);letter-spacing:.06em}
+.cc2-read b{color:var(--amber);font-weight:600;font-size:13.5px}
+.cc2-read .g{color:var(--green)}
+.cc2-read .r{color:var(--red)}
+.cc2-read .c{color:var(--cyan)}
+.cc2-note{
+  padding:0 20px 14px;font-family:var(--mono);font-size:11px;color:var(--faint);line-height:1.7;
+}
+.cc2-note b{color:var(--dim);font-weight:500}
+
+/* ============ §08 计算器 ============ */
+.cl-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.cl-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.cl-card .ch{
+  padding:14px 20px 10px;border-bottom:1px solid var(--line);
+  font-family:var(--disp);font-size:16px;font-weight:600;
+  display:flex;align-items:baseline;gap:12px;
+}
+.cl-card .ch span{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.14em}
+.cl-card .cb{padding:16px 20px 20px}
+.cl-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.cl-row label{font-family:var(--mono);font-size:11px;color:var(--faint);width:118px;flex:none}
+.cl-row input[type=range]{flex:1;min-width:60px}
+.cl-row .val{font-family:var(--mono);font-size:11.5px;color:var(--green);width:86px;text-align:right;flex:none}
+.cl-out{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.cl-out th{
+  font-family:var(--mono);font-weight:500;color:var(--faint);text-align:left;
+  padding:8px 10px;border-bottom:1px solid var(--line2);font-size:11px;letter-spacing:.06em;
+}
+.cl-out td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top}
+.cl-out td:first-child{color:var(--ink);white-space:nowrap}
+.cl-out td code{font-family:var(--mono);font-size:12px;color:var(--cyan)}
+.cl-out .bignum{font-family:var(--mono);font-size:15px;color:var(--amber);font-weight:600}
+.cl-verdict{
+  margin-top:14px;font-family:var(--mono);font-size:13px;padding:12px 16px;border-radius:6px;
+  border:1px solid var(--line2);line-height:1.9;
+}
+.cl-verdict.pass{border-color:var(--green-dim);background:rgba(52,224,138,.07);color:var(--green)}
+.cl-verdict.fail{border-color:rgba(255,100,120,.45);background:rgba(255,100,120,.08);color:var(--red)}
+
+/* ============ §09 实战终端 ============ */
+.term-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px}
+.term{
+  border:1px solid var(--line);border-radius:8px;background:#070c09;
+  overflow:hidden;display:flex;flex-direction:column;min-width:0;
+  transition:border-color .25s;
+}
+.term:hover{border-color:var(--line2)}
+.term.wide{grid-column:1/-1}
+.term-bar{
+  display:flex;align-items:center;gap:7px;padding:10px 14px;
+  border-bottom:1px solid var(--line);background:rgba(10,16,12,.85);
+}
+.term-bar i{width:10px;height:10px;border-radius:50%}
+.term-bar .d1{background:rgba(255,100,120,.55)}
+.term-bar .d2{background:rgba(255,176,46,.5)}
+.term-bar .d3{background:rgba(52,224,138,.5)}
+.term-bar span{margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.12em}
+.term-body{
+  padding:15px 18px 17px;font-family:var(--mono);font-size:12.3px;
+  line-height:1.95;overflow-x:auto;flex:1;
+}
+.term-body div{white-space:pre;min-height:1.35em}
+.t-ps{color:#3f5247;user-select:none}
+.t-cmd{
+  color:var(--green);cursor:pointer;font-family:inherit;
+  border-bottom:1px dotted transparent;transition:border-color .15s;
+}
+.t-cmd:hover{border-bottom-color:var(--green)}
+.t-cmd.copied{color:#052013;background:var(--green);border-radius:2px;padding:0 4px}
+.t-out{color:var(--dim)}
+.t-hl{color:var(--amber)}
+.t-cmt{color:#516657}
+.t-tag{color:var(--cyan)}
+.lnx-note{
+  margin-top:26px;padding:18px 22px;border-left:2px solid var(--cyan);
+  background:rgba(87,216,242,.05);border-radius:0 6px 6px 0;font-size:13.5px;color:var(--dim);
+}
+.lnx-note b{color:var(--cyan);font-weight:500}
+.lnx-note code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* ============ §10 踩坑 ============ */
+.pit-list{display:flex;flex-direction:column;gap:12px}
+.pit{
+  display:grid;grid-template-columns:44px 1fr;gap:18px;align-items:start;
+  border:1px solid var(--line);border-radius:6px;padding:17px 20px;background:var(--panel);
+  transition:border-color .2s;
+}
+.pit:hover{border-color:rgba(255,100,120,.4)}
+.pit .symptom{
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--red);
+  border:1px solid rgba(255,100,120,.35);border-radius:4px;padding:5px 7px;text-align:center;
+  line-height:1.5;background:rgba(255,100,120,.05);height:fit-content;
+}
+.pit .fix b{display:block;font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.pit .fix b code{font-family:var(--mono);font-size:.88em;color:var(--green)}
+.pit .fix p{font-size:12.8px;color:var(--dim);line-height:1.7}
+.pit .fix p code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* ============ §11 速查 ============ */
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.qr-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.qr-card .qh{padding:15px 20px 10px;border-bottom:1px solid var(--line)}
+.qr-card .qh h4{font-family:var(--disp);font-size:16.5px;font-weight:600}
+.qr-card .qh span{font-family:var(--mono);font-size:10px;color:var(--faint);margin-left:10px;letter-spacing:.12em}
+.qr-card .qb{padding:8px 20px 16px}
+.qr-card .qb p{
+  margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:1.9;
+}
+.qr-card .qb p b{color:var(--green);font-weight:500}
+.qr-card svg{display:block;width:100%;height:auto;background:#080d0a;margin-top:6px}
+
+/* ============ footer ============ */
+footer{
+  border-top:1px solid var(--line);padding:44px 6vw 60px;margin-top:40px;
+  display:flex;flex-wrap:wrap;gap:24px;align-items:baseline;justify-content:space-between;
+}
+footer .f-l{font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:2.1}
+footer .f-l b{color:var(--dim);font-weight:500}
+footer a{color:var(--faint);text-decoration:none;border-bottom:1px dotted var(--faint)}
+footer a:hover{color:var(--green);border-color:var(--green)}
+footer .f-r{font-family:var(--disp);font-weight:700;font-size:22px;color:var(--green)}
+footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-size:10px;color:var(--faint);letter-spacing:.18em;text-align:right;margin-top:6px}
+
+/* ============ 响应式 ============ */
+@media (max-width:1000px){
+  .two-col,.qr-grid,.cl-grid{grid-template-columns:1fr}
+  .lab-body{grid-template-columns:1fr}
+  .readout{border-left:none;border-top:1px solid var(--line)}
+  .fmt-grid{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .fam-grid,.fact-grid,.term-grid{grid-template-columns:1fr}
+  nav a{display:none}
+  section{padding:70px 5vw}
+  .sec-head .en{display:none}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">POWER<b>·</b>LAB</div>
+  <a href="#s1">为什么</a><a href="#s2">家族</a><a href="#s3">LDO</a><a href="#s4">BUCK</a><a href="#s5">BOOST</a><a href="#s6">效率</a><a href="#s7">电源树</a><a href="#s8">计算器</a><a href="#s9">实战</a>
+  <button class="pnav-open" aria-label="打开器件导航" title="全部器件">☰ 器件</button>
+  <div class="spacer"></div>
+  <div class="live"><i></i>REGULATION LAB</div>
+</nav>
+
+<main>
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="eyebrow">REGULATOR · LDO &amp; DC-DC · 图解硬件器件</div>
+  <h1>电源<span class="en">POWER SUPPLY · LDO &amp; DC-DC</span></h1>
+  <p class="lede">
+    每块板子的第一颗芯片，往往是<b>稳压器</b>：输入是乱糟糟的现实——锂电从 4.2V 一路放到 3.0V，
+    USB 在 4.75–5.25V 之间晃，适配器还叠着纹波；而负载是苛刻的完美主义者——
+    MCU 要 3.3V±3%，内核要 1.2V，模拟节嫌噪声大。<b>稳压器的唯一使命：输入在抖、负载在变，输出钉死。</b>
+    两条路线：<b>LDO</b>（线性调整管，安静但发热）与 <b>DC-DC</b>（开关搬电荷，高效但吵）。
+    <b>往下滚动：压差实验室、Buck 四 pane 开关闭环示波器、Boost 逐周期动画、效率对决、电源树上电时序、外围计算器。</b>
+  </p>
+  <div class="chips">
+    <span><b>LDO</b> η ≈ Vout/Vin · 压差 Vdo</span>
+    <span><b>Buck</b> D = Vout/Vin</span>
+    <span><b>Boost</b> Vout = Vin/(1−D)</span>
+    <span><b>上电时序</b> PG 菊花链 · latch-up</span>
+  </div>
+  <div class="scope-wrap"><canvas id="heroScope" title="点击左侧可切换 USB / 电池输入"></canvas></div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    SCROLL · 压差实验室在 03 节
+  </div>
+</header>
+
+<!-- ================= §01 ================= -->
+<section id="s1">
+  <div class="sec-head reveal"><span class="no">01</span><h2>为什么需要稳压</h2><span class="en">Why Regulate</span></div>
+  <p class="sec-sub reveal">一句话：<b>输入的现实与负载的要求之间隔着一条必须被填平的沟</b>——电压会漂、会抖、会叠纹波，而数字与模拟电路只认一条平直的轨。填沟的器件就是稳压器（regulator）。</p>
+  <div class="two-col">
+    <div class="prose reveal">
+      <p>
+        看<b>输入侧的现实</b>：锂电池满电 <span class="kw">4.2V</span>，放电平台一路滑到截止 <span class="kw">3.0V</span>——同一颗电池，早上和晚上电压差 30%；
+        USB 口规范允许 <span class="kw">4.5–5.25V</span>（差的线缆加负载还会更低），插上充电器纹波几十 mV 起步；
+        12V 适配器空载能飘到 <span class="kw">13V</span>。没有哪条输入轨天生适合直接供电。
+      </p>
+      <p>
+        再看<b>负载侧的要求</b>：MCU 的 3.3V 轨典型容差 <span class="kw2">±3%</span>（3.20–3.40V），超了轻则复位重则损伤；
+        SoC 内核要 <span class="kw2">1.2V 甚至 0.8V</span> 且随主频动态调（DVFS，09 节）；
+        ADC/RF 前端这类模拟节对纹波敏感，mV 级毛刺直接进采样结果（见
+        <a href="capacitor.html">电容页</a>的去耦、<a href="opamp.html">运放页</a>的电源抑制）。
+      </p>
+      <p>
+        中间的填沟者分两派：<b>LDO（低压差线性稳压器）</b>像一只由误差放大器牵着的可变电阻，
+        多余电压全部变成热——安静、便宜、无纹波，但效率近似 <span class="kw">η ≈ Vout/Vin</span>；
+        <b>DC-DC 开关稳压器</b>像快递员，把电荷打成包按占空比搬运——效率 85–97%，但开关动作本身产生纹波与 EMI。
+        实际产品几乎总是两者混搭：Buck 做粗调，LDO 给敏感节做最后一公里净化。
+      </p>
+      <p>
+        把这些轨画在一张图上就是<b>电源树（power tree）</b>：电池/USB 双输入 → 或ing 选择 → 各轨变换 → 各负载。
+        树怎么长、先给谁上电，是 07 节实验室的主题；本节先建立全页的物理模型底座：
+        <a href="resistor.html">电阻</a>的欧姆定律决定损耗、<a href="capacitor.html">电容</a>的储能决定纹波、
+        <a href="inductor.html">电感</a>的伏秒平衡决定 Buck/Boost 的一切——本页是它们合流的终点站。
+      </p>
+    </div>
+    <div class="reveal">
+      <table class="cmp-table">
+        <tr><th>输入源</th><th>实际范围</th><th>带给稳压器的难题</th></tr>
+        <tr><td>锂离子电池</td><td class="mid">4.2 → 3.0V</td><td>宽范围 + 放电平台斜坡</td></tr>
+        <tr><td>USB 2.0 VBUS</td><td class="mid">4.5 – 5.25V</td><td>容差 + 线缆压降</td></tr>
+        <tr><td>USB PD 协商</td><td class="mid">5 / 9 / 15 / 20V</td><td>电压跳变需耐压与缓启动</td></tr>
+        <tr><td>12V 适配器</td><td class="mid">±10% + 纹波</td><td>整流纹波与浪涌</td></tr>
+        <tr><th colspan="3" style="padding-top:14px">负载侧要求（对照）</th></tr>
+        <tr><td>MCU 3.3V 轨</td><td class="yes">±3%</td><td>瞬态电流 + 复位阈值</td></tr>
+        <tr><td>SoC 内核</td><td class="yes">1.2V/0.8V ±5%</td><td>DVFS 动态调压</td></tr>
+        <tr><td>模拟/RF 节</td><td class="yes">低噪声 &lt;µV·√Hz</td><td>PSRR · 纹波抑制</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="fmt-grid reveal" style="margin-top:36px">
+    <div class="fmt-card t-lin"><div class="fh"><span class="tag">TREE</span><h4>小型电源树示意 · 双输入三轨</h4><span class="en">POWER TREE</span></div>
+      <svg viewBox="0 0 310 150">
+        <g font-family="IBM Plex Mono,monospace">
+          <rect x="10" y="12" width="86" height="24" fill="none" stroke="#ffb02e" stroke-width="1.5" rx="3"/>
+          <text x="53" y="27" fill="#ffb02e" font-size="9.5" text-anchor="middle">USB 5V</text>
+          <rect x="10" y="52" width="86" height="24" fill="none" stroke="#ffb02e" stroke-width="1.5" rx="3"/>
+          <text x="53" y="67" fill="#ffb02e" font-size="9.5" text-anchor="middle">锂电 3.0–4.2V</text>
+          <path d="M96 24 L118 24 M96 64 L118 64 M118 24 L118 44 M118 64 L118 44" fill="none" stroke="#5c7264" stroke-width="1.5"/>
+          <path d="M110 21 l6 3.5 -6 3.5 Z M110 61 l6 3.5 -6 3.5 Z" fill="#57d8f2"/>
+          <text x="121" y="47" fill="#57d8f2" font-size="8.5">理想二极管 or-ing</text>
+          <path d="M170 44 L188 44 M188 22 L188 66" fill="none" stroke="#5c7264" stroke-width="1.5"/>
+          <text x="150" y="39" fill="#8aa294" font-size="9">VBUS</text>
+          <rect x="190" y="10" width="74" height="24" fill="none" stroke="#34e08a" stroke-width="1.5" rx="3"/>
+          <text x="227" y="25" fill="#34e08a" font-size="9.5" text-anchor="middle">3.3V LDO</text>
+          <rect x="190" y="42" width="74" height="24" fill="none" stroke="#57d8f2" stroke-width="1.5" rx="3"/>
+          <text x="227" y="57" fill="#57d8f2" font-size="9.5" text-anchor="middle">1.2V Buck</text>
+          <rect x="190" y="74" width="74" height="24" fill="none" stroke="#57d8f2" stroke-width="1.5" rx="3"/>
+          <text x="227" y="89" fill="#57d8f2" font-size="9.5" text-anchor="middle">1.8V Buck</text>
+          <path d="M264 22 L282 22 M264 54 L282 54 M264 86 L282 86" fill="none" stroke="#5c7264" stroke-width="1.5"/>
+          <text x="286" y="25" fill="#dcebe1" font-size="9">MCU</text>
+          <text x="286" y="57" fill="#dcebe1" font-size="9">内核</text>
+          <text x="286" y="89" fill="#dcebe1" font-size="9">DDR</text>
+          <path d="M20 108 q8 -6 16 0 q8 6 16 0 q8 -6 16 0" fill="none" stroke="#5c7264" stroke-width="1.4"/>
+          <text x="22" y="128" fill="#5c7264" font-size="8.5">能量自上而下流动：先聚合输入，再分轨变换，最后各回共地</text>
+          <text x="22" y="142" fill="#5c7264" font-size="8.5">07 节实验室可点节点查电流/功耗预算并步进上电时序</text>
+        </g>
+      </svg>
+      <div class="fb">典型嵌入式小板的最小电源树：<b>USB 与电池经理想二极管 or-ing</b>取电压高者（无倒灌、无压降之争），得到 VBUS；再分出 3.3V（LDO，安静供 MCU/外设）、1.2V（Buck，大电流内核）、1.8V（Buck，DDR）。<b>每条轨的电流、功耗预算与上电顺序</b>在 07 节可以点出来。</div></div>
+    <div class="fmt-card t-swk"><div class="fh"><span class="tag">DIVISION</span><h4>LDO 与 Buck 的一句话分工</h4><span class="en">TWO ROUTES</span></div>
+      <svg viewBox="0 0 300 150">
+        <g font-family="IBM Plex Mono,monospace">
+          <rect x="14" y="14" width="120" height="52" fill="none" stroke="#34e08a" stroke-width="1.5" rx="4"/>
+          <text x="74" y="34" fill="#34e08a" font-size="11" text-anchor="middle" font-weight="600">LDO · 线性</text>
+          <text x="74" y="50" fill="#8aa294" font-size="8.5" text-anchor="middle">调整管当可变电阻</text>
+          <text x="74" y="61" fill="#5c7264" font-size="8.5" text-anchor="middle">多余电压全变热</text>
+          <rect x="166" y="14" width="120" height="52" fill="none" stroke="#57d8f2" stroke-width="1.5" rx="4"/>
+          <text x="226" y="34" fill="#57d8f2" font-size="11" text-anchor="middle" font-weight="600">Buck · 开关</text>
+          <text x="226" y="50" fill="#8aa294" font-size="8.5" text-anchor="middle">电感按占空比搬电荷</text>
+          <text x="226" y="61" fill="#5c7264" font-size="8.5" text-anchor="middle">损耗只剩导通+开关</text>
+          <text x="74" y="86" fill="#dcebe1" font-size="9" text-anchor="middle">η ≈ Vout/Vin</text>
+          <text x="74" y="100" fill="#8aa294" font-size="8.5" text-anchor="middle">3.3V←5V：66%</text>
+          <text x="226" y="86" fill="#dcebe1" font-size="9" text-anchor="middle">η 85–97%</text>
+          <text x="226" y="100" fill="#8aa294" font-size="8.5" text-anchor="middle">3.3V←5V：≈95%</text>
+          <text x="74" y="118" fill="#34e08a" font-size="8.5" text-anchor="middle">噪声 µV 级 · 无开关谐波</text>
+          <text x="226" y="118" fill="#57d8f2" font-size="8.5" text-anchor="middle">纹波 mV 级 · fsw 谐波族</text>
+          <text x="74" y="132" fill="#5c7264" font-size="8.5" text-anchor="middle">小压差 · 小电流 · 求干净</text>
+          <text x="226" y="132" fill="#5c7264" font-size="8.5" text-anchor="middle">大压差 · 大电流 · 求效率</text>
+        </g>
+      </svg>
+      <div class="fb">同一份 5V→3.3V：LDO 把 1.7V×电流全部烧成热量（效率被<b>拓扑锁死在 66%</b>），Buck 只花导通与开关的零头（95% 上下）。反过来，给 ADC 供 3.3V 模拟轨时 Buck 的开关纹波是毒药，LDO 的 PSRR 是解药——<b>没有更好的那一方，只有放对位置的那一方</b>，06 节把这条分界线画成可扫的曲线。</div></div>
+  </div>
+  <div class="fact-grid reveal">
+    <div class="fact"><div class="f-no">FACT / A</div><h4>「稳压」稳的是闭环，不是器件 <code>FEEDBACK LOOP</code></h4><p>一切稳压器的内核都同构：<b>基准（带隙 1.2V 左右）+ 误差放大器 + 调整元件</b>。输出经分压与基准比较，误差放大器驱动调整管（LDO 的功率管 / Buck 的 PWM 占空比），把输出钉在 Vref×分压比上。负载电流突变时环路带宽决定恢复速度——这正是 03/04 节实验室里你可以亲手拖动的东西，也是运放页（<a href="opamp.html">虚短虚断</a>）负反馈思想的电源版。</p></div>
+    <div class="fact"><div class="f-no">FACT / B</div><h4>压差 Vdo 是 LDO 的生死线 <code>DROPOUT</code></h4><p>调整管需要一点「呼吸空间」：输入比输出至少高 Vdo，环路才成立。经典 NPN 结构（AMS1117）Vdo≈1.1V@800mA——3.3V 版本输入必须 ≥4.4V，接锂电池（3.0–4.2V）根本进不了稳压区；CMOS LDO（ME6211 类）Vdo≈100mV，3.5V 电池就能稳稳输出 3.3V。Vdo 还随电流涨，03 节的传输曲线把它画成三区：稳压 / 边缘 / 跟随。</p></div>
+    <div class="fact"><div class="f-no">FACT / C</div><h4>Buck 的一切来自伏秒平衡 <code>VOLT-SECOND</code></h4><p>稳态下电感一个周期内「充上的伏秒」必须等于「放掉的伏秒」（否则电流无限累积）：导通期 (Vin−Vout)·D·T = 关断期 Vout·(1−D)·T，移项即 <b>D = Vout/Vin</b>。Boost 同理得 Vout=Vin/(1−D)。这条平衡也是 <a href="inductor.html">电感页</a>的核心结论——本页 §04 实验室的锯齿波与三角波就是它在示波器上的长相。</p></div>
+    <div class="fact"><div class="f-no">FACT / D</div><h4>上电顺序错 = 器件报废 <code>LATCH-UP</code></h4><p>多轨 SoC 的 IO 电平由 3.3V 轨定、内核由 1.2V 轨定。若 IO 轨先于内核上电，IO 保护二极管会把电流倒灌进未上电的内核阱，触发寄生晶闸管——<b>latch-up，大电流直通，冒烟</b>。所以 PMIC 用 PG（power good）信号菊花链逐级放行下一轨，最后才释放 MCU 复位。07 节实验室把这条时序做成了可步进的状态机，错误顺序的后果也会演给你看。</p></div>
+  </div>
+</section>
+
+<!-- ================= §02 ================= -->
+<section id="s2">
+  <div class="sec-head reveal"><span class="no">02</span><h2>稳压器家族谱系</h2><span class="en">Regulator Families</span></div>
+  <p class="sec-sub reveal">「稳压芯片」是一个大家族：<b>线性</b>（标准 NPN / 准 LDO / CMOS LDO）、<b>开关</b>（Buck / Boost / Buck-Boost / 反激 / 电荷泵）、<b>基准</b>（带隙 / 齐纳 / TL431），以及把多轨+时序+监控打包的 <b>PMIC 与电源模块</b>。选型先选家族，再选型号。</p>
+  <div class="two-col">
+    <div class="reveal">
+      <table class="cmp-table">
+        <tr><th>家族</th><th>效率</th><th>噪声/纹波</th><th>外部件</th><th>成本</th><th>适用场景</th></tr>
+        <tr><td>标准 NPN 线性<br><span style="font-size:11px;color:var(--faint)">LM317 / 78xx</span></td><td class="no">≈Vout/Vin</td><td class="yes">极低</td><td>1–2 电容</td><td>低</td><td>高压差容忍 · 老派模拟板</td></tr>
+        <tr><td>准 LDO<br><span style="font-size:11px;color:var(--faint)">PNP 驱动</span></td><td class="no">同上</td><td class="yes">极低</td><td>需 Cout 稳 ESR</td><td>中</td><td>Vdo 0.5–1V 场合</td></tr>
+        <tr><td>CMOS LDO<br><span style="font-size:11px;color:var(--faint)">ME6211 / TPS7A02</span></td><td class="mid">同上+Iq µA</td><td class="yes">极低</td><td>1 µF MLCC</td><td>中</td><td>电池设备 · 低压差低功耗</td></tr>
+        <tr><td>Buck 降压<br><span style="font-size:11px;color:var(--faint)">SY8088 / TPS54331</span></td><td class="yes">85–97%</td><td class="mid">mV 级 @fsw</td><td>L+C+D(或同步)</td><td>中</td><td>一切大压差/大电流主轨</td></tr>
+        <tr><td>Boost 升压<br><span style="font-size:11px;color:var(--faint)">MT3608 / TPS61088</span></td><td class="yes">85–95%</td><td class="mid">mV 级</td><td>L+C+D</td><td>中</td><td>单节锂电供 5V/12V</td></tr>
+        <tr><td>Buck-Boost / 反激</td><td class="yes">80–93%</td><td class="mid">mV 级 + 变压器</td><td>变压器+开关</td><td>高</td><td>输入跨过输出 · 隔离</td></tr>
+        <tr><td>电荷泵</td><td class="mid">80–90%</td><td class="mid">有限流跳变</td><td>仅飞跨电容</td><td>低</td><td>小电流倍压/反压</td></tr>
+        <tr><td>并联基准<br><span style="font-size:11px;color:var(--faint)">TL431 / 齐纳</span></td><td class="no">无效率概念</td><td class="yes">可极低</td><td>1 电阻</td><td>极低</td><td>给 ADC/比较器供参考，不供功率</td></tr>
+        <tr><td>PMIC / 模块</td><td class="yes">看内部拓扑</td><td class="mid">看内部拓扑</td><td>一颗+少量</td><td>高</td><td>多轨 SoC · 时序/监控打包</td></tr>
+      </table>
+    </div>
+    <div class="prose reveal">
+      <p>
+        <b>线性家族</b>按调整管分三代：标准 NPN（78xx/LM317，Vdo 2V 级，便宜耐高压）、准 LDO（PNP，Vdo 0.5–1V，但需要输出电容的 ESR 落在稳定窗口）、CMOS LDO（Vdo 可低到几十 mV，静态电流 µA 甚至 nA 级，配 MLCC）。共同点：<b>输出永远是输入的「削足适履」</b>，效率天花板就是 Vout/Vin。
+      </p>
+      <p>
+        <b>开关家族</b>按能量搬运方向分：Buck 降压、Boost 升压、Buck-Boost（输入跨过输出上下都能稳）、反激（加隔离，小功率离线电源主力）、电荷泵（用飞跨电容搬电荷，无电感，小电流倍压/反压最省）。共同点：<b>靠占空比控制能量包大小</b>，损耗只剩开关损耗与导通损耗。
+      </p>
+      <p>
+        <b>基准</b>是只管「准」不管「力气」的一族：带隙基准（bandgap）把三极管 Vbe 的负温度系数与 PTAT 电流的正温度系数对消，得到 ~1.2V 温度稳定的电压——TL431 是可调并联基准的世纪常青树，REF30xx 系列给 12 位以上 ADC 当参考。每颗 LDO/Buck 内部都藏着一个带隙（hero 动画里画了它）。
+      </p>
+      <p>
+        <b>PMIC 与模块</b>是把整棵电源树装进一颗芯片或一块可焊接模块：多路 Buck/LDO + 上电时序 + PG/复位 + 看门狗 + 热保护。SoC 类芯片（RK/RPi/IMX）的参考设计几乎都围绕一颗 PMIC 展开——09 节 DTS 里的子节点就是它。
+      </p>
+    </div>
+  </div>
+  <div class="fmt-note reveal">
+    <b>选型第一问永远是拓扑，不是型号：</b>压差多大？电流多大？要不要隔离/升压/反压？噪声多敏感？——先在家族表里圈出 2–3 行，再看具体型号的 Vdo、fsw、封装热阻。
+    11 节的决策树把这条思考路径画成了流程图，本页 03–08 节的实验室则把每一行背后的物理各自拆开。
+  </div>
+</section>
+<!-- ================= §03 LDO 压差实验室 ================= -->
+<section id="s3">
+  <div class="sec-head reveal"><span class="no">03</span><h2>LDO 压差实验室</h2><span class="en">Dropout Lab</span></div>
+  <p class="sec-sub reveal">
+    拖动 <b>Vin 从 5.5V 一路降到 2.0V</b>：传输曲线上你会依次穿过三个区——
+    <b>稳压区</b>（Vout 钉死 3.3V）、<b>dropout 边缘</b>（环路开始力不从心）、<b>跟随区</b>（Vout ≈ Vin − Vdo，芯片退化成一只电阻）。
+    再切换器件档位：<b>AMS1117</b>（NPN 型，Vdo≈1.1V@800mA，Iq≈5mA）对上 <b>ME6211</b>（CMOS 型，Vdo≈100mV@300mA，Iq≈µA 级），
+    右侧读数同步结算 <b>功耗 P=(Vin−Vout)·(Iout+Iq)</b>、<b>结温 TJ=TA+P·θJA</b>（超温变红）与 <b>η≈Vout·Iout/(Vin·(Iout+Iq))</b>。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>器件</label>
+        <div class="seg" id="ldoSeg">
+          <button data-i="0" class="on" type="button">AMS1117 · NPN 型</button>
+          <button data-i="1" type="button">ME6211 · CMOS 型</button>
+        </div>
+      </div>
+      <div class="ctrl"><label>Vin</label><input type="range" id="ldoVin" min="200" max="550" value="500" style="width:150px"><span class="val" id="ldoVinV">5.00 V</span></div>
+      <div class="ctrl"><label>Iout</label><input type="range" id="ldoIout" min="10" max="800" value="200" style="width:130px"><span class="val" id="ldoIoutV">200 mA</span></div>
+    </div>
+    <div class="lab-body">
+      <div class="scope-main"><canvas id="ldoCanvas" style="height:330px"></canvas></div>
+      <div class="readout">
+        <div class="r-title">DROPOUT · 实时读数</div>
+        <div class="r-row"><span class="k">器件</span><span class="v a" id="ldoDev">AMS1117</span></div>
+        <div class="r-row"><span class="k">Vout</span><span class="v g" id="ldoVout">3.30 V</span></div>
+        <div class="r-row"><span class="k">压差 Vin−Vout</span><span class="v" id="ldoDrop">1.70 V</span></div>
+        <div class="r-row"><span class="k">功耗 P</span><span class="v" id="ldoP">349 mW</span></div>
+        <div class="r-row"><span class="k">结温 TJ</span><span class="v" id="ldoTJ">56.4 °C</span></div>
+        <div class="r-row"><span class="k">效率 η</span><span class="v c" id="ldoEta">64.4 %</span></div>
+        <div class="r-row"><span class="k">工作区</span><span class="v g" id="ldoZone">稳压区</span></div>
+        <div class="cc-formula">Vout = 3.30V（Vin ≥ 3.30+Vdo）<br>Vout ≈ Vin − Vdo（更低于此）</div>
+        <div class="r-note" id="ldoNote"></div>
+      </div>
+    </div>
+    <div class="lab-foot">
+      <div class="legend"><i style="background:#34e08a"></i>Vout 传输曲线</div>
+      <div class="legend"><i style="background:rgba(255,176,46,.9)"></i>跟随线 Vin−Vdo</div>
+      <div class="legend"><i style="background:rgba(255,100,120,.35)"></i>跟随区</div>
+      <div class="legend"><i style="background:rgba(255,176,46,.3)"></i>dropout 边缘</div>
+      <div class="legend"><i style="background:rgba(52,224,138,.25)"></i>稳压区</div>
+      <div class="legend">白点 = 当前工作点</div>
+    </div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">压差是预算 · 结温是账单<small>VDO IS THE BUDGET · TJ IS THE BILL</small></div>
+    <p>
+      AMS1117 从 5V 降到 3.3V、带 800mA 负载：P = 1.7V × 0.805A ≈ <b>1.37W</b>，SOT-223 的 θJA≈90°C/W 把结温顶到 <b>148°C——超温，热保护反复关断</b>（10 节坑 1）。
+      换 CMOS LDO 也别高兴太早：SOT-23-5 的 θJA 高达 250°C/W，小封装天然更怕热。两条硬规则：
+      <b>① 最坏情况（最低 Vin + 最大 Iout + 最高环温）仍留 Vdo 裕量；② TJ 计算 ≤ 110°C</b>——08 节计算器可一键复算。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §04 Buck 闭环开关实验室 ================= -->
+<section id="s4">
+  <div class="sec-head reveal"><span class="no">04</span><h2>Buck 闭环开关实验室</h2><span class="en">Buck Loop Lab</span></div>
+  <p class="sec-sub reveal">
+    本页招牌：一台四 pane 示波器解剖 Buck 的闭环——<b>① 锯齿波与误差电平交截生成 PWM</b>（误差放大器输出 vc 上抬，PWM 变宽；拖动 Vout 目标，看 vc 重新收敛）、
+    <b>② SW 节点方波</b>（异步整流时低电平 = −VF≈−0.4V，同步整流 ≈−0.05V）、<b>③ 电感电流三角波</b>（上升斜率 (Vin−Vout)/L、下降 −Vout/L）、
+    <b>④ 输出纹波</b>（ΔV=ΔIL/(8·Cout·fsw)）。Iout 拖到轻载自动进入 <b>DCM</b>：三角波底部钳 0、出现死区。模型常数 L=2.2µH · Cout=22µF。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>Vin</label><input type="range" id="bkVin" min="30" max="120" value="50" style="width:110px"><span class="val" id="bkVinV">5.0 V</span></div>
+      <div class="ctrl"><label>Vout 目标</label><input type="range" id="bkVout" min="8" max="55" value="33" style="width:110px"><span class="val" id="bkVoutV">3.3 V</span></div>
+      <div class="ctrl"><label>Iout</label><input type="range" id="bkIout" min="5" max="300" value="100" style="width:110px"><span class="val" id="bkIoutV">1.00 A</span></div>
+      <div class="ctrl"><label>fsw</label>
+        <div class="seg" id="bkFsw">
+          <button data-i="0" type="button">500k</button>
+          <button data-i="1" class="on" type="button">1M</button>
+          <button data-i="2" type="button">1.5M</button>
+        </div>
+      </div>
+      <div class="ctrl"><label>整流</label>
+        <div class="seg" id="bkMode">
+          <button data-m="0" class="on" type="button">异步二极管</button>
+          <button data-m="1" type="button">同步整流</button>
+        </div>
+      </div>
+      <div class="ctrl">
+        <button class="icon-btn play on" id="bkPlay" title="暂停/播放" type="button">❚❚</button>
+        <button class="icon-btn" id="bkStep" title="单步：推进一个开关周期" type="button">⏵</button>
+      </div>
+      <div class="ctrl"><label>速度</label>
+        <div class="seg" id="bkSpd">
+          <button data-s="0" type="button">0.5×</button>
+          <button data-s="1" class="on" type="button">1×</button>
+          <button data-s="2" type="button">2×</button>
+        </div>
+      </div>
+    </div>
+    <div class="cc2-body"><canvas id="bkCanvas" style="height:470px"></canvas></div>
+    <div class="cc2-read">
+      <span class="k">占空比 D=Vout/Vin</span><b id="bkD">66.0%</b>
+      <span class="k">模式</span><b class="g" id="bkModeRD">CCM</b>
+      <span class="k">ΔIL</span><b class="c" id="bkDIL">510 mA</b>
+      <span class="k">Ipk</span><b class="c" id="bkIpk">1.26 A</b>
+      <span class="k">纹波 ΔV</span><b class="g" id="bkRip">2.9 mV</b>
+      <span class="k">SW 低电平</span><b class="r" id="bkSwLo">−0.40 V</b>
+      <span class="k">fsw</span><b id="bkFswRD">1 MHz</b>
+    </div>
+    <div class="cc2-note" id="bkNote"><b>解说</b>：CCM 稳态——D=3.3/5=0.66，电感电流在 1A±ΔIL/2 之间摆动，平均值正好等于负载电流。</div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">伏秒平衡 · 闭环只动一个数<small>D = Vout / Vin · THE LOOP ONLY TUNES D</small></div>
+    <p>
+      Buck 稳态的一切由一条守恒式决定：(Vin−Vout)·D·T = Vout·(1−D)·T，即 <b>D = Vout/Vin</b>——与负载电流无关（CCM 下）。
+      误差放大器全部的工作就是把锯齿交点维持在这个 D 上：你拖高 Vout 目标，vc 上抬 → PWM 变宽 → 输出爬升 → 反馈追上 → vc 回落，四 pane 里看得一清二楚。
+      电流小到 <b>Iout &lt; ΔIL/2</b> 时三角波触底，进入 DCM——占空比不再等于 Vout/Vin，而要按能量收支重算（公式见 08 节）。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §05 Boost 升压实验室 ================= -->
+<section id="s5">
+  <div class="sec-head reveal"><span class="no">05</span><h2>Boost 升压实验室</h2><span class="en">Boost Cycle Lab</span></div>
+  <p class="sec-sub reveal">
+    Boost 的关键词是<b>「能量打包搬运」</b>：开关合上——二极管截止，电源只顾给电感充磁，<b>输出全靠 Cout 独自撑着</b>；
+    开关断开——电感电流不肯突变，经二极管把 <b>Vin+VL 泵向负载</b>并给电容补货。每个周期打一个电荷包，稳态读数 <b>Vout = Vin/(1−D)</b>。
+    <a href="inductor.html">电感页 §07</a> 已做过 Boost 的数值仿真；本页换视角：逐周期动画 + 闭环稳压如何靠调 D 把 Vout 钉住。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>Vin</label><input type="range" id="bstVin" min="27" max="50" value="37" style="width:110px"><span class="val" id="bstVinV">3.7 V</span></div>
+      <div class="ctrl"><label>占空比 D</label><input type="range" id="bstD" min="20" max="80" value="60" style="width:130px"><span class="val" id="bstDV">0.60</span></div>
+      <div class="ctrl"><button class="icon-btn play on" id="bstPlay" title="暂停/播放" type="button">❚❚</button></div>
+    </div>
+    <div class="cc2-body"><canvas id="bstCanvas" style="height:360px"></canvas></div>
+    <div class="cc2-read">
+      <span class="k">理想输出</span><b id="bstVout">9.25 V</b>
+      <span class="k">峰值电流 Ipk</span><b class="c" id="bstIpk">486 mA</b>
+      <span class="k">充磁斜率 Vin/L</span><b class="g" id="bstSlope">0.37 A/µs</b>
+      <span class="k">泵压斜率 (Vin−Vout)/L</span><b class="r" id="bstSlope2">−0.56 A/µs</b>
+      <span class="k">fsw</span><b>1 MHz</b>
+    </div>
+    <div class="cc2-note" id="bstNote"><b>解说</b>：开关合（D·T）——二极管反偏，Cout 独撑负载，电感电流以 Vin/L 爬升；开关断——电感经二极管续流，Vin+VL 一起泵给负载。</div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">电感是快递员 · 电容是仓库<small>INDUCTOR DELIVERS · CAPACITOR STORES</small></div>
+    <p>
+      Boost 输出永远<b>高于</b>输入，代价是输入电流连续、输出电流断续（斩波），所以 Boost 的输出纹波天然比 Buck 难压——Cout 要更大。
+      还有一条新手常栽的坑：<b>Boost 输出没有「断路」能力</b>——即使芯片关闭，Vin 仍会经电感+二极管直通到输出（Vin−VF），
+      想真正切断负载得加输出开关或背靠背 MOSFET。D 拖到 0.8 时注意 Vout=Vin/(1−D) 趋于发散：真实器件会先撞上开关耐压与二极管反向恢复的墙。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §06 效率对决实验室 ================= -->
+<section id="s6">
+  <div class="sec-head reveal"><span class="no">06</span><h2>效率对决实验室</h2><span class="en">Efficiency Duel</span></div>
+  <p class="sec-sub reveal">
+    负载电流从 <b>1mA 对数扫描到 3A</b>：LDO 的效率是一条<b>由拓扑锁死的平线 η≈Vout/Vin</b>（轻载再被 Iq 拖下水）；
+    Buck 的曲线是<b>两头低中间高</b>——轻载被固定损耗（Iq·Vin + 开关损耗）拖垮、中载登顶、重载被 I²R 导通损耗缓慢拉低。
+    下方功耗柱实时对比两方案在当前负载下各烧掉多少瓦。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>Vin</label><input type="range" id="effVin" min="40" max="120" value="50" style="width:130px"><span class="val" id="effVinV">5.0 V</span></div>
+      <div class="ctrl"><label>负载 Iout</label><input type="range" id="effI" min="0" max="100" value="70" style="width:170px"><span class="val" id="effIV">272 mA</span></div>
+    </div>
+    <div class="cc2-body"><canvas id="effCanvas" style="height:340px"></canvas></div>
+    <div class="cc2-read">
+      <span class="k">LDO η</span><b class="r" id="effLdo">64.8 %</b>
+      <span class="k">LDO 发热</span><b class="r" id="effLossL">0.48 W</b>
+      <span class="k">Buck η</span><b class="g" id="effBuck">97.5 %</b>
+      <span class="k">Buck 发热</span><b class="g" id="effLossB">0.02 W</b>
+      <span class="k">Buck 峰值 η@</span><b class="c" id="effPeak">236 mA</b>
+    </div>
+    <div class="cc2-note" id="effNote"><b>模型</b>：LDO η=Vout·I/(Vin·(I+Iq))，Iq=5mA；Buck 损耗=固定损耗(Vin·0.3mA+fsw·Vin²·k)+I²·R(0.18Ω)。</div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">小压差小电流 → LDO · 大压差大电流 → Buck<small>PICK BY DROPOUT × CURRENT</small></div>
+    <p>
+      分界线不是「谁效率高」一件事：Vin=5V→3.3V 时 Buck 全面碾压（95% vs 66%）；但压差缩到 0.2V（3.5V 电池→3.3V）时 LDO 逼近 94%、Buck 只剩个位数百分点的优势——
+      这时 LDO 的<b>零纹波、低成本、µA 静态电流</b>反超。经验法则：<b>压差×电流 &gt; 0.5W 就该认真考虑 Buck；模拟敏感节永远 LDO 收尾</b>。
+      轻载区间（&lt;1mA）两条线都跳水——那时该看的是 Iq（静态电流）指标，nano-Iq 器件（TPS7A02，25nA）就是为休眠态生的。
+    </p>
+  </div>
+</section>
+<!-- ================= §07 电源树与上电时序实验室 ================= -->
+<section id="s7">
+  <div class="sec-head reveal"><span class="no">07</span><h2>电源树与上电时序实验室</h2><span class="en">Power Tree &amp; Sequencing</span></div>
+  <p class="sec-sub reveal">
+    一块真实小板的电源架构：<b>USB 5V / 锂电 3.7V 双输入</b> → 理想二极管 or-ing → <b>3.3V LDO 供 MCU</b>（120mA）、<b>1.2V Buck 供内核</b>（280mA）、<b>1.8V Buck 供 DDR</b>（90mA）。
+    <b>点击树上任一节点</b>查看该轨的电流与功耗预算；再用 <b>⏭ 单步 / ▶ 自动</b>走完上电时序：
+    EN 拉高 → 1.2V 先爬 → PG 菊花链放行 1.8V → 3.3V → 释放 MCU 复位。顺序错了会怎样？页面下方给出 latch-up 的病理。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><button class="icon-btn" id="treeReset" title="复位到全下电" type="button">↺</button></div>
+      <div class="ctrl"><button class="icon-btn" id="treeStep" title="单步：推进一个上电阶段" type="button">⏭</button></div>
+      <div class="ctrl"><button class="icon-btn play" id="treePlay" title="自动播放上电时序" type="button">▶</button></div>
+      <div class="ctrl"><label>阶段</label><span class="val" id="treeSeqV">0 / 5 · 全下电</span></div>
+      <div class="ctrl"><label>输入</label>
+        <div class="seg" id="treeSrc">
+          <button data-i="0" class="on" type="button">USB 5V</button>
+          <button data-i="1" type="button">锂电 3.7V</button>
+        </div>
+      </div>
+    </div>
+    <div class="cc2-body"><canvas id="treeCanvas" style="height:470px"></canvas></div>
+    <div class="cc2-read" id="treeInfo">
+      <span class="k">节点</span><b id="treeNode">—</b>
+      <span class="k">轨电流</span><b class="c" id="treeI">—</b>
+      <span class="k">输出功率</span><b class="g" id="treePo">—</b>
+      <span class="k">自身损耗</span><b class="r" id="treePd">—</b>
+      <span class="k">整机输入功率</span><b id="treePin">—</b>
+    </div>
+    <div class="cc2-note" id="treeNote"><b>操作</b>：点击树上的源 / 或ing / 稳压器 / 负载节点查看预算；⏭ 逐步上电，观察 PG 信号如何逐级放行。</div>
+  </div>
+  <div class="fmt-grid reveal" style="margin-top:26px">
+    <div class="fmt-card t-lin"><div class="fh"><span class="tag">DAISY-CHAIN</span><h4>PG 菊花链 · 正确时序</h4><span class="en">POWER GOOD</span></div>
+      <svg viewBox="0 0 300 128">
+        <g font-family="IBM Plex Mono,monospace">
+          <rect x="14" y="14" width="62" height="20" fill="none" stroke="#8aa294" stroke-width="1.4" rx="3"/>
+          <text x="45" y="27" fill="#8aa294" font-size="9" text-anchor="middle">EN</text>
+          <path d="M76 24 L104 24" stroke="#5c7264" stroke-width="1.4"/>
+          <rect x="104" y="14" width="62" height="20" fill="none" stroke="#57d8f2" stroke-width="1.4" rx="3"/>
+          <text x="135" y="27" fill="#57d8f2" font-size="9" text-anchor="middle">1.2V core</text>
+          <path d="M166 24 L194 24" stroke="#5c7264" stroke-width="1.4"/>
+          <rect x="194" y="14" width="62" height="20" fill="none" stroke="#57d8f2" stroke-width="1.4" rx="3"/>
+          <text x="225" y="27" fill="#57d8f2" font-size="9" text-anchor="middle">1.8V ddr</text>
+          <path d="M256 24 L284 24" stroke="#5c7264" stroke-width="1.4"/>
+          <rect x="226" y="52" width="62" height="20" fill="none" stroke="#34e08a" stroke-width="1.4" rx="3"/>
+          <text x="257" y="65" fill="#34e08a" font-size="9" text-anchor="middle">3.3V io</text>
+          <path d="M257 52 L257 34 M284 24 L284 44 L288 44" fill="none" stroke="#5c7264" stroke-width="1.4"/>
+          <rect x="14" y="52" width="100" height="20" fill="none" stroke="#34e08a" stroke-width="1.4" rx="3"/>
+          <text x="64" y="65" fill="#34e08a" font-size="9" text-anchor="middle">RSTn 释放</text>
+          <path d="M114 62 L226 62" stroke="#5c7264" stroke-width="1.4"/>
+          <path d="M140 20 l5 4 -5 4 M230 20 l5 4 -5 4 M280 20 l5 4 -5 4" fill="none" stroke="#ffb02e" stroke-width="1.4"/>
+          <text x="16" y="96" fill="#8aa294" font-size="8.5">PG_1.2 → EN_1.8 → PG_1.8 → EN_3.3 → PG_3.3 → RSTn</text>
+          <text x="16" y="112" fill="#5c7264" font-size="8.5">每级等前级 PG 置位才开下一级，最后才让 MCU 跑起来</text>
+        </g>
+      </svg>
+      <div class="fb">PG（power good）是稳压器的自检输出：输出达到目标的 90–95% 并稳定后置位。把它接到下一轨的 EN，就形成<b>菊花链</b>——任何一级没起来，后面全部被拦住，复位信号永远等到全树就绪才释放。硬件上零软件成本，是 PMIC 内建时序的等价手工版。</div></div>
+    <div class="fmt-card t-pmic"><div class="fh"><span class="tag">LATCH-UP</span><h4>时序错误 · IO 先于内核</h4><span class="en">WRONG ORDER</span></div>
+      <svg viewBox="0 0 300 128">
+        <g font-family="IBM Plex Mono,monospace">
+          <rect x="14" y="16" width="120" height="22" fill="none" stroke="#ff6478" stroke-width="1.6" rx="3"/>
+          <text x="74" y="30" fill="#ff6478" font-size="9.5" text-anchor="middle">3.3V IO 轨 先上电</text>
+          <rect x="166" y="16" width="120" height="22" fill="none" stroke="#5c7264" stroke-width="1.4" rx="3" stroke-dasharray="4 3"/>
+          <text x="226" y="30" fill="#5c7264" font-size="9.5" text-anchor="middle">1.2V 内核 未上电</text>
+          <path d="M74 38 L74 60 L180 60" stroke="#ff6478" stroke-width="1.6"/>
+          <path d="M174 56 l7 4 -7 4 Z" fill="#ff6478"/>
+          <text x="104" y="56" fill="#ff6478" font-size="8.5">电流经 IO 保护二极管倒灌</text>
+          <rect x="46" y="74" width="208" height="26" fill="none" stroke="#ff6478" stroke-width="1.8" rx="3"/>
+          <text x="150" y="90" fill="#ff6478" font-size="10" text-anchor="middle">寄生晶闸管导通 · LATCH-UP</text>
+          <text x="16" y="118" fill="#5c7264" font-size="8.5">大电流直通电源到地 · 发热 · 冒烟 · 器件永久损伤</text>
+        </g>
+      </svg>
+      <div class="fb">SoC 的每个 IO 内部都有接到两轨的保护二极管/结构。IO 轨先上电而内核为 0V 时，IO 引脚上的高电平会经保护结构向内核阱<b>倒灌</b>，触发寄生的 PNPN 晶闸管——一旦触发，电源到地近似短路，唯一的解法是断电。<b>这也是 datasheet 里「最大 IO 电压不得超过内核+0.3V」的由来</b>，以及上电时序必须内核在前的物理原因。</div></div>
+  </div>
+</section>
+
+<!-- ================= §08 外围器件计算器 ================= -->
+<section id="s8">
+  <div class="sec-head reveal"><span class="no">08</span><h2>外围器件计算器</h2><span class="en">Component Calculator</span></div>
+  <p class="sec-sub reveal">
+    datasheet 里那页「应用信息」的公式，做成实时计算器：给定 Vin / Vout / Iout / fsw / 目标纹波 ΔV 与电流纹波系数 γ（ΔIL/Iout，0.2–0.4），
+    立刻算出 <b>L</b>、<b>Cout</b>、<b>ESR 上限</b> 与 <b>输入电容 RMS 电流</b>；右边是 LDO 的热校验——θJA 与环温 TA 给定后，结温 PASS/FAIL 一句话宣判。
+  </p>
+  <div class="cl-grid reveal">
+    <div class="cl-card">
+      <div class="ch">Buck 外围设计<span>INDUCTOR &amp; CAPACITOR</span></div>
+      <div class="cb">
+        <div class="cl-row"><label>Vin</label><input type="range" id="clVin" min="30" max="240" value="120"><span class="val" id="clVinV">12 V</span></div>
+        <div class="cl-row"><label>Vout</label><input type="range" id="clVout" min="8" max="120" value="33"><span class="val" id="clVoutV">3.3 V</span></div>
+        <div class="cl-row"><label>Iout</label><input type="range" id="clIout" min="1" max="30" value="10"><span class="val" id="clIoutV">1.0 A</span></div>
+        <div class="cl-row"><label>fsw</label><input type="range" id="clFsw" min="100" max="3000" step="50" value="1000"><span class="val" id="clFswV">1.0 MHz</span></div>
+        <div class="cl-row"><label>纹波目标 ΔV</label><input type="range" id="clRip" min="5" max="100" value="20"><span class="val" id="clRipV">20 mV</span></div>
+        <div class="cl-row"><label>γ = ΔIL/Iout</label><input type="range" id="clGam" min="20" max="40" value="30"><span class="val" id="clGamV">0.30</span></div>
+        <table class="cl-out">
+          <tr><th>参数</th><th>公式</th><th>结果</th></tr>
+          <tr><td>占空比 D</td><td><code>Vout/Vin</code></td><td><span class="bignum" id="clD">0.275</span></td></tr>
+          <tr><td>电感 L</td><td><code>Vout(1−D)/(γ·Iout·fsw)</code></td><td><span class="bignum" id="clL">8.0 µH</span></td></tr>
+          <tr><td>电流纹波 ΔIL</td><td><code>γ·Iout</code></td><td><span class="bignum" id="clDIL">300 mA</span></td></tr>
+          <tr><td>输出电容 Cout</td><td><code>≥ ΔIL/(8·fsw·ΔV)</code></td><td><span class="bignum" id="clCout">≥ 1.9 µF</span></td></tr>
+          <tr><td>ESR 上限</td><td><code>≤ ΔV/ΔIL</code></td><td><span class="bignum" id="clEsr">≤ 67 mΩ</span></td></tr>
+          <tr><td>输入电容 RMS</td><td><code>Iout·√(D(1−D))</code></td><td><span class="bignum" id="clCin">447 mA</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="cl-card">
+      <div class="ch">LDO 热校验<span>THERMAL CHECK</span></div>
+      <div class="cb">
+        <div class="cl-row"><label>压差 Vin−Vout</label><span class="val" id="thDropV">8.7 V</span></div>
+        <div class="cl-row"><label>θJA（封装热阻）</label><input type="range" id="thJa" min="30" max="250" value="90"><span class="val" id="thJaV">90 °C/W</span></div>
+        <div class="cl-row"><label>环境温度 TA</label><input type="range" id="thTa" min="25" max="85" value="40"><span class="val" id="thTaV">40 °C</span></div>
+        <table class="cl-out">
+          <tr><th>参数</th><th>公式</th><th>结果</th></tr>
+          <tr><td>耗散功率 P</td><td><code>(Vin−Vout)·Iout</code></td><td><span class="bignum" id="thP">8.70 W</span></td></tr>
+          <tr><td>结温 TJ</td><td><code>TA+P·θJA</code></td><td><span class="bignum" id="thTJ">823 °C</span></td></tr>
+          <tr><td>TJmax</td><td><code>典型 125 °C（留 ≤110 余量）</code></td><td><span class="bignum">125 °C</span></td></tr>
+        </table>
+        <div class="cl-verdict fail" id="thVerdict">FAIL —— 结温远超 125 °C：这不是 LDO 的活，换 Buck（06 节）或大幅降低压差/电流</div>
+        <div class="r-note" style="margin-top:12px"><b>提示</b>：θJA 参考值——SOT-223 约 90、SOT-23-5 约 250、TO-220 加散热器可到 40 以下。左栏改 Vin/Vout/Iout，本栏压差与 P 同步更新。</div>
+      </div>
+    </div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">γ 定电感 · ΔV 定电容<small>RIPPLE RATIO → L · RIPPLE VOLTAGE → C</small></div>
+    <p>
+      γ（电流纹波系数）是 Buck 设计里你真正在「选」的数：γ 大→电感小便宜、但纹波与峰值电流大；γ 小→电感笨重、瞬态响应反而慢。0.3–0.4 是工程甜点。
+      Cout 由电压纹波目标反推，但<b>别忘 ESR 那一行</b>——MLCC 的 ESR 只有几 mΩ 天然满足，钽电容与电解常在这里超标（10 节坑 3）。
+      输入电容看的是 <b>RMS 电流耐量</b>：Buck 输入电流是方波，I_rms=Iout·√(D(1−D))，选小了电容自己先发热鼓包。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §09 Linux 实战 ================= -->
+<section id="s9">
+  <div class="sec-head reveal"><span class="no">09</span><h2>Linux 实战 · regulator 子系统</h2><span class="en">Linux Regulator Framework</span></div>
+  <p class="sec-sub reveal">
+    Linux 把板上每条轨抽象成 <b>/sys/class/regulator</b> 里的一个节点：名字、当前电压、开关状态、被几个消费者引用，一屏看全整棵电源树。
+    嵌入式工程师的三件日常：<b>浏览运行时电源树</b>、写 <b>DTS 里的 regulator 声明与约束</b>、理解 <b>DVFS 调频时 PMIC 的联动调压</b>。
+  </p>
+  <div class="term-grid reveal">
+    <div class="term wide">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>SYSFS · /sys/class/regulator — 运行时电源树</span></div>
+      <div class="term-body">
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="ls /sys/class/regulator/">ls /sys/class/regulator/</span></div>
+        <div class="t-out">regulator.0  regulator.1  regulator.2  regulator.3  regulator.4</div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/class/regulator/regulator.*/name">cat /sys/class/regulator/regulator.*/name</span></div>
+        <div class="t-out">vdd-core    vdd-io    vcc-3v3    vbat    usb5v</div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/class/regulator/regulator.0/microvolts">cat /sys/class/regulator/regulator.0/microvolts</span></div>
+        <div class="t-out"><span class="t-hl">1200000</span>          <span class="t-cmt"># 1.2V 内核轨，DVFS 会改这个数</span></div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/class/regulator/regulator.0/state">cat /sys/class/regulator/regulator.0/state</span></div>
+        <div class="t-out">enabled</div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/class/regulator/regulator.0/num_users">cat /sys/class/regulator/regulator.0/num_users</span></div>
+        <div class="t-out"><span class="t-hl">2</span>               <span class="t-cmt"># 2 个消费者引用（如 GPU + CPU cluster）</span></div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/class/regulator/regulator.3/status">cat /sys/class/regulator/regulator.3/status</span></div>
+        <div class="t-out">normal              <span class="t-cmt"># vs. disabled / error</span></div>
+      </div>
+    </div>
+    <div class="term wide">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>DEVICETREE · regulator-fixed 与 PMIC 子节点约束</span></div>
+      <div class="term-body">
+        <div class="t-cmt">/* 固定 regulator：USB VBUS，EN 脚挂在 GPIO1_5 */</div>
+        <div><span class="t-tag">reg_usb5v</span>: <span class="t-hl">regulator-usb5v</span> {</div>
+        <div class="t-out">    compatible = <span class="t-hl">"regulator-fixed"</span>;</div>
+        <div class="t-out">    regulator-name = <span class="t-hl">"usb5v"</span>;</div>
+        <div class="t-out">    regulator-min-microvolt = &lt;5000000&gt;;</div>
+        <div class="t-out">    regulator-max-microvolt = &lt;5000000&gt;;</div>
+        <div class="t-out">    gpio = &lt;&amp;gpio1 5 GPIO_ACTIVE_HIGH&gt;;</div>
+        <div class="t-out">    enable-active-high;</div>
+        <div class="t-out">};</div>
+        <div>&nbsp;</div>
+        <div class="t-cmt">/* PMIC：I2C 挂一颗，DCDC/LDO 每路一个子节点 */</div>
+        <div><span class="t-tag">pmic</span>: pmic@40 {</div>
+        <div class="t-out">    compatible = "rockchip,rk809";</div>
+        <div class="t-out">    <span class="t-tag">regulators</span> {</div>
+        <div class="t-out">        vdd_core: <span class="t-hl">DCDC_REG1</span> {</div>
+        <div class="t-out">            regulator-name = "vdd-core";</div>
+        <div class="t-out">            regulator-min-microvolt = &lt;712500&gt;;   <span class="t-cmt"># 允许调压下限</span></div>
+        <div class="t-out">            regulator-max-microvolt = &lt;1500000&gt;;   <span class="t-cmt"># 上限——DVFS 的活动空间</span></div>
+        <div class="t-out">            regulator-ramp-delay = &lt;12500&gt;;      <span class="t-cmt"># 12.5mV/µs 爬升速率</span></div>
+        <div class="t-out">            regulator-boot-on;                   <span class="t-cmt"># bootloader 已开启</span></div>
+        <div class="t-out">            regulator-always-on;                 <span class="t-cmt"># 不许关</span></div>
+        <div class="t-out">        };</div>
+        <div class="t-out">    };</div>
+        <div class="t-out">};</div>
+      </div>
+    </div>
+    <div class="term wide">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>CPUFREQ · DVFS 调频与 PMIC 联动调压</span></div>
+      <div class="term-body">
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_freqs">cat .../cpufreq/scaling_available_freqs</span></div>
+        <div class="t-out">408000 600000 816000 1008000 1200000 <span class="t-hl">1416000 1608000</span></div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor">cat .../cpufreq/scaling_governor</span></div>
+        <div class="t-out">schedutil</div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="grep . /sys/devices/system/cpu/cpufreq/policy0/related_cpus >/dev/null; cat /sys/class/regulator/regulator.0/microvolts">cat /sys/class/regulator/regulator.0/microvolts</span></div>
+        <div class="t-out">712500              <span class="t-cmt"># 408MHz 时内核只需 0.7125V——省电的关键</span></div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor">echo performance &gt; .../scaling_governor</span></div>
+        <div><span class="t-ps">kpen@hwlab:~$ </span><span class="t-cmd" data-copy="cat /sys/class/regulator/regulator.0/microvolts">cat /sys/class/regulator/regulator.0/microvolts</span></div>
+        <div class="t-out"><span class="t-hl">1225000</span>            <span class="t-cmt"># 跳到 1.6GHz，PMIC 同步升到 1.225V</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="lnx-note reveal">
+    <b>DVFS 就是把本页 §03 的滑杆交给内核：</b>cpufreq 的 opp-table 里每一档频率对应一组电压（频率越高、晶体管翻转越快、需要越高电压），
+    governor 决定何时升降频，regulator 子系统负责把 PMIC 真正拧到目标电压并等 ramp-delay 走完。
+    <code>regulator-min/max-microvolt</code> 是你在 DTS 里给内核画的护栏——超出 opp 表的请求会被框架直接拒绝，这正是 01 节「负载要求」在操作系统层的表达。
+  </div>
+</section>
+
+<!-- ================= §10 踩坑指南 ================= -->
+<section id="s10">
+  <div class="sec-head reveal"><span class="no">10</span><h2>踩坑指南 · 症状 → 病因</h2><span class="en">Pitfalls</span></div>
+  <p class="sec-sub reveal">电源问题的麻烦在于<b>症状常出现在别处</b>：MCU 复位、ADC 跳码、WiFi 掉线——最后查回来都是稳压器或它的外围。八条高频坑，按「症状 → 病因 → 药方」排列。</p>
+  <div class="pit-list reveal">
+    <div class="pit"><div class="symptom">烫手<br>热保护</div><div class="fix"><b><code>AMS1117</code> 高压差大电流 = 小暖手宝</b><p>5V→3.3V@800mA：P=1.7V×0.805A≈1.37W，SOT-223 θJA≈90°C/W → 结温飙升过 125°C，进入热保护反复关断，输出锯齿状掉电。药方：压差×电流 &gt; 0.5W 就换 Buck；必须 LDO 时给铜箔散热、降电流，或两级降压（先 Buck 后 LDO）。</p></div></div>
+    <div class="pit"><div class="symptom">啸叫<br>可闻噪声</div><div class="fix"><b>Buck 轻载<b>啸叫</b>（audible noise）</b><p>轻载进入 DCM 或跳周期（pulse skipping）模式后，有效开关频率掉进 20Hz–20kHz 人耳频段，电感磁致伸缩+陶瓷电容压电效应把电流变化变成声音。药方：选带 audio-skip-mode 抑制的型号、负载太轻时改小电流 LDO、换一体成型电感（molded）与非铁电介质电容。</p></div></div>
+    <div class="pit"><div class="symptom">负载瞬态<br>电压跌落</div><div class="fix"><b>瞬态跌落 → 输出电容 ESR / 环路带宽不够</b><p>MCU 从睡眠瞬间唤醒，电流阶跃 5→300mA，环路要几百 µs 才反应，中间全靠输出电容顶住：ΔV ≈ ΔI·ESR + ΔI²·L/(2·Vheadroom)。ESR 大的钽/电解电容让第一项超标。药方：低 ESR MLCC 并联组（考虑直流偏置降容！）、提高环路带宽、必要时加大 Cout。</p></div></div>
+    <div class="pit"><div class="symptom">MCU<br>无故复位</div><div class="fix"><b>输入电容离引脚太远 → 输入振铃吃掉余量</b><p>Buck 的输入电流是方波，输入引线电感与电容谐振，SW 导通瞬间 Vin 引脚处实际电压可能比电源低零点几伏——5V 系统瞬态跌到 4.3V 以下，MCU 复位阈值一碰就倒。药方：<code>10µF+100nF 尽量贴近芯片 Vin/PGND</code>，输入走线短而宽，必要时加磁珠+第二级电容。</p></div></div>
+    <div class="pit"><div class="symptom">EMI 超标<br>干扰射频</div><div class="fix"><b>大电流回路铺铜成天线 · SW 节点成辐射源</b><p>Buck 的 hot loop（Cin→上管→SW→下管→Cin）面积每大一圈，辐射效率就高一分；SW 节点 dv/dt 极大，铺一大片铜等于给全板发广播。药方：输入回路面积压到最小、SW 走线只求短不求粗、多层板内层完整地平面、射频敏感板选扩频(fsw dithering)型号。</p></div></div>
+    <div class="pit"><div class="symptom">随机<br>启停</div><div class="fix"><b><code>EN</code> 脚悬空</b><p>不少稳压器 EN 无内置下拉（或高阻），悬空时耦合噪声决定开关机——板子「有时能开有时不能」「手靠近就好」。药方：查 datasheet 的 EN 逻辑，不用的 EN 按极性上拉/下拉到确定电平（典型 100k），需要时序控制的接 RC 或 PG 链（07 节）。</p></div></div>
+    <div class="pit"><div class="symptom">启动<br>振荡</div><div class="fix"><b>LDO 输出电容缺失 / MLCC 直流偏置降容</b><p>老准 LDO 依赖输出电容 ESR 参与补偿：上电瞬间 Cout 从 0 充电，环路相位裕度不足直接振荡；MLCC 的实际容值随直流偏置下降 30–60%，22µF 标称可能只剩 10µF。药方：按手册给的最小 Cout 与「稳定 ESR 窗口」选件、容值按降容后校核、新型 CMOS LDO 选「任意电容稳定」型号。</p></div></div>
+    <div class="pit"><div class="symptom">轻载<br>纹波变大</div><div class="fix"><b>PFM 省电与纹波的取舍</b><p>高效 Buck 轻载自动进 PFM/DCM：跳周期省了开关损耗，但每包能量不变、包间隔拉长 → 低频纹波明显增大，ADC 可能采到跳变。药方：模拟敏感场合选强制 PWM（force-continuous）模式（牺牲轻载效率）、或 Buck 后串一颗 LDO 做净化（两级架构，06 节结论）。</p></div></div>
+  </div>
+</section>
+
+<!-- ================= §11 速查表 ================= -->
+<section id="s11">
+  <div class="sec-head reveal"><span class="no">11</span><h2>速查表 · 常见型号与选型决策树</h2><span class="en">Quick Reference</span></div>
+  <p class="sec-sub reveal">最常被用到的四组型号：<b>低压差 LDO</b>（3.3V 模拟轨 / 电池伴随）、<b>小 Buck</b>（主轨）、<b>Boost</b>（升压）、<b>基准与特殊</b>。最后用一棵决策树把本页的所有判断串成一条选择路径。</p>
+  <div class="qr-grid reveal">
+    <div class="qr-card">
+      <div class="qh"><h4>常见型号速查</h4><span>PART NUMBERS</span></div>
+      <div class="qb">
+        <table class="cmp-table" id="qrModels"></table>
+        <p>参数为典型档（详细以各厂数据手册为准）；<b>Vdo</b> 列为额定电流下压差，「—」表示不适用。选型先走右边的决策树，再回来对号入座。</p>
+      </div>
+    </div>
+    <div class="qr-card">
+      <div class="qh"><h4>选型决策树</h4><span>DECISION TREE</span></div>
+      <div class="qb">
+        <svg viewBox="0 0 300 300">
+          <g font-family="IBM Plex Mono,monospace">
+            <rect x="90" y="8" width="120" height="22" fill="none" stroke="#34e08a" stroke-width="1.6" rx="3"/>
+            <text x="150" y="22" fill="#34e08a" font-size="9.5" text-anchor="middle">需要的是基准还是供电？</text>
+            <path d="M150 30 L150 44" stroke="#5c7264" stroke-width="1.4"/>
+            <text x="120" y="40" fill="#8aa294" font-size="8">基准</text>
+            <rect x="14" y="46" width="112" height="20" fill="none" stroke="#ffb02e" stroke-width="1.4" rx="3"/>
+            <text x="70" y="59" fill="#ffb02e" font-size="8.5" text-anchor="middle">TL431 / REF3030</text>
+            <text x="70" y="78" fill="#5c7264" font-size="8" text-anchor="middle">只准不大力 · 给 ADC/比较器</text>
+            <path d="M150 44 L150 92" stroke="#5c7264" stroke-width="1.4"/>
+            <text x="156" y="56" fill="#8aa294" font-size="8">供电</text>
+            <rect x="82" y="92" width="136" height="22" fill="none" stroke="#34e08a" stroke-width="1.6" rx="3"/>
+            <text x="150" y="106" fill="#34e08a" font-size="9.5" text-anchor="middle">Vout 与 Vin 什么关系？</text>
+            <path d="M150 114 L150 128 M60 128 L240 128" stroke="#5c7264" stroke-width="1.4"/>
+            <path d="M60 128 L60 140" stroke="#5c7264" stroke-width="1.4"/>
+            <path d="M150 128 L150 140" stroke="#5c7264" stroke-width="1.4"/>
+            <path d="M240 128 L240 140" stroke="#5c7264" stroke-width="1.4"/>
+            <text x="38" y="124" fill="#8aa294" font-size="8">Vout&lt;Vin</text>
+            <text x="152" y="124" fill="#8aa294" font-size="8">跨/反相</text>
+            <text x="246" y="124" fill="#8aa294" font-size="8">Vout&gt;Vin</text>
+            <rect x="10" y="140" width="100" height="20" fill="none" stroke="#57d8f2" stroke-width="1.4" rx="3"/>
+            <text x="60" y="153" fill="#57d8f2" font-size="8.5" text-anchor="middle">Buck 降压为主</text>
+            <rect x="120" y="140" width="66" height="20" fill="none" stroke="#57d8f2" stroke-width="1.4" rx="3"/>
+            <text x="153" y="153" fill="#57d8f2" font-size="8.5" text-anchor="middle">Buck-Boost</text>
+            <rect x="196" y="140" width="94" height="20" fill="none" stroke="#57d8f2" stroke-width="1.4" rx="3"/>
+            <text x="243" y="153" fill="#57d8f2" font-size="8.5" text-anchor="middle">Boost 升压</text>
+            <path d="M243 160 L243 176" stroke="#5c7264" stroke-width="1.4"/>
+            <rect x="182" y="176" width="108" height="20" fill="none" stroke="#dcebe1" stroke-width="1.2" rx="3"/>
+            <text x="236" y="189" fill="#dcebe1" font-size="8" text-anchor="middle">MT3608 / TPS61088</text>
+            <text x="236" y="208" fill="#5c7264" font-size="8" text-anchor="middle">单节锂电→5V/12V</text>
+            <path d="M153 160 L153 172 M153 172 L70 172 M70 172 L70 176" fill="none" stroke="#5c7264" stroke-width="1.4"/>
+            <rect x="8" y="176" width="124" height="20" fill="none" stroke="#34e08a" stroke-width="1.6" rx="3"/>
+            <text x="70" y="189" fill="#34e08a" font-size="9" text-anchor="middle">压差大吗？电流大吗？</text>
+            <path d="M70 196 L70 210 M30 210 L110 210" stroke="#5c7264" stroke-width="1.4"/>
+            <path d="M30 210 L30 222" stroke="#5c7264" stroke-width="1.4"/>
+            <path d="M110 210 L110 222" stroke="#5c7264" stroke-width="1.4"/>
+            <text x="14" y="206" fill="#8aa294" font-size="8">是（P&gt;0.5W）</text>
+            <text x="114" y="206" fill="#8aa294" font-size="8">否</text>
+            <rect x="6" y="222" width="86" height="20" fill="none" stroke="#dcebe1" stroke-width="1.2" rx="3"/>
+            <text x="49" y="235" fill="#dcebe1" font-size="8" text-anchor="middle">Buck：SY8088 等</text>
+            <rect x="104" y="222" width="86" height="20" fill="none" stroke="#34e08a" stroke-width="1.4" rx="3"/>
+            <text x="147" y="235" fill="#34e08a" font-size="8" text-anchor="middle">噪声敏感吗？</text>
+            <path d="M147 242 L147 252 M122 252 L172 252 M122 252 L122 262 M172 252 L172 262" fill="none" stroke="#5c7264" stroke-width="1.4"/>
+            <rect x="60" y="262" width="124" height="20" fill="none" stroke="#ffb02e" stroke-width="1.4" rx="3"/>
+            <text x="122" y="275" fill="#ffb02e" font-size="8" text-anchor="middle">CMOS LDO：ME6211 等</text>
+            <rect x="192" y="262" width="100" height="20" fill="none" stroke="#dcebe1" stroke-width="1.2" rx="3"/>
+            <text x="242" y="275" fill="#dcebe1" font-size="8" text-anchor="middle">大电流 Buck 亦可</text>
+            <text x="150" y="296" fill="#5c7264" font-size="8" text-anchor="middle">模拟节/RF：Buck 之后再加一级 LDO 净化（06 节结论）</text>
+          </g>
+        </svg>
+        <p>入口三问：<b>① 输出比输入高还是低？② 压差×电流多大？③ 负载嫌不嫌噪声？</b>——落到叶子节点再去 11 节左表对型号。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-l">
+    <b>参考</b> · TI AMS1117 / TPS7A02 / TPS54331 数据手册 · MPS MP2359 · Silergy SY8088 / ME6211 ·
+    《The Art of Electronics 3rd ed》Ch.9 稳压与电源 · Linux 内核文档 regulator_summary / opp ·
+    姊妹页：<a href="resistor.html">电阻</a> / <a href="capacitor.html">电容</a> / <a href="inductor.html">电感</a> / <a href="diode.html">二极管</a> / <a href="transistor.html">三极管</a> / <a href="mosfet.html">MOSFET</a> / <a href="opamp.html">运放</a> / <a href="battery.html">电池</a><br>
+    本页为单文件交互式图解，可离线打开 · 波形与电源树由浏览器实时渲染
+  </div>
+  <div class="f-r">POWER·LAB<small>HW-BASIC · MAINTAINED WITH ♥ FOR EMBEDDED ENGINEERS</small></div>
+</footer>
+
+</main>
+<script>
+/* ================================================================
+   电源页交互引擎
+   ① hero 稳压动画（输入抖动 → 输出钉死，读数由模型变量生成）
+   ② §03 LDO 压差实验室   ③ §04 Buck 四 pane 闭环示波器
+   ④ §05 Boost 逐周期动画  ⑤ §06 效率对决
+   ⑥ §07 电源树+上电时序   ⑦ §08 外围计算器
+   ⑧ §11 型号速查渲染      ⑨ 终端复制
+   读数/标注里的物理量一律由模型常量计算生成，禁止硬编码。
+================================================================ */
+
+/* ---------------- 工具 ---------------- */
+const $ = id => document.getElementById(id);
+const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const trim3 = n => parseFloat(n.toPrecision(3));
+const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
+function supNum(n){ return String(n).split('').map(c=>SUP[+c]).join(''); }
+function fmtV(v){
+  if (!isFinite(v)) return '—';
+  const s=v<0?'−':'';
+  v=Math.abs(v);
+  if (v>=1) return s+trim3(v)+' V';
+  return s+trim3(v*1e3)+' mV';
+}
+function fmtA(a){
+  if (!isFinite(a)) return '—';
+  if (a===0) return '0 A';
+  const s=a<0?'−':'';
+  a=Math.abs(a);
+  const us=[[1,'A'],[1e-3,'mA'],[1e-6,'µA'],[1e-9,'nA']];
+  for (const [f,n] of us){ if (a>=f) return s+trim3(a/f)+' '+n; }
+  return s+trim3(a/1e-12)+' pA';
+}
+function fmtW(p){
+  if (!isFinite(p)) return '—';
+  const s=p<0?'−':'';
+  p=Math.abs(p);
+  if (p>=1) return s+trim3(p)+' W';
+  return s+trim3(p*1e3)+' mW';
+}
+function fmtHz(f){
+  if (!isFinite(f)) return '—';
+  const us=[[1e9,'GHz'],[1e6,'MHz'],[1e3,'kHz'],[1,'Hz']];
+  for (const [g,n] of us){ if (f>=g) return trim3(f/g)+' '+n; }
+  return trim3(f)+' Hz';
+}
+function fmtH(l){
+  if (!isFinite(l)) return '—';
+  const us=[[1,'H'],[1e-3,'mH'],[1e-6,'µH'],[1e-9,'nH']];
+  for (const [f,n] of us){ if (l>=f) return trim3(l/f)+' '+n; }
+  return trim3(l/1e-12)+' pH';
+}
+function fmtF(c){
+  if (!isFinite(c)) return '—';
+  const us=[[1,'F'],[1e-3,'mF'],[1e-6,'µF'],[1e-9,'nF']];
+  for (const [f,n] of us){ if (c>=f) return trim3(c/f)+' '+n; }
+  return trim3(c/1e-12)+' pF';
+}
+/* canvas HiDPI 自适应：st.W 在 draw 里恢复逻辑宽，禁止局部死值；
+   redraw 供无 rAF 循环的静态实验室在 resize 后重画 */
+function bindCanvas(cv,h,redraw){
+  const ctx=cv.getContext('2d');
+  const st={ctx:ctx,W:300,H:h};
+  function resize(){
+    const r=cv.parentElement.getBoundingClientRect();
+    st.W=Math.max(300,r.width);
+    const dpr=Math.min(devicePixelRatio||1,2);
+    cv.width=st.W*dpr; cv.height=h*dpr; cv.style.height=h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    if (redraw && st.ready) redraw();   /* 初次同步 resize 时 st 尚未就绪，由调用方 update() 首绘 */
+  }
+  try{ new ResizeObserver(resize).observe(cv.parentElement); }catch(e){}
+  resize();
+  st.ready=true;
+  return st;
+}
+function wireSeg(id,attr,fn){
+  const seg=$(id); if(!seg) return;
+  const bs=seg.querySelectorAll('button');
+  bs.forEach(b=>b.addEventListener('click',()=>{
+    bs.forEach(x=>x.classList.toggle('on',x===b));
+    fn(+b.getAttribute(attr));
+  }));
+}
+function wireRange(id,fn){
+  const el=$(id); if(!el) return;
+  el.addEventListener('input',()=>fn(+el.value));
+}
+/* 各实验室暴露 update，供冒烟测试在改状态后重算读数 */
+const UPD={};
+
+/* ================================================================
+   ① HERO · 输入在抖、负载在变，输出钉死
+      左：输入源（USB/锂电可点击切换，电压缓慢波动）
+      中：稳压芯片（带隙基准+误差放大器+调整管）
+      右：三路输出 3.3/1.8/1.2V 纹丝不动；电流粒子随负载变速
+================================================================ */
+(function(){
+  const cv = $('heroScope'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const H = 170;
+  let W = 300;
+  function resize(){
+    const r = cv.parentElement.getBoundingClientRect();
+    W = Math.max(300, r.width);
+    const dpr = Math.min(devicePixelRatio||1, 2);
+    cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  try{ new ResizeObserver(resize).observe(cv.parentElement); }catch(e){}
+  resize();
+  /* ---- 模型常量：一切读数由此生成 ---- */
+  const SRC=[
+    {n:'USB 输入', c:5.0,  a:0.25, per:3.1},
+    {n:'锂电池',   c:3.85, a:0.35, per:4.3}
+  ];
+  const RAILS=[ {v:3.3, t:'MCU · 3.3V'}, {v:1.8, t:'DDR · 1.8V'}, {v:1.2, t:'CORE · 1.2V'} ];
+  const VREF=1.2;                       /* 带隙基准 */
+  let srcI=0, t=0, last=performance.now();
+  const vinAt =()=>{ const s=SRC[srcI]; return s.c + s.a*Math.sin(2*Math.PI*t/s.per); };
+  const loadAt=()=> 0.06 + 0.05*Math.sin(2*Math.PI*t/2.3 + 1.2);   /* 整机负载 A */
+  cv.addEventListener('click',e=>{
+    const x=(e.offsetX===undefined?(e.clientX||0):e.offsetX);
+    if (x < Math.min(210, W*0.24)) { srcI=1-srcI; }
+  });
+  function meter(x,y,w,h,label,txt,color,pin){
+    ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1.4;
+    ctx.strokeRect(x,y,w,h);
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+    ctx.fillText(label,x+7,y+12);
+    ctx.font=h>38?'19px':'15px "IBM Plex Mono"'; ctx.fillStyle=color; ctx.textAlign='right';
+    ctx.fillText(txt,x+w-8,y+h-8);
+    if (pin){
+      ctx.strokeStyle='rgba(52,224,138,.5)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x+7,y+h-5); ctx.lineTo(x+w-8,y+h-5); ctx.stroke();
+    }
+  }
+  function frame(now){
+    const dt=Math.min(.05,(now-last)/1000); last=now;
+    t += dt;
+    const vin=vinAt(), il=loadAt();
+    ctx.clearRect(0,0,W,H);
+    const srcW=Math.min(178,W*0.21);
+    /* ---- 左：输入源 ---- */
+    meter(14,52,srcW,40,SRC[srcI].n,vin.toFixed(2)+' V','#ffb02e',false);
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+    ctx.fillText('输入在抖（点击切换源）',14,106);
+    /* ---- 中：稳压芯片 ---- */
+    const cx=srcW+52, cw=Math.min(190,W*0.24);
+    ctx.fillStyle='#0a100c'; ctx.fillRect(cx,30,cw,96);
+    ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.8; ctx.strokeRect(cx,30,cw,96);
+    ctx.font='9.5px "IBM Plex Mono"'; ctx.fillStyle='#57d8f2'; ctx.textAlign='center';
+    ctx.fillText('稳压芯片 REGULATOR',cx+cw/2,44);
+    /* 带隙基准 */
+    ctx.strokeStyle='#ffb02e'; ctx.lineWidth=1.3;
+    ctx.strokeRect(cx+10,52,44,20);
+    ctx.fillStyle='#ffb02e'; ctx.font='8px "IBM Plex Mono"';
+    ctx.fillText('带隙基准',cx+32,62);
+    ctx.fillText('Vref '+VREF.toFixed(1)+'V',cx+32,70);
+    /* 误差放大器（小三角） */
+    ctx.strokeStyle='#34e08a'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(cx+34,96); ctx.lineTo(cx+34,110); ctx.lineTo(cx+50,103); ctx.closePath(); ctx.stroke();
+    ctx.fillStyle='#34e08a'; ctx.font='7.5px "IBM Plex Mono"';
+    ctx.fillText('误差放大',cx+41,115);
+    /* 调整管 */
+    ctx.strokeStyle='#dcebe1'; ctx.lineWidth=1.4;
+    ctx.strokeRect(cx+68,52,40,26);
+    ctx.fillStyle='#dcebe1'; ctx.font='8px "IBM Plex Mono"';
+    ctx.fillText('调整管',cx+88,64);
+    ctx.fillText('调整开关级',cx+88,73);
+    ctx.beginPath(); ctx.moveTo(cx+32,72); ctx.lineTo(cx+32,100); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+54,103); ctx.lineTo(cx+68,65); ctx.stroke();
+    /* ---- 右：三路输出 ---- */
+    const rx=cx+cw+34, rw=Math.min(150,W-rx-16);
+    RAILS.forEach((r,i)=>{
+      const y=24+i*38;
+      meter(rx,y,rw,34,r.t,r.v.toFixed(3)+' V','#34e08a',true);
+    });
+    /* ---- 导线与电流粒子 ---- */
+    const yIn=72, yMid=78;
+    const railC=RAILS.map((r,i)=>24+i*38+17);
+    ctx.strokeStyle='#5c7264'; ctx.lineWidth=1.6;
+    ctx.beginPath(); ctx.moveTo(14+srcW,yIn); ctx.lineTo(cx,yMid); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+cw,78); ctx.lineTo(rx-24,78); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx-24,railC[0]); ctx.lineTo(rx-24,railC[2]); ctx.stroke();
+    railC.forEach(c=>{ ctx.beginPath(); ctx.moveTo(rx-24,c); ctx.lineTo(rx-2,c); ctx.stroke(); });
+    const spd=il*140;                      /* 粒子速度 ∝ 负载 */
+    for (let k=0;k<6;k++){
+      const ph=((t*spd/60)+k/6)%1;
+      const x=14+srcW+(cx-(14+srcW))*ph;
+      ctx.fillStyle='rgba(255,176,46,.9)';
+      ctx.beginPath(); ctx.arc(x,yIn+(yMid-yIn)*ph,2.2,0,7); ctx.fill();
+      const x2=cx+cw+((rx-24)-(cx+cw))*((ph*3)%1);
+      ctx.fillStyle='rgba(52,224,138,.9)';
+      ctx.beginPath(); ctx.arc(x2,78,2.2,0,7); ctx.fill();
+      const rc=railC[k%3];
+      const x3=rx-24+(k/6)*(0)+(ph*24)%22;
+      ctx.fillStyle='rgba(52,224,138,.85)';
+      ctx.beginPath(); ctx.arc(rx-24+((ph*22)%22),rc,1.9,0,7); ctx.fill();
+    }
+    /* ---- 负载条 ---- */
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+    const ltxt='负载 '+(il*1000).toFixed(0)+' mA';
+    const lw=Math.min(70,rw*0.45);
+    ctx.fillText(ltxt,rx,146);
+    ctx.strokeStyle='#1d2c22'; ctx.strokeRect(rx+lw,140,Math.max(30,rw-lw),7);
+    ctx.fillStyle='rgba(87,216,242,.7)';
+    ctx.fillRect(rx+lw,140,Math.max(30,rw-lw)*il/0.12,7);
+    /* ---- 读数行（由模型变量生成） ---- */
+    ctx.font=(W<560?'10px':'11.5px')+' "IBM Plex Mono"'; ctx.textAlign='left'; ctx.fillStyle='#8aa294';
+    ctx.fillText(
+      `Vin ${vin.toFixed(2)} V · 负载 ${(il*1000).toFixed(0)} mA → 输出 ${RAILS.map(r=>r.v.toFixed(3)).join(' / ')} V 锁定`,
+      14,H-4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ================================================================
+   ② §03 LDO 压差实验室
+================================================================ */
+const LDO_DEVS=[
+  {name:'AMS1117', type:'NPN 型', vnom:3.3, vdo:1.1, iq:5e-3,  ja:90,  imax:1.0, tjmax:125 },
+  {name:'ME6211',  type:'CMOS 型',vnom:3.3, vdo:0.1, iq:40e-6, ja:250, imax:0.5, tjmax:125 }
+];
+const LDO={dev:0, vin:5.0, iout:0.2, ta:25, tjmax:125};
+function ldoVout(vin){
+  const d=LDO_DEVS[LDO.dev];
+  return vin >= d.vnom+d.vdo ? d.vnom : Math.max(0, vin-d.vdo);
+}
+function ldoP(){
+  const d=LDO_DEVS[LDO.dev];
+  return (LDO.vin-ldoVout(LDO.vin))*(LDO.iout+d.iq);
+}
+function ldoTJ(){ return LDO.ta + ldoP()*LDO_DEVS[LDO.dev].ja; }
+function ldoEta(){
+  const vo=ldoVout(LDO.vin), d=LDO_DEVS[LDO.dev];
+  return vo*LDO.iout/(LDO.vin*(LDO.iout+d.iq));
+}
+function ldoZone(){
+  const d=LDO_DEVS[LDO.dev], thr=d.vnom+d.vdo;
+  if (LDO.vin >= thr+0.25) return ['稳压区','g'];
+  if (LDO.vin >= thr) return ['dropout 边缘','a'];
+  return ['跟随区（Vin−Vdo）','r'];
+}
+(function(){
+  const cv=$('ldoCanvas'); if(!cv) return;
+  const st=bindCanvas(cv,330,()=>draw());
+  const X0=70, X1M=18, Y0=20, Y1=280, VMAX=4.5, VMIN=2.0;
+  function draw(){
+    const ctx=st.ctx, W=st.W;
+    const X1=W-X1M;
+    const xv=v=>X0+(v-VMIN)/(5.5-VMIN)*(X1-X0);
+    const yv=v=>Y1-v/VMAX*(Y1-Y0);
+    ctx.clearRect(0,0,W,st.H);
+    const d=LDO_DEVS[LDO.dev], thr=d.vnom+d.vdo;
+    /* 三区着色 */
+    ctx.fillStyle='rgba(255,100,120,.065)'; ctx.fillRect(X0,Y0,xv(thr-0.25)-X0,Y1-Y0);
+    ctx.fillStyle='rgba(255,176,46,.075)';  ctx.fillRect(xv(thr-0.25),Y0,xv(thr+0.25)-xv(thr-0.25),Y1-Y0);
+    ctx.fillStyle='rgba(52,224,138,.05)';   ctx.fillRect(xv(thr+0.25),Y0,X1-xv(thr+0.25),Y1-Y0);
+    ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,100,120,.8)'; ctx.fillText('跟随区',(X0+xv(thr-0.25))/2,14);
+    ctx.fillStyle='rgba(255,176,46,.85)';  ctx.fillText('边缘',(xv(thr-0.25)+xv(thr+0.25))/2,14);
+    ctx.fillStyle='rgba(52,224,138,.8)';   ctx.fillText('稳压区',(xv(thr+0.25)+X1)/2,14);
+    /* 网格与轴 */
+    ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+    for (let v=1;v<=4;v++){ ctx.beginPath(); ctx.moveTo(X0,yv(v)); ctx.lineTo(X1,yv(v)); ctx.stroke(); }
+    ctx.strokeStyle='#27392d';
+    ctx.strokeRect(X0,Y0,X1-X0,Y1-Y0);
+    ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='right';
+    for (let v=0;v<=4;v+=1) ctx.fillText(v+'V',X0-6,yv(v)+3);
+    ctx.textAlign='center';
+    for (let v=2.0;v<=5.5;v+=0.5) ctx.fillText(v.toFixed(1),xv(v),Y1+14);
+    ctx.fillText('Vin →',(X0+X1)/2,Y1+28);
+    /* Vout 目标线（青色虚线） */
+    ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(87,216,242,.55)'; ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(xv(thr),yv(d.vnom)); ctx.lineTo(X1,yv(d.vnom)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(87,216,242,.8)'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('目标 '+d.vnom.toFixed(2)+'V',X1-92,yv(d.vnom)-6);
+    /* 跟随线 Vin−Vdo（琥珀虚线，仅跟随段） */
+    ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(255,176,46,.75)';
+    ctx.beginPath(); ctx.moveTo(xv(2.0),yv(2.0-d.vdo)); ctx.lineTo(xv(thr),yv(d.vnom)); ctx.stroke();
+    ctx.setLineDash([]);
+    /* 传输曲线（绿） */
+    ctx.strokeStyle='#34e08a'; ctx.lineWidth=2.5;
+    ctx.beginPath();
+    for (let px=0;px<=X1-X0;px++){
+      const vin=VMIN+px/(X1-X0)*(5.5-VMIN);
+      const vo=ldoVout(vin);
+      const x=X0+px, y=yv(vo);
+      px?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.stroke();
+    /* 工作点 */
+    const vo=ldoVout(LDO.vin);
+    ctx.strokeStyle='rgba(220,235,225,.35)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(xv(LDO.vin),Y0); ctx.lineTo(xv(LDO.vin),Y1); ctx.stroke();
+    ctx.save();
+    ctx.shadowColor='rgba(255,255,255,.9)'; ctx.shadowBlur=8;
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(xv(LDO.vin),yv(vo),4,0,7); ctx.fill();
+    ctx.restore();
+    ctx.font='9.5px "IBM Plex Mono"'; ctx.fillStyle='#dcebe1'; ctx.textAlign='left';
+    ctx.fillText('Vin '+LDO.vin.toFixed(2)+'V → Vout '+fmtV(vo),Math.min(xv(LDO.vin)+8,X1-150),Math.max(yv(vo)-10,Y0+26));
+    /* 器件参数标注（由模型常量生成） */
+    ctx.font='9.5px "IBM Plex Mono"'; ctx.textAlign='left'; ctx.fillStyle='#8aa294';
+    ctx.fillText(`${d.name}（${d.type}）Vdo=${d.vdo.toFixed(2)}V@${(d.imax*1000).toFixed(0)}mA · Iq=${fmtA(d.iq)} · θJA=${d.ja}°C/W`,X0+8,Y1-10);
+  }
+  function readout(){
+    const d=LDO_DEVS[LDO.dev];
+    const vo=ldoVout(LDO.vin), tj=ldoTJ(), zone=ldoZone();
+    $('ldoDev').textContent=d.name+' · '+d.type;
+    $('ldoVout').textContent=fmtV(vo);
+    $('ldoDrop').textContent=fmtV(LDO.vin-vo);
+    $('ldoP').textContent=fmtW(ldoP());
+    const tjEl=$('ldoTJ');
+    tjEl.textContent=tj.toFixed(1)+' °C';
+    tjEl.className='v'+(tj>d.tjmax?' r':tj>110?' a':'');
+    $('ldoEta').textContent=(ldoEta()*100).toFixed(1)+' %';
+    const zEl=$('ldoZone');
+    zEl.textContent=zone[0]; zEl.className='v '+zone[1];
+    let note='<b>解说</b>：';
+    if (LDO.vin >= thr0()+0.25){
+      note+='稳压区——环路闭环，Vout 钉在 '+d.vnom.toFixed(2)+'V；多余电压 ('+fmtV(LDO.vin-vo)+')×'+fmtA(LDO.iout+d.iq)+' 全部变成热。';
+    } else if (LDO.vin >= thr0()){
+      note+='dropout 边缘——压差 ('+fmtV(LDO.vin-vo)+') 贴着 Vdo='+fmtV(d.vdo)+'，负载一冲就掉出稳压。';
+    } else {
+      note+='跟随区——Vin−Vdo='+fmtV(vo)+'，芯片退化成电阻；把它拖回 '+(d.vnom+d.vdo).toFixed(2)+'V 以上才恢复稳压。';
+    }
+    if (tj>d.tjmax) note+='<br>⚠ 结温 '+tj.toFixed(0)+'°C 超过 '+d.tjmax+'°C——热保护/损坏风险（10 节坑 1）。';
+    else if (tj>110) note+='<br>⚠ 结温 '+tj.toFixed(0)+'°C 逼近上限，余量不足。';
+    if (LDO.iout>d.imax) note+='<br>⚠ 电流 '+fmtA(LDO.iout)+' 超过该器件额定 '+fmtA(d.imax)+'。';
+    $('ldoNote').innerHTML=note;
+    function thr0(){ return d.vnom+d.vdo; }
+  }
+  function update(){
+    $('ldoVinV').textContent=LDO.vin.toFixed(2)+' V';
+    $('ldoIoutV').textContent=(LDO.iout*1000).toFixed(0)+' mA';
+    readout(); draw();
+  }
+  wireRange('ldoVin',v=>{ LDO.vin=v/100; update(); });
+  wireRange('ldoIout',v=>{ LDO.iout=v/1000; update(); });
+  wireSeg('ldoSeg','data-i',i=>{ LDO.dev=i; update(); });
+  UPD.ldo=update;
+  update();
+})();
+
+/* ================================================================
+   ③ §04 Buck 闭环开关实验室（四 pane）
+================================================================ */
+const BK_L=2.2e-6, BK_COUT=22e-6, BK_FSWS=[500e3,1e6,1.5e6], BK_VF=0.4, BK_VSYNC=0.05;
+const BK={vin:5, vout:3.3, iout:1.0, fswI:1, sync:0, spd:1, playing:true, vc:0.66, ph:0};
+function bkFsw(){ return BK_FSWS[BK.fswI]; }
+function bkClamped(){ return BK.vout > BK.vin*0.92; }
+function bkVeff(){ return Math.min(BK.vout, BK.vin*0.92); }
+function bkDtarget(){ return bkVeff()/BK.vin; }
+function bkDIL(){ const V=bkVeff(); return V*(1-V/BK.vin)/(BK_L*bkFsw()); }
+function bkDCM(){ return BK.iout < bkDIL()/2; }
+function bkD1(){ const V=bkVeff(); return Math.sqrt(2*BK_L*bkFsw()*BK.iout*V/(BK.vin*(BK.vin-V))); }
+function bkD2(){ return bkD1()*(BK.vin-bkVeff())/bkVeff(); }
+function bkIpk(){ return bkDCM() ? (BK.vin-bkVeff())*bkD1()/(BK_L*bkFsw()) : BK.iout+bkDIL()/2; }
+function bkRip(){ return bkDIL()/(8*BK_COUT*bkFsw()); }
+function bkSwLow(){ return BK.sync? -BK_VSYNC : -BK_VF; }
+/* 电感电流：CCM 用环路占空比 vc（稳态=Vout/Vin），DCM 用能量收支解出的 D1/D2 */
+function bkIl(t){
+  const T=1/bkFsw();
+  const tau=((t%T)+T)%T;
+  const V=bkVeff();
+  if (!bkDCM()){
+    const dIL=V*(1-BK.vc)/(BK_L*bkFsw());
+    if (tau < BK.vc*T) return BK.iout-dIL/2 + (BK.vin-V)/BK_L*tau;
+    return BK.iout+dIL/2 - V/BK_L*(tau-BK.vc*T);
+  }
+  const D1=bkD1(), D2=bkD2(), Ipk=bkIpk();
+  if (tau < D1*T) return (BK.vin-V)/BK_L*tau;
+  if (tau < (D1+D2)*T) return Ipk - V/BK_L*(tau-D1*T);
+  return 0;
+}
+function bkOn(t){
+  const T=1/bkFsw();
+  const tau=((t%T)+T)%T;
+  return bkDCM() ? tau < bkD1()*T : tau < BK.vc*T;
+}
+function bkSw(t){
+  const T=1/bkFsw();
+  const tau=((t%T)+T)%T;
+  if (bkOn(t)) return BK.vin;
+  if (bkDCM() && tau > (bkD1()+bkD2())*T) return bkVeff();   /* DCM 死区：SW 浮到 Vout */
+  return bkSwLow();
+}
+/* 输出纹波：对 ic=il−iout 数值积分一个周期后去均值（波形真实自洽） */
+let _ripCache={key:'',arr:null};
+function bkRippleWave(){
+  const key=[BK.vin,bkVeff(),BK.iout,bkFsw(),BK.vc,BK.sync,BK.dev||0].join('|');
+  if (_ripCache.key===key) return _ripCache.arr;
+  const T=1/bkFsw(), N=720, dt=T/N, co=BK_COUT;
+  const acc=new Array(N); let s=0;
+  for (let k=0;k<N;k++){ s+=(bkIl(k*dt)-BK.iout)*dt/co; acc[k]=s; }
+  /* 减去峰谷中点（而非时间均值）：不对称弧的时间均值偏离中点，
+     会把 2·max|v| 撑大、与理想公式 ΔIL/(8·C·f) 读数矛盾 */
+  let hi=-1e30, lo=1e30;
+  for (const v of acc){ if(v>hi)hi=v; if(v<lo)lo=v; }
+  const mid=(hi+lo)/2;
+  const arr=acc.map(v=>v-mid);
+  _ripCache={key:key,arr:arr};
+  return arr;
+}
+(function(){
+  const cv=$('bkCanvas'); if(!cv) return;
+  const st=bindCanvas(cv,470);
+  const PLABEL=['① PWM 调制 · 锯齿×误差电平','② SW 节点 · 高=Vin · 低=VF/同步压降','③ 电感电流 IL','④ 输出纹波（放大）'];
+  const PY=[[18,112],[126,220],[234,328],[342,436]];
+  function draw(){
+    const ctx=st.ctx, W=st.W;
+    const X0=64, X1=W-18, T=1/bkFsw(), SPAN=3*T;
+    ctx.clearRect(0,0,W,st.H);
+    for (let p=0;p<4;p++){
+      const [ya,yb]=PY[p];
+      ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+      ctx.strokeRect(X0,ya,X1-X0,yb-ya);
+      ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(140,162,148,.18)';
+      ctx.beginPath(); ctx.moveTo(X0,(ya+yb)/2); ctx.lineTo(X1,(ya+yb)/2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+      ctx.fillText(PLABEL[p],X0+6,ya+11);
+      /* 周期刻度 */
+      ctx.strokeStyle='rgba(140,162,148,.12)';
+      for (let k=0;k<=3;k++){
+        const x=X0+k/3*(X1-X0);
+        ctx.beginPath(); ctx.moveTo(x,ya); ctx.lineTo(x,yb); ctx.stroke();
+      }
+    }
+    const tx=x=>{ const f=(x-X0)/(X1-X0); return f*SPAN - BK.ph*T; };
+    /* ---- pane1：锯齿 + vc（满幅映射：ya↔1.15V · yb↔−0.05） ---- */
+    {
+      const [ya,yb]=PY[0], h=yb-ya;
+      const vT=1.15, vB=-0.05;
+      const yv=v=>yb-(v-vB)/(vT-vB)*h;
+      /* PWM 高电平着色 */
+      ctx.fillStyle='rgba(52,224,138,.13)';
+      for (let x=X0;x<X1;x++){
+        if (bkOn(tx(x))) ctx.fillRect(x,ya+18,1,h-26);
+      }
+      ctx.strokeStyle='rgba(255,176,46,.9)'; ctx.lineWidth=1.8;
+      ctx.beginPath();
+      for (let x=X0;x<=X1;x++){
+        const tau=((tx(x)%T)+T)%T;
+        const y=yv(tau/T);
+        x===X0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([5,4]); ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.6;
+      ctx.beginPath(); ctx.moveTo(X0,yv(BK.vc)); ctx.lineTo(X1,yv(BK.vc)); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#57d8f2'; ctx.textAlign='right';
+      ctx.fillText('vc = '+(BK.vc*100).toFixed(0)+'%',X1-6,yv(BK.vc)-4);
+      ctx.fillStyle='rgba(255,176,46,.85)'; ctx.textAlign='left';
+      ctx.fillText('锯齿 0→1/周期',X0+6,yb-6);
+    }
+    /* ---- pane2：SW 节点（满幅映射：ya↔vT · yb↔vB） ---- */
+    {
+      const [ya,yb]=PY[1];
+      const vT=BK.vin+1, vB=-1;
+      const yv=v=>yb-(v-vB)/(vT-vB)*(yb-ya);
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(87,216,242,.5)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(X0,yv(bkVeff())); ctx.lineTo(X1,yv(bkVeff())); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='rgba(87,216,242,.8)'; ctx.textAlign='right';
+      ctx.fillText('Vout',X1-4,yv(bkVeff())-4);
+      ctx.strokeStyle='#34e08a'; ctx.lineWidth=2.2;
+      ctx.beginPath();
+      for (let x=X0;x<=X1;x++){
+        const y=yv(bkSw(tx(x)));
+        x===X0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#8aa294'; ctx.textAlign='right';
+      ctx.fillText('低 '+fmtV(bkSwLow()),X1-4,yv(bkSwLow())-4);
+    }
+    /* ---- pane3：电感电流（满幅映射：ya↔2.5A · yb↔−0.1A） ---- */
+    {
+      const [ya,yb]=PY[2];
+      const vT=2.5, vB=-0.1;
+      const yv=v=>yb-(v-vB)/(vT-vB)*(yb-ya);
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(255,176,46,.6)'; ctx.lineWidth=1.3;
+      ctx.beginPath(); ctx.moveTo(X0,yv(BK.iout)); ctx.lineTo(X1,yv(BK.iout)); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='rgba(255,176,46,.85)'; ctx.textAlign='right';
+      ctx.fillText('Iout '+fmtA(BK.iout),X1-4,yv(BK.iout)-4);
+      ctx.strokeStyle='#57d8f2'; ctx.lineWidth=2.2;
+      ctx.beginPath();
+      for (let x=X0;x<=X1;x++){
+        const y=yv(Math.max(0,bkIl(tx(x))));
+        x===X0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.fillStyle='#5c7364'; ctx.textAlign='left';
+      ctx.fillStyle='#5c7264';
+      ctx.fillText(bkDCM()?'DCM：触底钳 0，死区电感电流为零':'CCM：均值=Iout，斜率 (Vin−Vout)/L 与 −Vout/L',X0+6,yb-6);
+    }
+    /* ---- pane4：输出纹波 ---- */
+    {
+      const [ya,yb]=PY[3];
+      const mid=(ya+yb)/2;
+      const arr=bkRippleWave();
+      let pk=0; for (const v of arr) pk=Math.max(pk,Math.abs(v));
+      const disp=Math.max(pk,1e-9);
+      const N=arr.length, Tt=1/bkFsw();
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(87,216,242,.5)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(X0,mid); ctx.lineTo(X1,mid); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle='#ffb02e'; ctx.lineWidth=2;
+      ctx.beginPath();
+      for (let x=X0;x<=X1;x++){
+        const t=tx(x);
+        const tau=((t%Tt)+Tt)%Tt;
+        const v=arr[Math.floor(tau/Tt*N)%N];
+        const y=mid-v/disp*34;
+        x===X0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+      ctx.fillText('真实幅度 pk-pk ≈ '+fmtV(2*pk)+'（显示放大）· 目标线=Vout',X0+6,yb-6);
+    }
+    /* 顶部当前参数 */
+    ctx.font='10px "IBM Plex Mono"'; ctx.fillStyle='#8aa294'; ctx.textAlign='left';
+    ctx.fillText(`Vin ${BK.vin.toFixed(1)}V → Vout ${bkVeff().toFixed(2)}V · L=${(BK_L*1e6).toFixed(1)}µH Cout=${(BK_COUT*1e6).toFixed(0)}µF · fsw=${fmtHz(bkFsw())}`,X0,12);
+  }
+  function readout(){
+    $('bkD').textContent=(bkDtarget()*100).toFixed(1)+'%';
+    const m=$('bkModeRD');
+    m.textContent=bkDCM()?'DCM':'CCM';
+    m.className=bkDCM()?'r':'g';
+    $('bkDIL').textContent=fmtA(bkDIL());
+    $('bkIpk').textContent=fmtA(bkIpk());
+    $('bkRip').textContent=fmtV(bkRip());
+    $('bkSwLo').textContent=fmtV(bkSwLow())+(BK.sync?'（同步）':'（VF）');
+    $('bkFswRD').textContent=fmtHz(bkFsw());
+    let n='<b>解说</b>：';
+    if (bkClamped()) n+='目标 '+BK.vout.toFixed(2)+'V 不可达（Vin 太低），输出钳在 '+bkVeff().toFixed(2)+'V。';
+    if (!bkDCM()){
+      n+=`CCM 稳态——D=Vout/Vin=${(bkDtarget()*100).toFixed(0)}%，ΔIL=${fmtA(bkDIL())}，均值=Iout=${fmtA(BK.iout)}；纹波 ΔV=ΔIL/(8·Cout·fsw)=${fmtV(bkRip())}。`;
+    } else {
+      n+=`DCM——Iout(${fmtA(BK.iout)}) < ΔIL/2(${fmtA(bkDIL()/2)})，导通期 D1=${(bkD1()*100).toFixed(0)}%（由能量收支解出，≠Vout/Vin）；死区 SW 浮到 Vout。`;
+    }
+    $('bkNote').innerHTML=n;
+  }
+  function update(){ readout(); }
+  wireRange('bkVin',v=>{ BK.vin=v/10; update(); });
+  wireRange('bkVout',v=>{ BK.vout=v/10; update(); });
+  wireRange('bkIout',v=>{ BK.iout=v/100; update(); });
+  wireSeg('bkFsw','data-i',i=>{ BK.fswI=i; update(); });
+  wireSeg('bkMode','data-m',m=>{ BK.sync=m; update(); });
+  UPD.bk=update;
+  wireSeg('bkSpd','data-s',s=>{ BK.spd=[0.5,1,2][s]; });
+  const playBtn=$('bkPlay');
+  if (playBtn){
+    playBtn.addEventListener('click',()=>{
+      BK.playing=!BK.playing;
+      playBtn.classList.toggle('on',BK.playing);
+      playBtn.textContent=BK.playing?'❚❚':'▶';
+    });
+  }
+  const stepBtn=$('bkStep');
+  if (stepBtn) stepBtn.addEventListener('click',()=>{ BK.ph+=1; });
+  let last=performance.now();
+  function loop(now){
+    const dt=BK.playing?Math.min(.05,(now-last)/1000):0;
+    last=now;
+    BK.ph+=dt*BK.spd*1.6;
+    /* 闭环一阶收敛：vc → Dtarget */
+    const tau=0.35;
+    BK.vc+=(bkDtarget()-BK.vc)*(1-Math.exp(-dt/tau));
+    if (dt===0){ /* 暂停：dt=0 时 vc 不动，画面完全冻结 */ }
+    draw();
+    requestAnimationFrame(loop);
+  }
+  update();
+  requestAnimationFrame(loop);
+})();
+
+/* ================================================================
+   ④ §05 Boost 升压实验室（逐周期动画）
+================================================================ */
+const BS_L=10e-6, BS_FSW=1e6, BS_ILOAD=0.15;
+const BS={vin:3.7, d:0.6, playing:true, t:0};
+function bsVout(){ return BS.vin/(1-BS.d); }
+function bsIavg(){ return BS_ILOAD*bsVout()/BS.vin; }
+function bsDIL(){ return BS.vin*BS.d/(BS_L*BS_FSW); }
+function bsIpk(){ return bsIavg()+bsDIL()/2; }
+(function(){
+  const cv=$('bstCanvas'); if(!cv) return;
+  const st=bindCanvas(cv,360);
+  function draw(){
+    const ctx=st.ctx, W=st.W;
+    ctx.clearRect(0,0,W,st.H);
+    const cw=Math.max(390,Math.min(W*0.52,470));
+    const T=1/BS_FSW, tau=((BS.t%T)+T)%T, on=tau<BS.d*T;
+    /* ================= 左：电路 ================= */
+    const R=70, gy=210;
+    /* 电池：+ 极板（长，上）接主轨；− 极板（短，下）接地母线 */
+    const bx=46;
+    ctx.strokeStyle='#ffb02e'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(bx-10,R); ctx.lineTo(bx+10,R);        /* + 长板 */
+    ctx.moveTo(bx-5,R+11); ctx.lineTo(bx+5,R+11);    /* − 短板 */
+    ctx.moveTo(bx,R+11); ctx.lineTo(bx,gy);          /* − → 地 */
+    ctx.stroke();
+    ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#ffb02e'; ctx.textAlign='center';
+    ctx.fillText('+',bx-17,R+4);
+    ctx.fillText('−',bx-17,R+15);
+    ctx.fillText(fmtV(BS.vin),bx,R-26);
+    /* 主轨：+ → 电感 → SW 节点 */
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(bx+10,R); ctx.lineTo(bx+20,R); ctx.stroke();
+    ctx.strokeStyle='#ffb02e'; ctx.lineWidth=2;
+    ctx.beginPath();
+    for (let k=0;k<4;k++){ ctx.moveTo(bx+24+k*14,R); ctx.arc(bx+31+k*14,R,7,Math.PI,0,false); }
+    ctx.stroke();
+    const swx=bx+94;
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(bx+82,R); ctx.lineTo(swx,R); ctx.stroke();
+    ctx.fillStyle='#9aa79d'; ctx.beginPath(); ctx.arc(swx,R,2.6,0,7); ctx.fill();
+    /* 开关（SW 节点 → 地）：闭合=斜杠落底，断开=斜杠抬起 */
+    const swy=R+64;
+    ctx.strokeStyle=on?'#34e08a':'#5c7264'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(swx,R); ctx.lineTo(swx+(on?0:22),on?swy:R+38);
+    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(swx-8,swy); ctx.lineTo(swx+8,swy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(swx,swy); ctx.lineTo(swx,gy); ctx.stroke();
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle=on?'#34e08a':'#5c7264'; ctx.textAlign='left';
+    ctx.fillText(on?'开关 合':'开关 断',swx+14,R+40);
+    ctx.fillText('PWM',swx-10,swy+16);
+    /* 二极管 SW → Vout 轨（阳极左 · 阴极右） */
+    const dx0=swx+34, dx1=swx+74;
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(swx,R); ctx.lineTo(dx0,R); ctx.stroke();
+    ctx.strokeStyle=on?'#5c7264':'#34e08a'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(dx0,R-9); ctx.lineTo(dx0,R+9); ctx.lineTo(dx1,R); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(dx1,R-9); ctx.lineTo(dx1,R+9); ctx.stroke();
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle=on?'#ff6478':'#34e08a'; ctx.textAlign='center';
+    ctx.fillText(on?'截止':'导通',(dx0+dx1)/2,R-14);
+    /* Vout 轨 → 负载 */
+    const coutX=swx+116, lx=swx+176;
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(dx1,R); ctx.lineTo(lx,R); ctx.stroke();
+    ctx.fillStyle='#9aa79d';
+    ctx.beginPath(); ctx.arc(coutX,R,2.6,0,7); ctx.fill();
+    ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle=on?'#57d8f2':'#34e08a'; ctx.textAlign='center';
+    ctx.fillText('Vout '+fmtV(bsVout()),(coutX+lx)/2,R-14);
+    /* Cout（Vout 轨 → 地） */
+    ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.8;
+    ctx.beginPath();
+    ctx.moveTo(coutX,R); ctx.lineTo(coutX,R+22);
+    ctx.moveTo(coutX-9,R+24); ctx.lineTo(coutX+9,R+24);
+    ctx.moveTo(coutX-9,R+33); ctx.lineTo(coutX+9,R+33);
+    ctx.moveTo(coutX,R+33); ctx.lineTo(coutX,gy);
+    ctx.stroke();
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#57d8f2'; ctx.textAlign='left';
+    ctx.fillText('Cout',coutX+11,R+32);
+    /* 负载（Vout 轨 → 地，回路闭合） */
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(lx,R); ctx.lineTo(lx,R+18); ctx.stroke();
+    ctx.strokeRect(lx-10,R+18,20,30);
+    ctx.beginPath(); ctx.moveTo(lx,R+48); ctx.lineTo(lx,gy); ctx.stroke();
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#dcebe1'; ctx.textAlign='left';
+    ctx.fillText('负载',lx+14,R+34);
+    ctx.fillText(fmtA(BS_ILOAD),lx+14,R+44);
+    /* 地母线：电池− / 开关 / Cout / 负载 四路共地 */
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(bx-24,gy); ctx.lineTo(lx+24,gy); ctx.stroke();
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.moveTo(bx-14,gy+5); ctx.lineTo(bx-4,gy+5);
+    ctx.moveTo(bx-11,gy+10); ctx.lineTo(bx-7,gy+10);
+    ctx.stroke();
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+    ctx.fillText('GND',bx-30,gy+24);
+    /* 电流粒子：合=电感充磁回路（琥珀）；断=经二极管泵给负载（绿） */
+    const pathOn=[[bx+10,R],[swx,R],[swx,gy],[bx,gy],[bx,R+11]];
+    const pathOff=[[bx+10,R],[lx,R],[lx,gy],[bx,gy],[bx,R+11]];
+    function alongPath(path,f){
+      let L=0;
+      const segs=[];
+      for (let i=1;i<path.length;i++){
+        const d=Math.hypot(path[i][0]-path[i-1][0],path[i][1]-path[i-1][1]);
+        segs.push(d); L+=d;
+      }
+      let dist=f*L;
+      for (let i=0;i<segs.length;i++){
+        if (dist<=segs[i]){
+          const t=dist/segs[i];
+          return [path[i][0]+(path[i+1][0]-path[i][0])*t, path[i][1]+(path[i+1][1]-path[i][1])*t];
+        }
+        dist-=segs[i];
+      }
+      return path[path.length-1];
+    }
+    const spd=Math.abs(bsIavg())*260+40;
+    const path=on?pathOn:pathOff;
+    for (let k=0;k<7;k++){
+      const f=((BS.t*spd/120)+k/7)%1;
+      const p=alongPath(path,f);
+      ctx.fillStyle=on?'rgba(255,176,46,.95)':'rgba(52,224,138,.95)';
+      ctx.beginPath(); ctx.arc(p[0],p[1],2.4,0,7); ctx.fill();
+    }
+    /* 阶段字幕 */
+    ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillStyle=on?'#ffb02e':'#34e08a';
+    ctx.fillText(on
+      ? `开关合（${(BS.d*100).toFixed(0)}%·T）：电感以 Vin/L=${(BS.vin/BS_L/1e6).toFixed(2)} A/µs 爬升 · Cout 独撑负载`
+      : `开关断：电感续流，Vin+VL 泵给负载 · 斜率 (Vin−Vout)/L=−${((bsVout()-BS.vin)/BS_L/1e6).toFixed(2)} A/µs`,
+      20,26);
+    /* ================= 右：波形 ================= */
+    const x0=cw+14, x1=W-16;
+    if (x1-x0>120){
+      const T2=2*T;
+      /* IL pane */
+      const iya=40, iyb=170, ipk=bsIpk()*1.25;
+      const yil=i=>iyb-8-i/ipk*(iyb-iya-14);
+      ctx.strokeStyle='#1d2c22'; ctx.strokeRect(x0,iya,x1-x0,iyb-iya);
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+      ctx.fillText('IL 三角波',x0+6,iya+11);
+      ctx.strokeStyle='#57d8f2'; ctx.lineWidth=2;
+      ctx.beginPath();
+      for (let x=x0;x<=x1;x++){
+        const t=(x-x0)/(x1-x0)*T2 + BS.t;
+        const tau=((t%T)+T)%T;
+        let il;
+        if (tau<BS.d*T) il=BS.vin/BS_L*tau;
+        else il=Math.max(0,bsIpk()-(bsVout()-BS.vin)/BS_L*(tau-BS.d*T));
+        const y=yil(il);
+        x===x0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(255,176,46,.55)'; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.moveTo(x0,yil(bsIavg())); ctx.lineTo(x1,yil(bsIavg())); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(255,176,46,.85)'; ctx.textAlign='right';
+      ctx.fillText('Iavg '+fmtA(bsIavg()),x1-4,yil(bsIavg())-4);
+      /* Vout pane */
+      const vya=200, vyb=320;
+      const vT=bsVout()*1.3;
+      const yv=v=>vyb-10-v/vT*(vyb-vya-16);
+      ctx.strokeStyle='#1d2c22'; ctx.strokeRect(x0,vya,x1-x0,vyb-vya);
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+      ctx.fillText('Vout（纹波放大）',x0+6,vya+11);
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(87,216,242,.6)'; ctx.lineWidth=1.3;
+      ctx.beginPath(); ctx.moveTo(x0,yv(bsVout())); ctx.lineTo(x1,yv(bsVout())); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle='#ffb02e'; ctx.lineWidth=2;
+      ctx.beginPath();
+      for (let x=x0;x<=x1;x++){
+        const t=(x-x0)/(x1-x0)*T2 + BS.t;
+        const tau=((t%T)+T)%T;
+        /* 纹波（显示放大）：开关合期 Cout 放电下垂，断开期被泵回 */
+        let dv;
+        if (tau<BS.d*T) dv=-6*(tau/(BS.d*T));
+        else dv=-6+6*((tau-BS.d*T)/((1-BS.d)*T));
+        const y=yv(bsVout()+dv);
+        x===x0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.fillStyle='rgba(87,216,242,.85)'; ctx.textAlign='right';
+      ctx.fillText('目标 '+fmtV(bsVout()),x1-4,yv(bsVout())-5);
+    }
+  }
+  function readout(){
+    $('bstVout').textContent=fmtV(bsVout());
+    $('bstIpk').textContent=fmtA(bsIpk());
+    $('bstSlope').textContent=(BS.vin/BS_L/1e6).toFixed(2)+' A/µs';
+    $('bstSlope2').textContent='−'+((bsVout()-BS.vin)/BS_L/1e6).toFixed(2)+' A/µs';
+    $('bstNote').innerHTML='<b>解说</b>：开关合（'+(BS.d*100).toFixed(0)+'%·T）——二极管反偏，Cout 独撑负载，电感以 Vin/L 爬升储能；开关断——电感电流经二极管续流，Vin+VL 一起泵给负载并给 Cout 补货。稳态伏秒平衡 → Vout=Vin/(1−D)='+fmtV(bsVout())+'。';
+  }
+  function update(){ readout(); draw(); }
+  wireRange('bstVin',v=>{ BS.vin=v/10; update(); });
+  wireRange('bstD',v=>{ BS.d=v/100; update(); });
+  UPD.bst=update;
+  const pb=$('bstPlay');
+  if (pb) pb.addEventListener('click',()=>{
+    BS.playing=!BS.playing;
+    pb.classList.toggle('on',BS.playing);
+    pb.textContent=BS.playing?'❚❚':'▶';
+  });
+  let last=performance.now();
+  function loop(now){
+    const dt=BS.playing?Math.min(.05,(now-last)/1000):0;
+    last=now;
+    BS.t+=dt*1.5;
+    draw();
+    requestAnimationFrame(loop);
+  }
+  update();
+  requestAnimationFrame(loop);
+})();
+
+/* ================================================================
+   ⑤ §06 效率对决实验室
+================================================================ */
+const EFF_VOUT=3.3, EFF_LDO_IQ=5e-3, EFF_IQ=0.3e-3, EFF_KSW=3.4e-10, EFF_R=0.18;
+const EFF={vin:5, x:70};
+function effLdo(i){ return EFF_VOUT*i/(EFF.vin*(i+EFF_LDO_IQ)); }
+function effPfix(){ return EFF.vin*EFF_IQ + EFF_KSW*1e6*EFF.vin*EFF.vin; }  /* fsw=1MHz */
+function effBuckLoss(i){ return effPfix()+i*i*EFF_R; }
+function effBuck(i){ const po=EFF_VOUT*i; return po/(po+effBuckLoss(i)); }
+function effIout(){ return 1e-3*Math.pow(10,EFF.x/100*Math.log10(3000)); }
+function effPeakI(){ return Math.sqrt(effPfix()/EFF_R); }
+(function(){
+  const cv=$('effCanvas'); if(!cv) return;
+  const st=bindCanvas(cv,340,()=>draw());
+  const IMIN=1e-3, IMAX=3;
+  const lx=i=>Math.log10(i);
+  function draw(){
+    const ctx=st.ctx, W=st.W;
+    ctx.clearRect(0,0,W,st.H);
+    const x0=64, x1=W-18, y0=20, y1=240;
+    const xa=i=>x0+(lx(i)-lx(IMIN))/(lx(IMAX)-lx(IMIN))*(x1-x0);
+    const ya=e=>y1-e/100*(y1-y0);
+    /* 网格 */
+    ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+    for (let e=0;e<=100;e+=20){
+      ctx.beginPath(); ctx.moveTo(x0,ya(e)); ctx.lineTo(x1,ya(e)); ctx.stroke();
+      ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='right';
+      ctx.fillText(e+'%',x0-6,ya(e)+3);
+    }
+    const decs=[1e-3,1e-2,0.1,1,3];
+    for (const d of decs){
+      ctx.beginPath(); ctx.moveTo(xa(d),y0); ctx.lineTo(xa(d),y1); ctx.stroke();
+      ctx.textAlign='center'; ctx.fillStyle='#5c7264';
+      ctx.fillText(fmtA(d),xa(d),y1+14);
+    }
+    ctx.strokeStyle='#27392d'; ctx.strokeRect(x0,y0,x1-x0,y1-y0);
+    ctx.fillText('Iout（对数）',(x0+x1)/2,y1+28);
+    /* 曲线 */
+    function curve(fn,color,w){
+      ctx.strokeStyle=color; ctx.lineWidth=w;
+      ctx.beginPath();
+      let first=true;
+      for (let k=0;k<=240;k++){
+        const i=IMIN*Math.pow(10,k/240*(lx(IMAX)-lx(IMIN)));
+        const e=Math.min(100,fn(i)*100);
+        const x=xa(i), y=ya(e);
+        first?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        first=false;
+      }
+      ctx.stroke();
+    }
+    curve(effLdo,'#ffb02e',2.2);
+    curve(effBuck,'#34e08a',2.2);
+    /* 峰值标记 */
+    const pk=effPeakI();
+    ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(87,216,242,.5)'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(xa(pk),y0); ctx.lineTo(xa(pk),y1); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#57d8f2'; ctx.textAlign='center';
+    ctx.fillText('Buck 峰值 η '+(effBuck(pk)*100).toFixed(1)+'% @'+fmtA(pk),xa(pk),ya(effBuck(pk)*100)-8);
+    /* 当前负载 marker */
+    const mi=effIout();
+    ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(220,235,225,.4)'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(xa(mi),y0); ctx.lineTo(xa(mi),y1); ctx.stroke();
+    ctx.setLineDash([]);
+    const eL=effLdo(mi), eB=effBuck(mi);
+    ctx.fillStyle='#ffb02e';
+    ctx.beginPath(); ctx.arc(xa(mi),ya(eL*100),4,0,7); ctx.fill();
+    ctx.fillStyle='#34e08a';
+    ctx.beginPath(); ctx.arc(xa(mi),ya(eB*100),4,0,7); ctx.fill();
+    ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillStyle='#ffb02e'; ctx.fillText('LDO η≈Vout/Vin 平线',x0+8,8);
+    ctx.fillStyle='#34e08a'; ctx.fillText('Buck：轻载固定损耗掉效率 · 中载峰 · 重载 I²R 缓降',x0+8,18);
+    /* ---- 功耗柱 ---- */
+    const by=262, bh=58, bx0=x0, bx1=x1;
+    ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+    ctx.fillText('当前负载下两方案各自烧掉的功率：',bx0,by-4);
+    const pl=EFF.vin*(mi+EFF_LDO_IQ)-EFF_VOUT*mi;
+    const pb=effBuckLoss(mi);
+    const pmax=Math.max(pl,pb,0.5);
+    const bw=Math.max(46,Math.min(120,(bx1-bx0-240)/2));
+    ctx.fillStyle='rgba(255,100,120,.55)';
+    ctx.fillRect(bx0+70,by+bh-pl/pmax*bh,bw,pl/pmax*bh);
+    ctx.fillStyle='rgba(52,224,138,.55)';
+    ctx.fillRect(bx0+70+bw+120,by+bh-pb/pmax*bh,bw,pb/pmax*bh);
+    ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+    ctx.strokeRect(bx0+70,by,bw,bh);
+    ctx.strokeRect(bx0+70+bw+120,by,bw,bh);
+    ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillStyle='#ff6478'; ctx.fillText('LDO '+fmtW(pl),bx0+70+bw/2,by+bh-pl/pmax*bh-6);
+    ctx.fillStyle='#34e08a'; ctx.fillText('Buck '+fmtW(pb),bx0+70+bw+120+bw/2,by+bh-pb/pmax*bh-6);
+    /* LDO η 数字（读数由模型生成） */
+    ctx.textAlign='left'; ctx.fillStyle='#8aa294';
+    ctx.fillText('Vout '+EFF_VOUT.toFixed(1)+'V ← Vin '+EFF.vin.toFixed(1)+'V',bx1-170,by+12);
+  }
+  function readout(){
+    const i=effIout();
+    $('effIV').textContent=fmtA(i);
+    $('effLdo').textContent=(effLdo(i)*100).toFixed(1)+' %';
+    $('effBuck').textContent=(effBuck(i)*100).toFixed(1)+' %';
+    $('effLossL').textContent=fmtW(EFF.vin*(i+EFF_LDO_IQ)-EFF_VOUT*i);
+    $('effLossB').textContent=fmtW(effBuckLoss(i));
+    $('effPeak').textContent=fmtA(effPeakI());
+  }
+  function update(){ readout(); draw(); }
+  wireRange('effVin',v=>{ EFF.vin=v/10; update(); });
+  wireRange('effI',v=>{ EFF.x=v; update(); });
+  UPD.eff=update;
+  update();
+})();
+
+/* ================================================================
+   ⑥ §07 电源树与上电时序实验室
+================================================================ */
+const TR_RAILS=[
+  {id:'io',  name:'3.3V LDO · CMOS', type:'LDO',  v:3.3, i:0.120, vdo:0.1, iq:40e-6, et:3.1},
+  {id:'core',name:'1.2V Buck · 内核', type:'BUCK', v:1.2, i:0.280, eta:0.90, et:1.1},
+  {id:'ddr', name:'1.8V Buck · DDR',  type:'BUCK', v:1.8, i:0.090, eta:0.90, et:2.1}
+];
+const TR_USB_V=5.0, TR_USB_IMAX=0.5;
+const TR={src:0, t:0, playing:false, sel:null, hits:[]};
+const TR_STAGES=['全下电','EN 拉高','1.2V 内核爬升','PG→1.8V DDR','PG→3.3V IO','RSTn 释放 · 全树就绪'];
+function trVbus(){ return TR.src===0?5.0:3.7; }
+function trRailPin(r){
+  const pout=r.v*r.i;
+  if (r.type==='LDO') return trVbus()*(r.i+r.iq);
+  return pout/r.eta;
+}
+function trRailPd(r){ const pout=r.v*r.i; return trRailPin(r)-pout; }
+function trTotalPin(){ return TR_RAILS.reduce((s,r)=>s+trRailPin(r),0); }
+function trTotalPout(){ return TR_RAILS.reduce((s,r)=>s+r.v*r.i,0); }
+function trStage(){ const t=TR.t; return t<0.4?0:t<1.1?1:t<2.1?2:t<3.1?3:t<4.1?4:5; }
+function trRailUp(r){ /* 0..1 爬升进度 */
+  const t=TR.t;
+  if (t<r.et) return 0;
+  return Math.min(1,(t-r.et)/0.7);
+}
+(function(){
+  const cv=$('treeCanvas'); if(!cv) return;
+  const st=bindCanvas(cv,470);
+  function rr(ctx,x,y,w,h,txt,sub,c,fill){
+    ctx.fillStyle=fill||'#0a100c';
+    ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle=c; ctx.lineWidth=1.7;
+    ctx.strokeRect(x,y,w,h);
+    ctx.font='9.5px "IBM Plex Mono"'; ctx.fillStyle=c; ctx.textAlign='center';
+    ctx.fillText(txt,x+w/2,y+(sub?15:h/2+3.5));
+    if (sub){ ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#8aa294'; ctx.fillText(sub,x+w/2,y+h-8); }
+    return {x:x,y:y,w:w,h:h};
+  }
+  function draw(){
+    const ctx=st.ctx, W=st.W;
+    ctx.clearRect(0,0,W,st.H);
+    TR.hits=[];
+    const vbus=trVbus(), stage=trStage();
+    /* ---- 源 ---- */
+    const usb={x:16,y:26,w:130,h:36}, bat={x:16,y:196,w:130,h:36};
+    const usbOn=stage>=1&&TR.src===0, batOn=stage>=1&&TR.src===1;
+    TR.hits.push({r:rr(ctx,usb.x,usb.y,usb.w,usb.h,'USB 5V','适配器/主机制',usbOn?'#ffb02e':'#5c7264'),id:'usb'});
+    TR.hits.push({r:rr(ctx,bat.x,bat.y,bat.w,bat.h,'锂电 3.7V','3.0–4.2V 放电平台',batOn?'#ffb02e':'#5c7264'),id:'bat'});
+    /* 理想二极管 or-ing */
+    const ox=210, oy=129;
+    ctx.strokeStyle='#5c7264'; ctx.lineWidth=1.6;
+    ctx.beginPath();
+    ctx.moveTo(usb.x+usb.w,usb.y+usb.h/2); ctx.lineTo(ox-34,usb.y+usb.h/2); ctx.lineTo(ox-34,oy-7);
+    ctx.moveTo(bat.x+bat.w,bat.y+bat.h/2); ctx.lineTo(ox-34,bat.y+bat.h/2); ctx.lineTo(ox-34,oy+7);
+    ctx.stroke();
+    /* 二极管符号（源→VBUS 方向） */
+    for (const dy of [-7,7]){
+      ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(ox-30,oy+dy-5); ctx.lineTo(ox-30,oy+dy+5); ctx.lineTo(ox-22,oy+dy); ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ox-22,oy+dy-5); ctx.lineTo(ox-22,oy+dy+5); ctx.stroke();
+      ctx.strokeStyle='#5c7264'; ctx.lineWidth=1.6;
+      ctx.beginPath(); ctx.moveTo(ox-22,oy+dy); ctx.lineTo(ox,oy+dy); ctx.stroke();
+    }
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#57d8f2'; ctx.textAlign='center';
+    ctx.fillText('理想二极管 or-ing',ox-26,oy-16);
+    ctx.fillStyle='#9aa79d'; ctx.beginPath(); ctx.arc(ox,oy,3,0,7); ctx.fill();
+    ctx.font='9.5px "IBM Plex Mono"'; ctx.fillStyle=stage>=1?'#dcebe1':'#5c7264'; ctx.textAlign='left';
+    ctx.fillText('VBUS '+vbus.toFixed(1)+'V',ox+8,oy-6);
+    TR.hits.push({r:{x:ox-34,y:oy-20,w:60,h:40},id:'oring'});
+    /* ---- 三条轨 ---- */
+    const regs=TR_RAILS.map((r,i)=>({x:320,y:22+i*95,w:170,h:44,...r}));
+    regs.forEach((r)=>{
+      const up=trRailUp(r);
+      const live=up>0;
+      const hov=TR.sel===r.id;
+      rr(ctx,r.x,r.y,r.w,r.h,r.name,
+        live?('输出 '+(r.v*up).toFixed(2)+'V · '+fmtA(r.i)):'等待 PG 放行',
+        live?'#34e08a':'#5c7264', hov?'rgba(52,224,138,.12)':'#0a100c');
+      /* VBUS 母线 → 该轨 EN */
+      ctx.strokeStyle='#5c7264'; ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(ox,oy);
+      ctx.lineTo(r.x-30,oy);
+      ctx.lineTo(r.x-30,r.y+r.h/2);
+      ctx.lineTo(r.x,r.y+r.h/2);
+      ctx.stroke();
+      /* EN 标记 */
+      ctx.font='8px "IBM Plex Mono"'; ctx.fillStyle=live?'#34e08a':'#5c7264'; ctx.textAlign='left';
+      ctx.fillText('EN',r.x-2,r.y-4);
+      TR.hits.push({r:{x:r.x,y:r.y,w:r.w,h:r.h},id:r.id});
+    });
+    /* ---- 负载 ---- */
+    const loads=TR_RAILS.map((r,i)=>({x:560,y:22+i*95,w:150,h:44,rr:r}));
+    loads.forEach((l,idx)=>{
+      const r=regs[idx], up=trRailUp(l.rr), live=up>0.99;
+      rr(ctx,l.x,l.y,l.w,l.h,
+        {io:'MCU · 外设',core:'SoC 内核',ddr:'DDR 存储器'}[l.rr.id],
+        live?(fmtA(l.rr.i)+' · '+fmtW(l.rr.v*l.rr.i)):'未上电',
+        live?'#dcebe1':'#5c7264', TR.sel===('load_'+l.rr.id)?'rgba(220,235,225,.08)':'#0a100c');
+      ctx.strokeStyle='#5c7264'; ctx.lineWidth=1.6;
+      ctx.beginPath(); ctx.moveTo(r.x+r.w,r.y+r.h/2); ctx.lineTo(l.x,l.y+l.h/2); ctx.stroke();
+      if (live){
+        ctx.fillStyle='rgba(52,224,138,.85)';
+        const f=(TR.t*1.4)%1;
+        const px=r.x+r.w+f*(l.x-(r.x+r.w));
+        ctx.beginPath(); ctx.arc(px,r.y+r.h/2,2.4,0,7); ctx.fill();
+      }
+      TR.hits.push({r:{x:l.x,y:l.y,w:l.w,h:l.h},id:'load_'+l.rr.id});
+    });
+    /* ---- 共地母线 ---- */
+    const gy=306;
+    ctx.strokeStyle='#9aa79d'; ctx.lineWidth=1.8;
+    ctx.beginPath();
+    ctx.moveTo(usb.x+usb.w/2,usb.y+usb.h); ctx.lineTo(usb.x+usb.w/2,gy);
+    ctx.moveTo(bat.x+bat.w/2,bat.y+bat.h); ctx.lineTo(bat.x+bat.w/2,gy);
+    ctx.moveTo(16,gy); ctx.lineTo(720,gy);
+    loads.forEach(l=>{ ctx.moveTo(l.x+l.w/2,l.y+l.h); ctx.lineTo(l.x+l.w/2,gy); });
+    regs.forEach(r=>{ ctx.moveTo(r.x+r.w/2,r.y+r.h); ctx.lineTo(r.x+r.w/2,r.y+r.h+8); });
+    ctx.stroke();
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.fillStyle='#5c7264'; ctx.textAlign='left';
+    ctx.fillText('GND 共地（所有回路的归途）',18,gy+14);
+    /* ---- 预算总表（右侧） ---- */
+    const bx=744, bw=W-bx-16;
+    if (bw>150){
+      ctx.font='9.5px "IBM Plex Mono"'; ctx.fillStyle='#8aa294'; ctx.textAlign='left';
+      ctx.fillText('整机功耗预算（满载）',bx,26);
+      TR_RAILS.forEach((r,i)=>{
+        const y=44+i*54;
+        ctx.strokeStyle='#1d2c22'; ctx.strokeRect(bx,y,bw,46);
+        ctx.fillStyle='#dcebe1';
+        ctx.fillText(r.name.split(' · ')[0]+' → '+fmtA(r.i),bx+8,y+15);
+        ctx.fillStyle='#5c7264';
+        ctx.fillText('Pout '+fmtW(r.v*r.i)+' · 损耗 '+fmtW(trRailPd(r)),bx+8,y+29);
+        ctx.fillText('Pin '+fmtW(trRailPin(r)),bx+8,y+42);
+      });
+      const yP=44+3*54;
+      ctx.strokeStyle='#27392d'; ctx.strokeRect(bx,yP,bw,46);
+      ctx.fillStyle='#34e08a';
+      ctx.fillText('总输入 '+fmtW(trTotalPin())+'（'+fmtA(trTotalPin()/vbus)+' @'+vbus.toFixed(1)+'V）',bx+8,yP+15);
+      const lim=TR_USB_V*TR_USB_IMAX;
+      ctx.fillStyle=trTotalPin()<=lim?'#ffb02e':'#ff6478';
+      ctx.fillText('USB 限额 '+fmtW(lim)+(trTotalPin()<=lim?' 内 ✓':' 超 ✗'),bx+8,yP+32);
+    }
+    /* ================= 上电时序带 ================= */
+    const sy=330;
+    ctx.strokeStyle='#27392d'; ctx.lineWidth=1;
+    ctx.strokeRect(64,sy-12,W-64-16,140);
+    ctx.font='9px "IBM Plex Mono"'; ctx.fillStyle='#8aa294'; ctx.textAlign='left';
+    ctx.fillText('上电时序（时间 →）',70,sy);
+    const rows=[['EN',null],['1.2V core','core'],['1.8V ddr','ddr'],['3.3V io','io'],['RSTn',null]];
+    rows.forEach((row,i)=>{
+      const y=sy+16+i*24;
+      ctx.fillStyle='#5c7264'; ctx.textAlign='right';
+      ctx.fillText(row[0],58,y+4);
+      const x0=70, x1=W-30;
+      const tt=f=>x0+f*(x1-x0);
+      ctx.strokeStyle='#1d2c22';
+      ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+      let pts=[];
+      if (row[0]==='EN'){
+        pts=[[0,0],[0.08,0],[0.08,1],[1,1]];
+      } else if (row[0]==='RSTn'){
+        pts=[[0,0],[0.82,0],[0.82,1],[1,1]];
+      } else {
+        const r=TR_RAILS.find(q=>q.id===row[1]);
+        const f0=r.et/5.2;
+        pts=[[0,0],[f0,0],[f0+0.13,1],[1,1]];
+      }
+      ctx.strokeStyle=row[0]==='RSTn'?'#34e08a':'#57d8f2'; ctx.lineWidth=1.8;
+      ctx.beginPath();
+      pts.forEach((p,k)=>{ const x=tt(p[0]), yy=y-p[1]*12; k?ctx.lineTo(x,yy):ctx.moveTo(x,yy); });
+      ctx.stroke();
+      /* PG tick */
+      if (row[1]){
+        const r=TR_RAILS.find(q=>q.id===row[1]);
+        const f=r.et/5.2+0.13;
+        ctx.fillStyle='#34e08a';
+        ctx.beginPath(); ctx.arc(tt(f),y-12,2.2,0,7); ctx.fill();
+      }
+    });
+    /* 时间游标 */
+    const cx=70+Math.min(1,TR.t/5.2)*(W-100);
+    ctx.strokeStyle='rgba(255,176,46,.8)'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(cx,sy+6); ctx.lineTo(cx,sy+128); ctx.stroke();
+  }
+  const seqV=$('treeSeqV');
+  function updateSeqLabel(){
+    const s=trStage();
+    if (seqV) seqV.textContent=s+' / 5 · '+TR_STAGES[s];
+  }
+  cv.addEventListener('click',e=>{
+    const rct=cv.getBoundingClientRect();
+    const x=(e.clientX||0)-rct.left, y=(e.clientY||0)-rct.top;
+    for (const h of TR.hits){
+      if (x>=h.r.x&&x<=h.r.x+h.r.w&&y>=h.r.y&&y<=h.r.y+h.r.h){ TR.sel=h.id; info(); return; }
+    }
+  });
+  function info(){
+    const id=TR.sel;
+    const set=(n,i,po,pd)=>{ $('treeNode').textContent=n; $('treeI').textContent=i; $('treePo').textContent=po; $('treePd').textContent=pd; };
+    if (!id){ return; }
+    if (id==='usb'||id==='bat'){
+      const v=id==='usb'?5.0:3.7;
+      set(id==='usb'?'USB 5V 输入':'锂电 3.7V 输入',
+        fmtA(trTotalPin()/trVbus()),
+        fmtW(trTotalPout()),
+        fmtW(trTotalPin()-trTotalPout()));
+      $('treePin').textContent=fmtW(trTotalPin());
+    } else if (id==='oring'){
+      set('VBUS（or-ing 后）', fmtA(trTotalPin()/trVbus()), '—', '理想二极管压降≈0');
+      $('treePin').textContent=fmtW(trTotalPin());
+    } else if (id.lastIndexOf('load_',0)===0){
+      const rid=id.slice(5);
+      const r=TR_RAILS.find(q=>q.id===rid);
+      set({io:'MCU · 外设',core:'SoC 内核',ddr:'DDR 存储器'}[rid]+'（'+r.v.toFixed(1)+'V）',
+        fmtA(r.i), fmtW(r.v*r.i), '—（负载）');
+      $('treePin').textContent=fmtW(trTotalPin());
+    } else {
+      const r=TR_RAILS.find(q=>q.id===id);
+      set(r.name, fmtA(r.i), fmtW(r.v*r.i), fmtW(trRailPd(r))+(r.type==='LDO'?'（压差'+fmtV(trVbus()-r.v)+'）':'（η90%）'));
+      $('treePin').textContent=fmtW(trTotalPin());
+    }
+    draw();
+  }
+  UPD.tr=info;
+  const stepB=$('treeStep');
+  if (stepB) stepB.addEventListener('click',()=>{
+    const s=trStage();
+    const next=[0.45,1.15,2.15,3.15,4.15][Math.min(s,4)];
+    TR.t=s>=5?0:next;
+    updateSeqLabel();
+  });
+  const resetB=$('treeReset');
+  if (resetB) resetB.addEventListener('click',()=>{ TR.t=0; updateSeqLabel(); });
+  const playB=$('treePlay');
+  if (playB) playB.addEventListener('click',()=>{
+    TR.playing=!TR.playing;
+    playB.classList.toggle('on',TR.playing);
+    playB.textContent=TR.playing?'❚❚':'▶';
+  });
+  wireSeg('treeSrc','data-i',i=>{ TR.src=i; });
+  let last=performance.now();
+  function loop(now){
+    const dt=TR.playing?Math.min(.05,(now-last)/1000):0;
+    last=now;
+    TR.t+=dt;
+    if (TR.t>6.5) TR.t=6.5;
+    updateSeqLabel();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  updateSeqLabel();
+  requestAnimationFrame(loop);
+})();
+
+/* ================================================================
+   ⑦ §08 外围器件计算器
+================================================================ */
+const CL={vin:12, vout:3.3, iout:1.0, fsw:1e6, rip:0.020, gam:0.30};
+const TH={ja:90, ta:40};
+function clD(){ return CL.vout/CL.vin; }
+function clDIL(){ return CL.gam*CL.iout; }
+function clL(){ const D=clD(); return CL.vout*(1-D)/(CL.gam*CL.iout*CL.fsw); }
+function clCout(){ return clDIL()/(8*CL.fsw*CL.rip); }
+function clEsr(){ return CL.rip/clDIL(); }
+function clCin(){ return CL.iout*Math.sqrt(clD()*(1-clD())); }
+function thP(){ return (CL.vin-CL.vout)*CL.iout; }
+function thTJ(){ return TH.ta+thP()*TH.ja; }
+(function(){
+  function update(){
+    $('clVinV').textContent=CL.vin.toFixed(0)+' V';
+    $('clVoutV').textContent=CL.vout.toFixed(1)+' V';
+    $('clIoutV').textContent=CL.iout.toFixed(1)+' A';
+    $('clFswV').textContent=(CL.fsw/1e6).toFixed(1)+' MHz';
+    $('clRipV').textContent=(CL.rip*1e3).toFixed(0)+' mV';
+    $('clGamV').textContent=CL.gam.toFixed(2);
+    $('clD').textContent=clD().toFixed(3);
+    $('clL').textContent=fmtH(clL());
+    $('clDIL').textContent=fmtA(clDIL());
+    $('clCout').textContent='≥ '+fmtF(clCout());
+    $('clEsr').textContent='≤ '+(clEsr()*1e3).toFixed(0)+' mΩ';
+    $('clCin').textContent=fmtA(clCin());
+    $('thDropV').textContent=(CL.vin-CL.vout).toFixed(1)+' V';
+    $('thJaV').textContent=TH.ja.toFixed(0)+' °C/W';
+    $('thTaV').textContent=TH.ta.toFixed(0)+' °C';
+    $('thP').textContent=fmtW(thP());
+    $('thTJ').textContent=thTJ().toFixed(0)+' °C';
+    const v=$('thVerdict');
+    if (thTJ()>125){
+      v.className='cl-verdict fail';
+      v.textContent='FAIL —— 结温 '+thTJ().toFixed(0)+'°C 远超 125°C 上限：这不是 LDO 的活，换 Buck（06 节）或大幅降低压差/电流';
+    } else if (thTJ()>110){
+      v.className='cl-verdict fail';
+      v.textContent='CAUTION —— 结温 '+thTJ().toFixed(0)+'°C 未超 125°C 但越过 110°C 工程红线，余量不足：降流、加铜或换封装';
+    } else {
+      v.className='cl-verdict pass';
+      v.textContent='PASS —— 结温 '+thTJ().toFixed(0)+'°C ≤ 110°C 工程红线（TJmax 125°C），可接受';
+    }
+  }
+  wireRange('clVin',v=>{ CL.vin=v/10; update(); });
+  wireRange('clVout',v=>{ CL.vout=v/10; update(); });
+  wireRange('clIout',v=>{ CL.iout=v/10; update(); });
+  wireRange('clFsw',v=>{ CL.fsw=v*1e3; update(); });
+  wireRange('clRip',v=>{ CL.rip=v/1000; update(); });
+  wireRange('clGam',v=>{ CL.gam=v/100; update(); });
+  wireRange('thJa',v=>{ TH.ja=v; update(); });
+  wireRange('thTa',v=>{ TH.ta=v; update(); });
+  UPD.cl=update;
+  update();
+})();
+
+/* ================================================================
+   ⑧ §11 常见型号速查
+================================================================ */
+const PMODELS=[
+  ['AMS1117','LDO','3.3/5/12V 固定','1A','1.1V','5mA','SOT-223 · 便宜经典 · 压差大发热（坑1）'],
+  ['ME6211','LDO','1.5–6.5V 固定','500mA','100mV','40µA','电池伴随 · 3.3V 轨常客'],
+  ['RT9013','LDO','1.2–3.6V','500mA','300mV','25µA','PSRR 65dB · ADC/模拟供电'],
+  ['TPS7A02','LDO','1.2–5.5V','200mA','60mV','25nA','nano-Iq · 休眠态神器'],
+  ['SY8088','BUCK','4.5–18V → 0.6–7V','2A','—','70µA','1.5MHz 同步 · 主轨标配'],
+  ['MP2359','BUCK','4.5–22V','1.2A','—','100µA','宽输入 · 12/24V 进 3.3V 出'],
+  ['TPS54331','BUCK','3.5–28V','3A','—','1.9mA','570kHz 老将 · 工业板常见'],
+  ['LM2596','BUCK','4.5–40V','3A','—','5mA','150kHz 经典模块 · 外围大但皮实'],
+  ['MT3608','BOOST','2–24V → ≤28V','2A 开关','—','1mA','1.2MHz · 单节锂电升 5V/12V'],
+  ['TPS61088','BOOST','2.7–12V → ≤12.6V','10A 开关','—','1.5mA','大功率同步 Boost'],
+  ['LM27762','特殊','±双输出低噪声','250mA','—','—','反相电荷泵+LDO · 负压轨'],
+  ['TL431','基准','2.495V 可调','100mA','—','—','并联基准 · 反馈环路之王'],
+  ['REF3030','基准','3.0V','25mA','—','42µA','0.15% 精密 · ADC 参考']
+];
+(function(){
+  const el=$('qrModels'); if(!el) return;
+  let html='<tr><th>型号</th><th>家族</th><th>电压</th><th>电流</th><th>Vdo</th><th>Iq</th><th>定位</th></tr>';
+  PMODELS.forEach(m=>{
+    html+='<tr><td><b>'+m[0]+'</b></td><td>'+m[1]+'</td><td>'+m[2]+'</td><td>'+m[3]+'</td><td>'+m[4]+'</td><td>'+m[5]+'</td><td>'+m[6]+'</td></tr>';
+  });
+  el.innerHTML=html;
+})();
+
+/* ---------------- 命令点击复制（事件委托） ---------------- */
+document.addEventListener('click', async e=>{
+  const el = e.target.closest('.t-cmd');
+  if (!el) return;
+  const txt = el.dataset.copy || el.textContent;
+  let okFlag = false;
+  try { await navigator.clipboard.writeText(txt); okFlag = true; }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { okFlag = document.execCommand('copy'); } catch {}
+    ta.remove();
+  }
+  const old = el.textContent;
+  el.classList.add('copied');
+  el.textContent = okFlag ? '已复制 ✓' : '复制失败';
+  setTimeout(()=>{ el.classList.remove('copied'); el.textContent = old; }, 900);
+});
+
+/* ---------------- 滚动显现 ---------------- */
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script src="component-nav.js" defer></script>
+</body>
+</html>

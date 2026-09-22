@@ -20,6 +20,7 @@
       ['opamp.html', '运算放大器']
     ]},
     { group: '电源与储能', items: [
+      ['power.html', '电源'],
       ['battery.html', '电池']
     ]},
     { group: '机电与连接', items: [
