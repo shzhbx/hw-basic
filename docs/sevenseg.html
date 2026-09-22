@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数码管 · 交互式图解</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23070b09'/><path d='M7 5 h16 l2 2 -2 2 h-16 l-2 -2 z M23 9 v6 l2 2 2 -2 v-6 l-2 -2 z M9 13 h16 l2 2 -2 2 h-16 l-2 -2 z M9 19 h16 l2 2 -2 2 h-16 l-2 -2 z' fill='%23ff6478'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b09;
+  --bg2:#0a100c;
+  --panel:#0d1510;
+  --panel2:#101a13;
+  --line:#1d2c22;
+  --line2:#27392d;
+  --ink:#dcebe1;
+  --dim:#8aa294;
+  --faint:#5c7264;
+  --green:#34e08a;
+  --green-dim:#1d8a55;
+  --amber:#ffb02e;
+  --cyan:#57d8f2;
+  --red:#ff6478;
+  --violet:#b98cff;
+  --seg:#ff5d5d;          /* 数码管点亮段（红光） */
+  --seg-dim:#38181c;      /* 熄灭段轮廓 */
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --disp:'Chakra Petch','Noto Sans SC',sans-serif;
+  --sans:'Noto Sans SC',-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:300;
+  line-height:1.8;
+  letter-spacing:.01em;
+  overflow-x:hidden;
+}
+/* 全局网格纸背景 */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(rgba(52,224,138,.014) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.014) 1px,transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 0%,transparent 60%,rgba(0,0,0,.5));
+}
+main{position:relative;z-index:1}
+::selection{background:rgba(52,224,138,.3)}
+
+/* ============ 导航 ============ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;gap:22px;
+  padding:0 26px;height:52px;flex-wrap:wrap;
+  background:rgba(7,11,9,.82);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+nav .logo{font-family:var(--disp);font-weight:700;font-size:17px;color:var(--green);letter-spacing:.04em}
+nav .logo b{color:var(--faint);font-weight:600}
+nav a{
+  color:var(--dim);text-decoration:none;font-size:12.5px;
+  font-family:var(--mono);letter-spacing:.05em;
+  transition:color .2s;
+}
+nav a:hover{color:var(--green)}
+nav .spacer{flex:1}
+nav .live{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+nav .live i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ============ Hero ============ */
+.hero{
+  min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  padding:110px 6vw 40px;position:relative;
+}
+.hero .eyebrow{
+  font-family:var(--mono);font-size:12px;color:var(--amber);
+  letter-spacing:.32em;margin-bottom:22px;
+  display:flex;align-items:center;gap:14px;
+}
+.hero .eyebrow::before{content:"";width:44px;height:1px;background:var(--amber)}
+.hero h1{
+  font-family:var(--disp);font:700 clamp(52px,10vw,132px)/0.95 var(--disp);
+  letter-spacing:-.01em;color:var(--ink);
+}
+.hero h1 .en{
+  display:block;font-family:var(--mono);font-weight:500;
+  font-size:clamp(14px,1.9vw,24px);color:var(--dim);
+  letter-spacing:.28em;margin-top:20px;
+}
+.hero h1 .en b{color:var(--green);font-weight:600}
+.hero p.lede{
+  max-width:660px;margin-top:34px;font-size:16px;color:var(--dim);
+}
+.hero p.lede b{color:var(--ink);font-weight:500}
+.hero .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.hero .chips span{
+  font-family:var(--mono);font-size:11.5px;padding:5px 12px;
+  border:1px solid var(--line2);border-radius:3px;color:var(--dim);
+  background:rgba(13,21,16,.6);
+}
+.hero .chips span b{color:var(--green);font-weight:500}
+.hero .scope-wrap{
+  margin-top:52px;border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;background:rgba(9,14,11,.75);position:relative;
+}
+.hero .scope-wrap::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px);
+}
+.hero canvas{display:block;width:100%;height:170px}
+.hero .scroll-hint{
+  margin-top:40px;font-family:var(--mono);font-size:11px;color:var(--faint);
+  letter-spacing:.2em;display:flex;align-items:center;gap:10px;
+}
+.hero .scroll-hint svg{animation:bounce 1.8s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* ============ 通用 section ============ */
+section{padding:96px 6vw;max-width:1280px;margin:0 auto;position:relative}
+section a{color:var(--green);text-decoration:none;border-bottom:1px dotted var(--green-dim)}
+section a:hover{border-bottom-style:solid}
+.sec-head{display:flex;align-items:baseline;gap:20px;margin-bottom:16px}
+.sec-head .no{
+  font-family:var(--mono);font-size:13px;color:var(--green);
+  letter-spacing:.1em;border:1px solid var(--green-dim);
+  padding:3px 10px;border-radius:3px;white-space:nowrap;
+}
+.sec-head h2{
+  font-family:var(--disp);font-weight:600;font-size:clamp(26px,3.6vw,40px);
+  letter-spacing:.01em;
+}
+.sec-head .en{
+  font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.24em;
+  text-transform:uppercase;margin-left:auto;white-space:nowrap;
+}
+.sec-sub{color:var(--dim);max-width:780px;margin-bottom:44px;font-size:15px}
+.sec-sub b{color:var(--ink);font-weight:500}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ §01 是什么 ============ */
+.two-col{display:grid;grid-template-columns:1.25fr .9fr;gap:44px;align-items:start}
+/* grid 子项 min-width:0：pre 长行靠自身 overflow-x 滚动，不许撑开列 */
+.two-col>*,.sc-wrap>*,.pin-wrap>*,.calc-grid>*,.fmt-grid>*,.cc-grid>*{min-width:0}
+.prose p{margin-bottom:18px;color:var(--dim);font-size:15px}
+.prose p b{color:var(--ink);font-weight:500}
+.prose .kw{color:var(--green);font-family:var(--mono);font-size:.92em}
+.prose .kw2{color:var(--amber);font-family:var(--mono);font-size:.92em}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th{
+  font-family:var(--mono);font-weight:500;color:var(--faint);text-align:left;
+  padding:9px 12px;border-bottom:1px solid var(--line2);font-size:11.5px;letter-spacing:.06em;
+}
+.cmp-table td{
+  padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top;
+}
+.cmp-table td:first-child{color:var(--ink);font-weight:400;white-space:nowrap}
+.cmp-table .yes{color:var(--green)}
+.cmp-table .no{color:var(--red)}
+.fact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:36px}
+.fact{
+  border:1px solid var(--line);border-radius:6px;padding:20px 20px 18px;
+  background:linear-gradient(160deg,var(--panel) 0%,rgba(13,21,16,.4) 100%);
+  transition:border-color .25s,transform .25s;
+}
+.fact:hover{border-color:var(--green-dim);transform:translateY(-3px)}
+.fact .f-no{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.14em}
+.fact h4{font-family:var(--disp);font-size:16.5px;font-weight:600;margin:8px 0 8px}
+.fact h4 code{font-family:var(--mono);font-size:.85em;color:var(--green)}
+.fact p{font-size:12.8px;color:var(--dim);line-height:1.7}
+
+/* ============ 实验室通用 ============ */
+.lab{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  overflow:hidden;
+}
+.lab-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:18px;
+  padding:16px 20px;border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+}
+.ctrl{display:flex;align-items:center;gap:9px}
+.ctrl label{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
+.seg{display:flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden}
+.seg button{
+  font-family:var(--mono);font-size:12px;padding:7px 13px;border:none;cursor:pointer;
+  background:transparent;color:var(--dim);border-right:1px solid var(--line2);
+  transition:all .18s;letter-spacing:.02em;
+}
+.seg button:last-child{border-right:none}
+.seg button:hover{color:var(--ink);background:rgba(52,224,138,.06)}
+.seg button.on{background:var(--green);color:#052013;font-weight:600}
+.icon-btn{
+  width:32px;height:32px;border:1px solid var(--line2);border-radius:5px;background:transparent;
+  color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:14px;
+  transition:all .18s;display:flex;align-items:center;justify-content:center;
+}
+.icon-btn:hover{color:var(--green);border-color:var(--green-dim)}
+.icon-btn.play.on{color:var(--green);border-color:var(--green-dim);background:rgba(52,224,138,.08)}
+input[type=range]{
+  -webkit-appearance:none;width:120px;height:2px;background:var(--line2);border-radius:2px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--green);
+  cursor:pointer;box-shadow:0 0 8px rgba(52,224,138,.5);
+}
+.lab-cap{
+  padding:14px 20px 18px;font-size:13px;color:var(--dim);line-height:1.8;
+  border-top:1px solid var(--line);min-height:96px;
+}
+.lab-cap b{color:var(--ink);font-weight:500}
+.lab-cap code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+.lab-read{
+  display:flex;flex-wrap:wrap;gap:8px 28px;align-items:baseline;
+  padding:13px 20px;border-top:1px solid var(--line);background:rgba(10,16,12,.6);
+  font-family:var(--mono);font-size:12px;color:var(--dim);
+}
+.lab-read b{color:var(--amber);font-weight:600;font-size:13.5px}
+.lab-body{background:#080d0a}
+.lab-body canvas{display:block;width:100%}
+
+/* ============ §02 段码构建实验室 ============ */
+.sc-wrap{display:grid;grid-template-columns:1fr 300px;gap:0}
+.sc-left{padding:26px 24px;display:flex;flex-direction:column;gap:18px}
+.sc-digit{
+  align-self:center;background:#060a08;border:1px solid var(--line);
+  border-radius:8px;padding:16px 22px;
+}
+.sc-digit svg{display:block;width:150px;height:146px}
+.sc-segs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.sc-segs button{
+  font-family:var(--mono);font-size:13px;width:44px;padding:8px 0;border-radius:5px;
+  border:1px solid var(--line2);background:transparent;color:var(--dim);cursor:pointer;
+  transition:all .15s;
+}
+.sc-segs button small{display:block;font-size:9px;color:var(--faint);letter-spacing:.05em}
+.sc-segs button.on{
+  background:rgba(255,93,93,.14);border-color:var(--seg);color:var(--seg);
+  box-shadow:0 0 12px rgba(255,93,93,.22);
+}
+.sc-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.sc-chips button{
+  font-family:var(--mono);font-size:12px;padding:5px 11px;border-radius:4px;cursor:pointer;
+  border:1px solid var(--line2);background:transparent;color:var(--dim);transition:all .15s;
+}
+.sc-chips button:hover{color:var(--seg);border-color:var(--seg)}
+.sc-chips button.cur{background:rgba(255,93,93,.12);border-color:var(--seg);color:var(--seg)}
+.sc-right{
+  border-left:1px solid var(--line);background:rgba(10,16,12,.55);
+  padding:22px 22px 18px;display:flex;flex-direction:column;gap:14px;
+}
+.sc-out{
+  font-family:var(--mono);font-size:13px;line-height:2.05;color:var(--dim);
+}
+.sc-out .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(39,57,45,.6)}
+.sc-out .row b{color:var(--ink);font-weight:500}
+.sc-out .hex{color:var(--seg);font-weight:600}
+.sc-out .bits{color:var(--cyan);letter-spacing:.08em}
+.sc-note{
+  font-size:12px;color:var(--faint);line-height:1.75;
+  border-top:1px solid var(--line);padding-top:12px;margin-top:auto;
+}
+.sc-note b{color:var(--dim);font-weight:500}
+.sc-note code{font-family:var(--mono);color:var(--amber);font-size:.92em}
+
+/* ============ §03 共阴共阳 ============ */
+.cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.cc-card{
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);
+}
+.cc-card .hd{
+  display:flex;align-items:center;gap:10px;padding:13px 18px;
+  border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+  font-family:var(--disp);font-size:16px;font-weight:600;
+}
+.cc-card .hd .tag{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 8px;border-radius:3px;
+}
+.cc-card.c-cc .hd{color:var(--green)} .cc-card.c-cc .tag{background:rgba(52,224,138,.1);border:1px solid var(--green-dim)}
+.cc-card.c-ca .hd{color:var(--amber)} .cc-card.c-ca .tag{background:rgba(255,176,46,.08);border:1px solid rgba(255,176,46,.35)}
+.cc-card .pic svg{display:block;width:100%;height:auto;background:#080d0a}
+.cc-card .bd{padding:14px 18px 16px;font-size:12.8px;color:var(--dim);line-height:1.75}
+.cc-card .bd b{color:var(--ink);font-weight:500}
+.cc-card .bd code{font-family:var(--mono);color:var(--amber);font-size:.9em}
+
+/* ============ §04 引脚判别 ============ */
+.pin-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:0}
+.pin-left{padding:22px;display:flex;flex-direction:column;gap:14px;align-items:center}
+.pin-left svg{display:block;width:100%;max-width:430px;background:#080d0a;border-radius:6px}
+.pin-right{
+  border-left:1px solid var(--line);background:rgba(10,16,12,.55);
+  padding:20px 22px;display:flex;flex-direction:column;gap:12px;
+}
+.pin-meter{
+  font-family:var(--mono);background:#060a08;border:1px solid var(--line2);border-radius:6px;
+  padding:12px 16px;display:flex;align-items:baseline;gap:14px;
+}
+.pin-meter .mv{font-size:26px;color:var(--green);font-weight:600;min-width:110px}
+.pin-meter .mv.ol{color:var(--faint)}
+.pin-meter .lab{font-size:10.5px;color:var(--faint);letter-spacing:.1em;line-height:1.6}
+.pin-map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pin-map .cell{
+  font-family:var(--mono);font-size:11px;text-align:center;padding:6px 4px;
+  border:1px solid var(--line);border-radius:4px;color:var(--faint);
+}
+.pin-map .cell.hit{color:var(--seg);border-color:var(--seg);background:rgba(255,93,93,.08)}
+.pin-msg{font-size:12.8px;color:var(--dim);line-height:1.75;min-height:64px}
+.pin-msg b{color:var(--ink);font-weight:500}
+.pin-msg code{font-family:var(--mono);color:var(--amber);font-size:.9em}
+
+/* ============ §06 计算器 ============ */
+.calc-grid{display:grid;grid-template-columns:340px 1fr;gap:0}
+.calc-form{padding:22px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:15px}
+.calc-form label{display:block;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.12em;margin-bottom:6px}
+.calc-form select,.calc-form input[type=number]{
+  width:100%;background:#060a08;border:1px solid var(--line2);border-radius:5px;
+  color:var(--ink);font-family:var(--mono);font-size:13px;padding:9px 11px;outline:none;
+}
+.calc-form select:focus,.calc-form input[type=number]:focus{border-color:var(--green-dim)}
+.calc-out{padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.calc-rows{font-family:var(--mono);font-size:13px;line-height:2.1;color:var(--dim)}
+.calc-rows .row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed rgba(39,57,45,.6)}
+.calc-rows .row b{color:var(--ink);font-weight:500}
+.calc-rows .row .v{color:var(--green)}
+.calc-rows .row .warn{color:var(--red)}
+.calc-formula{
+  font-family:var(--mono);font-size:12.5px;color:var(--green);
+  padding:10px 14px;background:rgba(52,224,138,.06);
+  border-left:2px solid var(--green-dim);border-radius:0 3px 3px 0;line-height:1.9;
+}
+.calc-verdict{
+  font-size:13px;color:var(--dim);line-height:1.8;padding:12px 16px;border-radius:6px;
+  background:rgba(10,16,12,.7);border:1px solid var(--line);
+}
+.calc-verdict b{font-weight:500}
+.calc-verdict.good{border-color:var(--green-dim)} .calc-verdict.good b{color:var(--green)}
+.calc-verdict.bad{border-color:rgba(255,100,120,.45)} .calc-verdict.bad b{color:var(--red)}
+.calc-verdict.warnv{border-color:rgba(255,176,46,.4)} .calc-verdict.warnv b{color:var(--amber)}
+
+/* ============ §08 字符画廊 ============ */
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px}
+.gal-cell{
+  border:1px solid var(--line);border-radius:6px;background:#080d0a;
+  padding:10px 8px 7px;text-align:center;transition:border-color .2s;
+}
+.gal-cell:hover{border-color:var(--seg)}
+.gal-cell svg{display:block;width:64px;height:62px;margin:0 auto}
+.gal-cell .ch{font-family:var(--mono);font-size:12px;color:var(--ink);margin-top:4px}
+.gal-cell .hx{font-family:var(--mono);font-size:10px;color:var(--faint)}
+
+/* ============ §09 实战 / 终端 ============ */
+.term{
+  background:#050907;border:1px solid var(--line);border-radius:8px;
+  overflow:hidden;
+}
+.term-hd{
+  display:flex;align-items:center;gap:8px;padding:10px 16px;
+  border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+  font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em;
+}
+.term-hd i{width:9px;height:9px;border-radius:50%;background:var(--line2)}
+.term-hd i.g{background:var(--green-dim)}
+.term pre{
+  margin:0;padding:18px 20px;overflow-x:auto;
+  font-family:var(--mono);font-size:12px;line-height:1.85;color:#b8cfc2;
+}
+.term pre .c{color:#5c7264}
+.term pre .k{color:var(--amber)}
+.term pre .s{color:var(--green)}
+.term pre .f{color:var(--cyan)}
+.sel-steps{display:flex;flex-direction:column;gap:0;margin-top:8px}
+.sel-step{
+  display:grid;grid-template-columns:44px 1fr;gap:18px;padding:18px 6px;
+  border-bottom:1px dashed rgba(39,57,45,.55);
+}
+.sel-step .n{
+  font-family:var(--mono);font-size:15px;color:var(--green);border:1px solid var(--green-dim);
+  border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+}
+.sel-step h4{font-size:14.5px;font-weight:500;margin-bottom:6px}
+.sel-step p{font-size:13px;color:var(--dim);line-height:1.75}
+.sel-step p code{font-family:var(--mono);color:var(--amber);font-size:.9em}
+
+/* ============ §10 踩坑 ============ */
+.pit-list{display:flex;flex-direction:column;gap:14px}
+.pit{
+  border:1px solid var(--line);border-radius:8px;background:var(--panel);
+  padding:20px 24px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;
+  transition:border-color .2s;
+}
+.pit:hover{border-color:rgba(255,100,120,.4)}
+.pit .sym{
+  font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:.1em;
+  border:1px solid rgba(255,100,120,.4);border-radius:4px;padding:4px 10px;white-space:nowrap;
+}
+.pit h4{font-size:15px;font-weight:500;margin-bottom:7px}
+.pit h4 b{color:var(--red);font-weight:500}
+.pit p{font-size:13px;color:var(--dim);line-height:1.8}
+.pit p code{font-family:var(--mono);color:var(--amber);font-size:.9em}
+.pit .fix{color:var(--green)}
+.pit .fix b{color:var(--green);font-weight:500}
+
+/* ============ §11 速查 ============ */
+.cheat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.cheat{
+  border:1px solid var(--line);border-radius:8px;background:var(--panel);
+  overflow:hidden;
+}
+.cheat .hd{
+  padding:12px 18px;border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+  font-family:var(--disp);font-size:15px;font-weight:600;color:var(--ink);
+}
+.cheat .hd span{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.16em;margin-left:10px}
+.cheat .bd{padding:16px 18px;font-family:var(--mono);font-size:12px;color:var(--dim);line-height:2}
+.cheat .bd b{color:var(--green);font-weight:500}
+.cheat .bd .r{color:var(--amber)}
+.cheat .bd table{border-collapse:collapse;width:100%}
+.cheat .bd td{padding:2px 8px;border-bottom:1px dashed rgba(39,57,45,.5)}
+
+/* ============ fmt 卡片（§01/§03 之间穿插的迷你图卡） ============ */
+.fmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+.fmt-card{
+  border:1px solid var(--line);border-radius:8px;background:var(--panel);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.fmt-card .fh{
+  display:flex;align-items:baseline;gap:10px;padding:13px 16px 10px;
+  border-bottom:1px solid var(--line);
+}
+.fmt-card .fh .tag{
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;padding:2px 7px;border-radius:3px;
+  background:rgba(52,224,138,.08);border:1px solid var(--green-dim);color:var(--green);
+}
+.fmt-card .fh h4{font-size:14.5px;font-weight:600}
+.fmt-card .fh .en{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--faint);letter-spacing:.12em}
+.fmt-card svg{display:block;width:100%;height:auto;background:#080d0a;flex:1}
+.fmt-card .fb{
+  padding:12px 16px 14px;font-size:12.3px;color:var(--dim);line-height:1.75;
+  border-top:1px solid var(--line);
+}
+.fmt-card .fb b{color:var(--ink);font-weight:500}
+.fmt-card .fb code{font-family:var(--mono);color:var(--amber);font-size:.9em}
+.fmt-card.t-warn .fh .tag{background:rgba(255,176,46,.08);border-color:rgba(255,176,46,.35);color:var(--amber)}
+.fmt-card.t-red .fh .tag{background:rgba(255,100,120,.08);border-color:rgba(255,100,120,.4);color:var(--red)}
+
+/* ============ 步进条（§03 电流路径） ============ */
+.stepbar{display:flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden}
+.stepbar button{
+  font-family:var(--mono);font-size:11.5px;padding:7px 12px;border:none;cursor:pointer;
+  background:transparent;color:var(--dim);border-right:1px solid var(--line2);transition:all .15s;
+}
+.stepbar button:last-child{border-right:none}
+.stepbar button.on{background:var(--green);color:#052013;font-weight:600}
+.stepbar button:disabled{color:#31413a;cursor:default}
+
+/* ============ footer ============ */
+footer{border-top:1px solid var(--line);padding:44px 6vw 60px;margin-top:40px;display:flex;flex-wrap:wrap;gap:24px;align-items:baseline;justify-content:space-between}
+footer .f-l{font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:2.1}
+footer .f-l b{color:var(--dim);font-weight:500}
+footer .f-l a{color:var(--dim);text-decoration:none;border-bottom:1px dotted var(--faint)}
+footer .f-l a:hover{color:var(--green)}
+footer .f-r{font-family:var(--disp);font-weight:700;font-size:22px;color:var(--green)}
+footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-size:10px;color:var(--faint);letter-spacing:.18em;text-align:right;margin-top:6px}
+
+/* ============ 响应式 ============ */
+@media(max-width:960px){
+  .two-col{grid-template-columns:1fr}
+  .sc-wrap{grid-template-columns:1fr}
+  .sc-right{border-left:none;border-top:1px solid var(--line)}
+  .pin-wrap{grid-template-columns:1fr}
+  .pin-right{border-left:none;border-top:1px solid var(--line)}
+  .calc-grid{grid-template-columns:1fr}
+  .calc-form{border-right:none;border-bottom:1px solid var(--line)}
+  .fmt-grid{grid-template-columns:1fr}
+  .cheat-grid{grid-template-columns:1fr}
+  .cc-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  section{padding:72px 5vw}
+  .pit{grid-template-columns:1fr;gap:8px}
+  .sc-digit svg{width:118px;height:115px}
+  .gal-grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">7SEG<b>·</b>LAB</div>
+  <a href="#s1">概述</a><a href="#s2">段码</a><a href="#s3">极性</a><a href="#s4">判别</a><a href="#s5">扫描</a><a href="#s6">计算器</a><a href="#s7">驱动</a><a href="#s8">字符集</a><a href="#s9">实战</a><a href="#s10">踩坑</a>
+  <button class="pnav-open" aria-label="打开器件导航" title="全部器件">☰ 器件</button>
+  <div class="spacer"></div>
+  <div class="live"><i></i>8 LEDS → 1 GLYPH</div>
+</nav>
+
+<main>
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="eyebrow">SEVEN-SEGMENT DISPLAY · 8 LEDS IN ONE GLASS · 图解硬件器件</div>
+  <h1>数码管<span class="en">SEVEN-SEGMENT &amp; <b>DISPLAY</b></span></h1>
+  <p class="lede">
+    最古老的「屏幕」：把 <b>8 颗 LED 塞进一片玻璃</b>，排成 8 字加一个小数点，点亮不同组合就是 0–9 与半个字母表。
+    它看似简单，实则是<b>LED 阵列的退化形态</b>——于是所有阵列的功课它全要补：限流、极性、<b>动态扫描</b>、鬼影、峰值电流。
+    一个 4 位数码管用 12 个 IO 还是 3 根线？答案都在「分时复用」四个字里。
+    <b>往下滚动：段码构建实验室、共阴/共阳电流路径、引脚判别侦探、动态扫描+鬼影实验室、限流计算器、四种驱动电路、0–F 字符画廊。</b>
+  </p>
+  <div class="chips">
+    <span><b>a–g + dp</b> 8 颗 LED 拼一个字形</span>
+    <span><b>共阴 / 共阳</b> 段码按位取反 0x3F ⇄ 0xC0</span>
+    <span><b>N 位复用 8 根段线</b> 刷新率 = 1/(N·t<sub>dwell</sub>)</span>
+    <span><b>占空比 1/N</b> 峰值电流 ×N 补亮度</span>
+  </div>
+  <div class="scope-wrap"><canvas id="heroScope"></canvas></div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    SCROLL · 段码构建实验室在 02 节 · 动态扫描实验室在 05 节
+  </div>
+</header>
+
+<!-- ================= §01 ================= -->
+<section id="s1">
+  <div class="sec-head reveal"><span class="no">01</span><h2>它是什么，为什么需要它</h2><span class="en">What &amp; Why</span></div>
+  <div class="two-col">
+    <div class="prose reveal">
+      <p>
+        数码管（seven-segment display，七段显示器）是<b>专门用来显示数字与少量字符的 LED 阵列</b>：
+        七个条形 LED（国际惯例命名 <span class="kw">a–g</span>）按「日」字形排布，加右下角小数点 <span class="kw">dp</span>，共 8 颗。
+        要显示「4」，就点亮 <span class="kw2">b c f g</span> 四段——一组亮灭组合叫一个<b>段码（segment code）</b>。
+      </p>
+      <p>
+        它 1970 年就出现在计算器上，比 LCD 便宜、比 OLED 皮实、<b>自带 1–5 米外可读的亮度</b>，
+        至今仍是万用表、电饭煲、充电宝、电梯楼层屏的主力。对嵌入式工程师，
+        它是绕不开的一课：一个人位数不多的项目里，「显示 4 个数字」这件事足以把
+        <b>限流、极性、IO 复用、驱动芯片选型</b>四门课全部考一遍。
+      </p>
+      <p>
+        多位数码管（2/3/4 位一体）内部把<b>所有位的同一段连在一起</b>：位 1 的 a 段和位 2 的 a 段共用一根引脚。
+        于是 4 位管只要 8 根段线 + 4 根位选线 = <b>12 个 IO</b>，而非 32 个——代价是同一时刻只能点亮一位，
+        靠<b>动态扫描</b>轮播欺骗眼睛（05 节实验室）。这就是「分时复用」，键盘矩阵扫描是同一招。
+      </p>
+      <p>
+        电气上，每一颗段 LED 与普通 LED 没有任何区别：<span class="kw2">VF</span> 按颜色（红 2.0V / 绿 2.2V / 蓝 3.2V），
+        必须限流，反接不亮。<a href="diode.html">二极管页</a>讲过的所有 LED 规则原样适用，本页只补「阵列」特有的部分。
+      </p>
+    </div>
+    <div class="reveal">
+      <table class="cmp-table">
+        <tr><th>显示技术</th><th>自发光</th><th>字符</th><th>典型场景</th></tr>
+        <tr><td>数码管</td><td class="yes">是</td><td>0–9 + 十几个字母</td><td class="yes">万用表 / 计时器 / 楼层屏</td></tr>
+        <tr><td>点阵 LED</td><td class="yes">是</td><td>任意（5×7 起）</td><td class="yes">车站大屏 / 跑马灯</td></tr>
+        <tr><td>LCD 段码</td><td class="no">否（靠背光）</td><td>0–9 + 图示</td><td>超低功耗表头 / 手表</td></tr>
+        <tr><td>OLED / TFT</td><td class="yes">是</td><td>任意像素</td><td class="no">贵 · 需显存与刷新驱动</td></tr>
+      </table>
+      <div class="fact-grid">
+        <div class="fact">
+          <div class="f-no">SPEC · 01</div>
+          <h4>正向压降 <code>VF</code></h4>
+          <p>按 LED 颜色：红 <b>2.0V</b>、黄 2.1V、绿 2.2V、蓝 <b>3.2V</b>。限流电阻按它算：R=(VCC−VF)/I。蓝色管在 3.3V 系统余量仅 0.1V，几乎点不亮（10 节踩坑 ⑤）。</p>
+        </div>
+        <div class="fact">
+          <div class="f-no">SPEC · 02</div>
+          <h4>尺寸 <code>0.28″–4″</code></h4>
+          <p>字高（英寸）。0.28/0.36 是仪表常客，0.56 是开发板四位一体常见尺寸，1 英寸以上要考虑驱动电流翻倍。</p>
+        </div>
+        <div class="fact">
+          <div class="f-no">SPEC · 03</div>
+          <h4>发光强度 <code>mcd</code></h4>
+          <p>毫坎德拉。红管典型 1–3mcd@10mA，超高亮红 20mcd+。户外屏选高亮管并提高峰值电流，别硬拉平均电流。</p>
+        </div>
+        <div class="fact">
+          <div class="f-no">SPEC · 04</div>
+          <h4>峰值电流 <code>If(peak)</code></h4>
+          <p>数据手册给的脉冲上限（典型 70–150mA，占空比 1/10、脉宽 ≤1ms）。动态扫描的峰值电流按它卡，不是按连续 20mA。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fmt-grid">
+    <div class="fmt-card reveal"><div class="fh"><span class="tag">GLYPH</span><h4>一个字形 = 一组段</h4><span class="en">SEGMENT CODE</span></div>
+      <svg viewBox="0 0 300 112">
+        <g id="heroGlyphMini"></g>
+        <text x="150" y="103" text-anchor="middle" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">显示「4」= 点亮 b·c·f·g → 共阴段码 0x66</text>
+      </svg>
+      <div class="fb">习惯上把 8 段压进一个字节：<b>bit7…bit0 = dp,g,f,e,d,c,b,a</b>。「0」= abcdef = <code>0x3F</code>，「8」= 全亮 = <code>0x7F</code>，加 dp 再或上 <code>0x80</code>。整字查表，一位一个字节。</div></div>
+    <div class="fmt-card reveal"><div class="fh"><span class="tag">DUPLEX</span><h4>多位的本质是复用</h4><span class="en">MULTIPLEX</span></div>
+      <svg viewBox="0 0 300 112">
+        <rect x="14" y="22" width="120" height="34" rx="4" fill="none" stroke="#34e08a" stroke-width="1.6"/>
+        <text x="74" y="42" text-anchor="middle" fill="#dcebe1" font-size="10" font-family="IBM Plex Mono,monospace">段总线 SEG[7:0]</text>
+        <rect x="14" y="66" width="120" height="30" rx="4" fill="none" stroke="#ffb02e" stroke-width="1.6"/>
+        <text x="74" y="85" text-anchor="middle" fill="#dcebe1" font-size="10" font-family="IBM Plex Mono,monospace">位选 DIG[3:0]</text>
+        <path d="M134 39 h22 m0 0 l-6 -3.6 m6 3.6 l-6 3.6" stroke="#5c7264" stroke-width="1.3" fill="none"/>
+        <path d="M134 81 h22 m0 0 l-6 -3.6 m6 3.6 l-6 3.6" stroke="#5c7264" stroke-width="1.3" fill="none"/>
+        <rect x="162" y="22" width="124" height="74" rx="4" fill="none" stroke="#ff5d5d" stroke-width="1.6"/>
+        <text x="224" y="55" text-anchor="middle" fill="#ff5d5d" font-size="15" font-family="IBM Plex Mono,monospace">8 8 : 8 8</text>
+        <text x="224" y="82" text-anchor="middle" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">4 位一体 · 12 引脚</text>
+      </svg>
+      <div class="fb">位内 8 段并联成「段总线」，位与位之间同段共享。任一时刻只拉通一位的公共端，12 个 IO 就够 4 位——轮换速度够快（全刷新 ≥50Hz），眼睛看到的就是 4 位同时亮。</div></div>
+    <div class="fmt-card reveal"><div class="fh"><span class="tag">SCAN</span><h4>眼睛是最后的显存</h4><span class="en">PERSISTENCE</span></div>
+      <svg viewBox="0 0 300 112">
+        <line x1="16" y1="90" x2="286" y2="90" stroke="#27392d" stroke-width="1.4"/>
+        <g fill="#ffb02e">
+          <rect x="22" y="52" width="58" height="10" rx="2"/>
+          <rect x="94" y="52" width="58" height="10" rx="2" opacity=".55"/>
+          <rect x="166" y="52" width="58" height="10" rx="2" opacity=".25"/>
+          <rect x="238" y="52" width="46" height="10" rx="2" opacity=".08"/>
+        </g>
+        <text x="150" y="36" text-anchor="middle" fill="#8aa294" font-size="9.5" font-family="IBM Plex Mono,monospace">位 1 点亮 → 熄灭后亮度按余辉衰减</text>
+        <text x="150" y="106" text-anchor="middle" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">刷新 &lt;50Hz 闪烁 · 25Hz 以下肉眼可见抖动</text>
+      </svg>
+      <div class="fb">LED 熄灭后，视觉亮度还要几十毫秒才归零。扫描周期必须比余辉短：全刷新 <b>≥50Hz</b> 是底线，工程上取 <b>100–200Hz</b>（每位驻留 1–2ms）。相机拍出滚动条纹正是扫描的证据。</div></div>
+  </div>
+</section>
+
+<!-- ================= §02 ================= -->
+<section id="s2">
+  <div class="sec-head reveal"><span class="no">02</span><h2>段码构建实验室</h2><span class="en">Segment Code Lab</span></div>
+  <p class="sec-sub reveal">
+    点亮/熄灭下面的段，右侧实时生成<b>共阴/共阳两套段码</b>——这就是你 MCU 里那个 <span class="kw">SEG_FONT[]</span> 数组的每一项。
+    快捷键直接载入 0–F 等现成字形；注意 <b>共阳码 = 共阴码按位取反</b>（0x3F ⇄ 0xC0），两套表差一个 <code>~</code>。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>点击段</label></div>
+      <div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">字节序 bit7…bit0 = dp g f e d c b a</span></div>
+    </div>
+    <div class="sc-wrap">
+      <div class="sc-left">
+        <div class="sc-digit"><svg id="scGlyph" viewBox="0 0 100 104"></svg></div>
+        <div class="sc-segs" id="scBtns"></div>
+        <div class="sc-chips" id="scChips"></div>
+      </div>
+      <div class="sc-right">
+        <div class="sc-out" id="scOut"></div>
+        <div class="sc-note" id="scNote">
+          <b>怎么读：</b>「0」= a b c d e f 六段 → 二进制 <code>0011 1111</code> → 共阴 <code>0x3F</code>。
+          同一字形在<b>共阳管</b>里要点亮的段完全一样，只是引脚电平取反，所以机器码按位取反得 <code>0xC0</code>。
+          表格请按<b>「芯片 + 管型」</b>二选一刻进 Flash，运行时查表最快。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= §03 ================= -->
+<section id="s3">
+  <div class="sec-head reveal"><span class="no">03</span><h2>共阴与共阳：一管两制</h2><span class="en">Common Cathode / Anode</span></div>
+  <p class="sec-sub reveal">
+    8 颗 LED 总要各接出一端到公共点——<b>阴极并联就是共阴（CC），阳极并联就是共阳（CA）</b>。
+    外观完全一样、丝印只差后缀（如 5011 共阴 / 5011BS 里 BS 常表共阳），买错就全灭或微亮。
+    点下面的步进，看同一颗 b 段 LED 在两种管子里的电流怎么走。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>电流路径</label>
+        <div class="stepbar" id="ccSteps">
+          <button data-i="0" class="on" type="button">① 电平设置</button>
+          <button data-i="1" type="button">② 段电流</button>
+          <button data-i="2" type="button">③ 熄灭</button>
+          <button data-i="3" type="button">④ 反接会怎样</button>
+        </div>
+      </div>
+    </div>
+    <div id="ccSvg" class="lab-body" style="padding:14px 16px 0"></div>
+    <div class="lab-read" id="ccRead"></div>
+    <div class="lab-cap" id="ccCap"></div>
+  </div>
+  <div class="cc-grid">
+    <div class="cc-card c-cc reveal">
+      <div class="hd"><span class="tag">CC</span>共阴管<span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint)">COMMON CATHODE</span></div>
+      <div class="pic"><svg viewBox="0 0 300 150" id="svgCC"></svg></div>
+      <div class="bd">公共端接 <b>GND</b>，段脚给<b>高电平</b>点亮（经限流电阻）。适合「IO 拉电流 → LED → 地」的低边思路；
+      段码<b>正逻辑</b>：写 1 亮。<code>0x3F</code> 显示「0」。</div>
+    </div>
+    <div class="cc-card c-ca reveal">
+      <div class="hd"><span class="tag">CA</span>共阳管<span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint)">COMMON ANODE</span></div>
+      <div class="pic"><svg viewBox="0 0 300 150" id="svgCA"></svg></div>
+      <div class="bd">公共端接 <b>VCC</b>，段脚给<b>低电平</b>点亮——MCU 引脚<b>灌电流</b>路径。多数 MCU 灌能力 &gt; 拉能力，
+      且高边直接挂电源，所以市售模块<b>共阳居多</b>。段码<b>负逻辑</b>：<code>0xC0</code> 显示「0」。</div>
+    </div>
+  </div>
+  <div class="fmt-grid" style="grid-template-columns:1fr 1fr">
+    <div class="fmt-card t-warn reveal"><div class="fh"><span class="tag">GPIO</span><h4>拉电流 vs 灌电流</h4><span class="en">SOURCE / SINK</span></div>
+      <svg viewBox="0 0 300 108">
+        <rect x="20" y="34" width="86" height="42" rx="4" fill="none" stroke="#34e08a" stroke-width="1.6"/>
+        <text x="63" y="58" text-anchor="middle" fill="#dcebe1" font-size="10.5" font-family="IBM Plex Mono,monospace">MCU IO</text>
+        <path d="M106 48 h60 m0 0 l-7 -4 m7 4 l-7 4" stroke="#ffb02e" stroke-width="1.5" fill="none"/>
+        <path d="M106 62 h60 m0 0 l-7 -4 m7 4 l-7 4" stroke="#5c7264" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+        <rect x="170" y="34" width="26" height="42" rx="3" fill="none" stroke="#57d8f2" stroke-width="1.6"/>
+        <text x="183" y="60" text-anchor="middle" fill="#57d8f2" font-size="9" font-family="IBM Plex Mono,monospace">R</text>
+        <path d="M196 48 h24" stroke="#ffb02e" stroke-width="1.5" fill="none"/>
+        <path d="M196 62 h24" stroke="#5c7264" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+        <g fill="#ffb02e" font-family="IBM Plex Mono,monospace" font-size="9">
+          <path d="M232 40 l9 8 -9 8 z M241 40 l9 8 -9 8 z" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
+          <text x="238" y="68">LED→GND</text>
+        </g>
+        <text x="150" y="92" text-anchor="middle" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">STM32 类：输出高 = 拉电流(source) ≤ 8–25mA</text>
+        <text x="150" y="103" text-anchor="middle" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">输出低 = 灌电流(sink) 常更强</text>
+      </svg>
+      <div class="fb">同一颗 IO，「往负载里推电流」与「从负载里收电流」的极限不同，数据手册分别叫 <b>I<sub>OH</sub> / I<sub>OL</sub></b>。
+      共阳管走灌路径，往往能点亮得更足——这就是「高边挂电源」流行的电气原因（不白占便宜）。</div></div>
+    <div class="fmt-card t-red reveal"><div class="fh"><span class="tag">CHIP</span><h4>驱动芯片常常只认一种</h4><span class="en">POLARITY LOCK-IN</span></div>
+      <svg viewBox="0 0 300 108">
+        <g font-family="IBM Plex Mono,monospace" font-size="9.5">
+          <rect x="16" y="18" width="88" height="72" rx="4" fill="none" stroke="#34e08a" stroke-width="1.6"/>
+          <text x="60" y="44" text-anchor="middle" fill="#dcebe1">TM1637</text>
+          <text x="60" y="60" text-anchor="middle" fill="#8aa294" font-size="8.5">位选 = 阳极</text>
+          <text x="60" y="76" text-anchor="middle" fill="#ffb02e" font-size="8.5">配共阳管</text>
+          <rect x="196" y="18" width="88" height="72" rx="4" fill="none" stroke="#57d8f2" stroke-width="1.6"/>
+          <text x="240" y="44" text-anchor="middle" fill="#dcebe1">CH450/164</text>
+          <text x="240" y="60" text-anchor="middle" fill="#8aa294" font-size="8.5">位选 = 阴极</text>
+          <text x="240" y="76" text-anchor="middle" fill="#57d8f2" font-size="8.5">配共阴管</text>
+          <path d="M104 54 h84 m0 0 l-8 -4.4 m8 4.4 l-8 4.4" stroke="#5c7264" stroke-width="1.4" fill="none"/>
+          <text x="146" y="44" text-anchor="middle" fill="#5c7264" font-size="8.5">先选芯片 → 再配管</text>
+          <text x="150" y="102" text-anchor="middle" fill="#5c7264" font-size="8.5">MAX7219 只配共阴 · TM1637 官方按共阳设计（共阴需改位序）</text>
+        </g>
+      </svg>
+      <div class="fb">扫描驱动芯片的位选输出极性是焊死的：<b>MAX7219 只配共阴</b>，TM1637 面向共阳。选型顺序应是「先定驱动芯片，再按它买单/布数码管」，反过来会多焊一层反相三极管。</div></div>
+  </div>
+</section>
+
+<!-- ================= §04 ================= -->
+<section id="s4">
+  <div class="sec-head reveal"><span class="no">04</span><h2>引脚判别侦探实验室</h2><span class="en">Pinout Detective</span></div>
+  <p class="sec-sub reveal">
+    手头一只<b>没有手册的散件</b>：10 只脚，哪两只是公共端 COM？共阴还是共阳？哪脚是 a 段？
+    万用表打到<b>二极管挡</b>（红笔输出约 3V 正电压、表内限流），把红/黑表笔搭到引脚上——
+    <b>下面的管子内部接线是随机生成的一只共阳管</b>，用表笔把它摸清楚。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl">
+        <div class="seg" id="pinProbe">
+          <button data-p="red" class="on" type="button">红笔 ⊕</button>
+          <button data-p="blk" type="button">黑笔 ⊖</button>
+        </div>
+      </div>
+      <div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">先选表笔，再点右侧引脚 · 二极管挡 3V / 1mA</span></div>
+      <div class="ctrl"><button class="icon-btn" id="pinReset" title="换一只随机管" type="button">↺</button></div>
+    </div>
+    <div class="pin-wrap">
+      <div class="pin-left">
+        <svg id="pinSvg" viewBox="0 0 430 240"></svg>
+      </div>
+      <div class="pin-right">
+        <div class="pin-meter">
+          <div class="mv" id="pinMv">--.-</div>
+          <div class="lab" id="pinMvLab">表笔未搭脚<br>点击左侧引脚</div>
+        </div>
+        <div class="pin-map" id="pinMap"></div>
+        <div class="pin-msg" id="pinMsg">
+          <b>侦探手册：</b>① 固定红笔某脚、黑笔扫其它脚——<b>若扫到好几脚都亮，红笔脚下就是 COM，且这是共阳管</b>
+          （电流：表内正 → COM → LED → 段脚）。② 若红黑互换后多脚亮，则是共阴。③ 逐脚记录亮的是哪一段（右侧映射表），得到这只管的私有段表。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= §05 ================= -->
+<section id="s5">
+  <div class="sec-head reveal"><span class="no">05</span><h2>动态扫描与鬼影实验室</h2><span class="en">Multiplex &amp; Ghosting Lab</span></div>
+  <p class="sec-sub reveal">
+    上半是<b>真实的 4 位管</b>（带视觉余辉模型），下半是<b>逻辑分析仪</b>：4 根位选线 + 1 根段总线（把 8 位段码按电压铺开）。
+    拖刷新率滑杆看余辉跟不上时哪里先闪烁；打开「鬼影时序」看切换顺序错误时邻位怎么串进半截字。
+    <b>正确顺序永远是：消隐 → 换段码 → 开位选</b>。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl">
+        <button class="icon-btn play on" id="scanPlay" title="暂停/播放" type="button">❚❚</button>
+      </div>
+      <div class="ctrl"><label>全刷新率</label><input type="range" id="scanF" min="25" max="400" value="125" style="width:150px"><span id="scanFVal" style="font-family:var(--mono);font-size:12px;color:var(--green);min-width:88px">125 Hz</span></div>
+      <div class="ctrl"><label>消隐</label>
+        <div class="seg" id="scanGhost">
+          <button data-m="0" class="on" type="button">正确时序</button>
+          <button data-m="1" type="button">鬼影时序</button>
+        </div>
+      </div>
+      <div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">显示 π = 3.141</span></div>
+    </div>
+    <div class="lab-body"><canvas id="scanCanvas"></canvas></div>
+    <div class="lab-read" id="scanRead"></div>
+    <div class="lab-cap" id="scanCap">
+      <b>怎么读：</b>每一位只在 <code>t<sub>dwell</sub> = 1000/(N·f<sub>refresh</sub>)</code> 的时间窗里被点亮，
+      占空比恒为 <code>1/N = 25%</code>——所以 4 位扫描的峰值电流要按 <b>×4</b> 补偿才能追平静态亮度（06 节算账）。
+      鬼影时序下，段码在<b>上一位还没关断时就改变</b>：位 1 的最后 0.3ms 显示出了位 2 的开头段——上半部分管子里能看到邻位渗出的半截红光。
+    </div>
+  </div>
+</section>
+<!-- ================= §06 ================= -->
+<section id="s6">
+  <div class="sec-head reveal"><span class="no">06</span><h2>限流电阻与亮度计算器</h2><span class="en">Resistor &amp; Brightness Calc</span></div>
+  <p class="sec-sub reveal">
+    数码管烧毁原因排行榜第一名：忘了「4 位扫描 = 峰值 ×N」。
+    这台计算器同时算<b>静态</b>与<b>动态</b>两本账：段电阻取 E24 就近值、回算实际电流，
+    并自动对照 GPIO / 74HC595 / 位驱动三极管的电流红线给出判读。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar"><div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">模型：每段独立限流 R 接段脚（推荐接法）· 位选由开关管驱动</span></div></div>
+    <div class="calc-grid">
+      <div class="calc-form">
+        <div><label>电源 VCC</label>
+          <select id="rcVcc"><option value="3.3">3.3 V（现代 MCU）</option><option value="5" selected>5 V（经典系统）</option><option value="12">12 V（经驱动管）</option></select></div>
+        <div><label>发光颜色（决定 VF）</label>
+          <select id="rcCol"><option value="2.0" selected>红 2.0 V</option><option value="2.1">黄 2.1 V</option><option value="2.2">绿 2.2 V</option><option value="3.2">蓝 3.2 V</option></select></div>
+        <div><label>目标段电流（亮度）mA</label>
+          <input type="number" id="rcI" value="10" min="1" max="25" step="0.5"></div>
+        <div><label>位数 N（动态扫描）</label>
+          <select id="rcN"><option value="1">1 位（静态）</option><option value="2">2 位</option><option value="4" selected>4 位</option><option value="6">6 位</option><option value="8">8 位</option></select></div>
+        <div><label>最亮段场景</label>
+          <select id="rcPat"><option value="6" selected>「0/8」6 段</option><option value="7">「8.」7 段+dp</option><option value="2">「1」2 段</option></select></div>
+      </div>
+      <div class="calc-out">
+        <div class="calc-formula" id="rcFormula"></div>
+        <div class="calc-rows" id="rcRows"></div>
+        <div class="calc-verdict" id="rcVerdict"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= §07 ================= -->
+<section id="s7">
+  <div class="sec-head reveal"><span class="no">07</span><h2>驱动电路实验室</h2><span class="en">Drive Circuit Lab</span></div>
+  <p class="sec-sub reveal">
+    从「12 个 IO 硬扛」到「2 根线全包」，四档驱动方案一屏对比：
+    <b>GPIO 直驱</b>的电流账、<b>三极管位驱动</b>为什么要存在、<b>74HC595</b> 的静态移位、
+    <b>TM1637</b> 的两线协议。点左上角切换场景，右侧示波器跟着换。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>方案</label>
+        <div class="seg" id="drvCir">
+          <button data-i="0" class="on" type="button">GPIO 直驱</button>
+          <button data-i="1" type="button">三极管位驱动</button>
+          <button data-i="2" type="button">74HC595</button>
+          <button data-i="3" type="button">TM1637</button>
+        </div>
+      </div>
+      <div class="ctrl">
+        <button class="icon-btn play on" id="drvPlay" title="暂停/播放波形" type="button">❚❚</button>
+      </div>
+    </div>
+    <div class="lab-body"><canvas id="drvCanvas"></canvas></div>
+    <div class="lab-read" id="drvRead"></div>
+    <div class="lab-cap" id="drvCap"></div>
+  </div>
+</section>
+
+<!-- ================= §08 ================= -->
+<section id="s8">
+  <div class="sec-head reveal"><span class="no">08</span><h2>字符集画廊与段码表</h2><span class="en">Charset Gallery</span></div>
+  <p class="sec-sub reveal">
+    七段能表现的不止数字：大写 A b C d E F、H L P U、温度符号、横线……
+    <b>以下字形全部由本页同一份 FONT 表渲染</b>——你在 02 节构建的任何组合，都在这份表里。
+    共阳码 = 共阴按位取反，不另列。
+  </p>
+  <div class="lab reveal" style="padding:22px">
+    <div class="gal-grid" id="galGrid"></div>
+  </div>
+</section>
+
+<!-- ================= §09 ================= -->
+<section id="s9">
+  <div class="sec-head reveal"><span class="no">09</span><h2>选型五步与实战代码</h2><span class="en">Selection &amp; Code</span></div>
+  <div class="two-col">
+    <div>
+      <div class="sel-steps reveal">
+        <div class="sel-step"><div class="n">1</div><div><h4>定颜色与 VF，先过电压关</h4>
+          <p>3.3V 系统<b>别选蓝色管</b>（VF 3.2V，余量 0.1V 点不亮）；红/绿安全。5V 系统全颜色可选。</p></div></div>
+        <div class="sel-step"><div class="n">2</div><div><h4>定极性：跟着驱动芯片走</h4>
+          <p>用 TM1637 → <b>共阳</b>；用 MAX7219 → <b>共阴</b>；纯 GPIO → 共阳吃灌电流红利。别先买管后配芯片。</p></div></div>
+        <div class="sel-step"><div class="n">3</div><div><h4>定位数与尺寸</h4>
+          <p>需要小数点/冒号（时钟）？确认 dp/colon 引脚存在。0.36″ 一米外可读，1″ 以上考虑分段提高电流。</p></div></div>
+        <div class="sel-step"><div class="n">4</div><div><h4>算电流账，选驱动档位</h4>
+          <p>1 位 GPIO 直驱；2–4 位三极管/ULN2003 位驱动 + 段串阻；≥4 位或要省 IO → TM1637/MAX7219/HT16K33。06 节计算器过一遍。</p></div></div>
+        <div class="sel-step"><div class="n">5</div><div><h4>查引脚图，画段映射表</h4>
+          <p>一体管引脚<b>没有统一标准</b>，COM 常在中间两脚但段序随机。按 04 节方法实测建 <code>SEG_PIN[]</code> 映射，别照抄别人的表。</p></div></div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="term">
+        <div class="term-hd"><i></i><i class="g"></i><i></i>arduino · TM1637（两线 · 共阳 4 位）</div>
+        <pre><span class="c">// Library: TM1637Display（avishorp）· CLK/DIO 任意两个 GPIO</span>
+<span class="k">#include</span> &lt;TM1637Display.h&gt;
+TM1637Display disp(<span class="f">CLK_PIN</span>, <span class="f">DIO_PIN</span>);
+
+<span class="k">void</span> setup() {
+  disp.setBrightness(<span class="s">7</span>);          <span class="c">// 0–7：内部 16 级 PWM 调占空比</span>
+  uint8_t seg[] = { <span class="s">0x4F</span>, <span class="s">0x86</span>, <span class="s">0x66</span>, <span class="s">0x06</span> };  <span class="c">// 3 . 1 4 1（dp=0x80）</span>
+  disp.setSegments(seg);        <span class="c">// 芯片内置扫描，MCU 只写一次显存</span>
+}</pre>
+      </div>
+      <div class="term" style="margin-top:16px">
+        <div class="term-hd"><i></i><i class="g"></i><i></i>stm32 · 裸 GPIO 动态扫描（TIM 中断换位）</div>
+        <pre><span class="c">// 段: PB0-PB7 = a..dp（共阴正逻辑）· 位选: PA4-PA7 经 NPN</span>
+<span class="k">const</span> uint8_t FONT[<span class="s">10</span>] = {<span class="s">0x3F,0x06,0x5B,0x4F,0x66,
+                            0x6D,0x7D,0x07,0x7F,0x6F</span>};
+<span class="k">volatile</span> uint8_t digits[<span class="s">4</span>] = {<span class="s">3,14,1,4</span>};  <span class="c">// 3.141</span>
+
+<span class="k">void</span> TIM2_IRQHandler(<span class="k">void</span>) {          <span class="c">// 2ms 一拍 = 全刷新 125Hz</span>
+  <span class="k">static</span> uint8_t pos = <span class="s">0</span>;
+  GPIOA-&gt;BSRR = dig_mask[pos];       <span class="c">// ① 消隐+关旧位（先拉低）</span>
+  GPIOB-&gt;ODR  = FONT[digits[pos]];   <span class="c">// ② 换段码</span>
+  GPIOA-&gt;BSRR = dig_mask[pos] &lt;&lt; <span class="s">16</span>; <span class="c">// ③ 开新位——顺序反了就出鬼影</span>
+  pos = (pos + <span class="s">1</span>) &amp; <span class="s">3</span>;
+}</pre>
+      </div>
+      <div class="term" style="margin-top:16px">
+        <div class="term-hd"><i></i><i class="g"></i><i></i>linux · gpiod 扫描线程（无驱动芯片时）</div>
+        <pre><span class="c"># 4 位共阳：段 gpioset 拉低点亮 · 位选经 NPN</span>
+<span class="k">while</span> : ; <span class="k">do</span>
+  <span class="k">for</span> i <span class="k">in</span> 0 1 2 3; <span class="k">do</span>
+    gpioset --mode=exit $(dig $i)=0          <span class="c"># 消隐（关所有位）</span>
+    gpioset --mode=exit $(seg ${D[i]})       <span class="c"># 段总线 = 共阳反码 ~FONT</span>
+    gpioset --mode=exit $(dig $i)=1          <span class="c"># 开当前位</span>
+    sleep 0.002
+  <span class="k">done</span>
+<span class="k">done</span>  <span class="c"># 实时性不足会闪烁——正式产品请用驱动芯片或内核扫描驱动</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= §10 ================= -->
+<section id="s10">
+  <div class="sec-head reveal"><span class="no">10</span><h2>踩坑指南</h2><span class="en">Pitfalls</span></div>
+  <p class="sec-sub reveal">八条高频翻车现场，每条都对应本页某个实验室里的红色演示。</p>
+  <div class="pit-list reveal">
+    <div class="pit"><div class="sym">PIT · 01</div><div>
+      <h4><b>鬼影</b>：邻位渗出半截字</h4>
+      <p>换位时<b>段码先变、位选后关</b>，旧位在 0.3ms 里显示了新位的开头段。表现为「3」旁边有淡淡的「1」。
+      <span class="fix">修法：<b>消隐 → 换段码 → 开位选</b>三步走（05 节右侧时序开关）。</span></p></div></div>
+    <div class="pit"><div class="sym">PIT · 02</div><div>
+      <h4><b>亮度不均</b>：1 比 8 暗 / 位间亮度漂移</h4>
+      <p>把限流电阻放在<b>位选一侧共用</b>：亮 2 段的「1」压降小电流大、亮 7 段的「8.」电流被摊薄——段数越多越暗。
+      <span class="fix">修法：电阻放<b>段侧每段一只</b>（8 只），位选只过开关管。</span></p></div></div>
+    <div class="pit"><div class="sym">PIT · 03</div><div>
+      <h4><b>峰值电流超限</b>：扫描把电流乘了 N</h4>
+      <p>4 位扫描占空比 25%，同亮度需峰值 ×4；位选电流 = 点亮段数 × 段电流（「8.」= 7×10mA = 70mA），直接进 GPIO 必超 25mA 红线。
+      <span class="fix">修法：位选一律经三极管/ULN2003，段峰值按手册 <code>If(peak)</code> 卡。</span></p></div></div>
+    <div class="pit"><div class="sym">PIT · 04</div><div>
+      <h4><b>共阴共阳搞反</b>：全灭或整管微亮</h4>
+      <p>共阳管按共阴接线：所有 LED 反偏——全灭；段码也反了，即便接对电平也是「亮的全亮、灭的全灭」一片红。
+      <span class="fix">修法：上电前按 04 节二极管挡判一遍；代码里加 <code>#define CA</code> 统一取反。</span></p></div></div>
+    <div class="pit"><div class="sym">PIT · 05</div><div>
+      <h4><b>3.3V 点蓝色管</b>：电路全对就是不亮</h4>
+      <p>蓝/白 LED <code>VF≈3.2V</code>，3.3V 减去后只剩 0.1V 给电阻——电流不到 0.3mA，勉强见幽光。
+      <span class="fix">修法：换红/绿管，或上 5V/升压，或用带电流源的驱动芯片。</span></p></div></div>
+    <div class="pit"><div class="sym">PIT · 06</div><div>
+      <h4><b>dp 微亮</b>：没接的小数点在发光</h4>
+      <p>dp 脚悬空时，相邻走线耦合 + IO 漏电流足以让它在暗室可见，产品夜间返修主因之一。
+      <span class="fix">修法：不用的 dp 段脚接 GND（共阳）或加下拉，别悬空。</span></p></div></div>
+    <div class="pit"><div class="sym">PIT · 07</div><div>
+      <h4><b>闪烁 / 相机条纹</b>：刷新率掉到 50Hz 以下</h4>
+      <p>中断被长任务压住、或 Linux 用户态扫描抖动，全刷新率跌破 50Hz：肉眼闪、手机拍出滚动黑带。
+      <span class="fix">修法：定时器中断保证节拍；Linux 上用驱动芯片让硬件自己扫。</span></p></div></div>
+    <div class="pit"><div class="sym">PIT · 08</div><div>
+      <h4><b>引脚图想当然</b>：照抄别家的段映射</h4>
+      <p>同是 0.56″ 4 位管，不同厂家段序、COM 位置都不同；「中间两脚是 COM」只是惯例不是标准。
+      <span class="fix">修法：04 节方法 5 分钟实测建表，写进 <code>SEG_PIN[]</code> 再动代码。</span></p></div></div>
+  </div>
+</section>
+
+<!-- ================= §11 ================= -->
+<section id="s11">
+  <div class="sec-head reveal"><span class="no">11</span><h2>速查表</h2><span class="en">Cheat Sheet</span></div>
+  <div class="cheat-grid">
+    <div class="cheat reveal">
+      <div class="hd">段码表 · 共阴<span>CC = CA 取反</span></div>
+      <div class="bd"><table id="csFont"></table></div>
+    </div>
+    <div class="cheat reveal">
+      <div class="hd">限流三笔账<span>RESISTOR</span></div>
+      <div class="bd">
+        <div>段电阻 <span class="r">R = (VCC − VF) / I<sub>seg</sub></span></div>
+        <div>静态电流 <span class="r">I<sub>avg</sub> = I<sub>seg</sub></span></div>
+        <div>扫描电流 <span class="r">I<sub>avg</sub> = I<sub>seg</sub>/N · I<sub>pk</sub> 补 ×N</span></div>
+        <div>位选电流 <span class="r">I<sub>dig</sub> = 点亮段数 × I<sub>seg</sub></span></div>
+        <div style="margin-top:6px">红线：<b>GPIO 单脚 ≤25mA</b> · <b>74HC595 ≤35mA/8mA</b> · 手册 <code>If(peak)</code></div>
+      </div>
+    </div>
+    <div class="cheat reveal">
+      <div class="hd">扫描时序五步<span>SCAN ORDER</span></div>
+      <div class="bd">
+        <div>① 关位选（<b>消隐</b>）</div>
+        <div>② 换段码 <code>SEG = FONT[d]</code></div>
+        <div>③ 开当前位选</div>
+        <div>④ 驻留 <span class="r">t<sub>dwell</sub> = 1000/(N·f<sub>refresh</sub>) ms</span></div>
+        <div>⑤ 中断里循环 ①–④，全刷新 <b>≥50Hz</b></div>
+      </div>
+    </div>
+    <div class="cheat reveal">
+      <div class="hd">判别口诀<span>DMM DETECTIVE</span></div>
+      <div class="bd">
+        <div>二极管挡 · 红笔为正</div>
+        <div>红笔定脚黑笔扫，<b>多段亮 → 共阳</b>（红在 COM）</div>
+        <div>黑笔定脚红笔扫，<b>多段亮 → 共阴</b>（黑在 COM）</div>
+        <div>亮哪段记哪脚 → 得私有段表</div>
+        <div style="margin-top:6px">10 脚管 <b>COM 常在 ③⑧</b>，段序必须实测</div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="f-l">
+    <b>参考</b> · 七段显示器厂商数据手册（LITE-ON / 华冠 / 天微 TM1637 / Maxim MAX7219）· IEC 60817 字形命名 · 跨页：<a href="diode.html">二极管</a> LED 限流与 VF · <a href="transistor.html">三极管</a>位驱动开关 · <a href="opamp.html">运放</a>比较器构建报警阈值<br>
+    本页为单文件交互式图解，可离线打开 · 波形与字形由浏览器实时渲染
+  </div>
+  <div class="f-r">7SEG·LAB<small>HW-BASIC · MAINTAINED WITH ♥ FOR EMBEDDED ENGINEERS</small></div>
+</footer>
+<script>
+/* ================================================================
+   数码管交互引擎
+   ① hero 计数动画（单管字形 + 段电流路径 + 4 位扫描时间轴）
+   ② §02 段码构建实验室  ③ §03 共阴/共阳电流路径步进
+   ④ §04 引脚判别侦探    ⑤ §05 动态扫描 + 鬼影实验室
+   ⑥ §06 限流/亮度计算器 ⑦ §07 四档驱动电路实验室
+   ⑧ §08 字符画廊 + §11 速查表填充
+================================================================ */
+
+/* ---------------- 工具 ---------------- */
+const $ = id => document.getElementById(id);
+const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const trim3 = n => parseFloat(n.toPrecision(3));
+function fmtA(a){
+  if (!isFinite(a)) return '—';
+  if (a===0) return '0 A';
+  const s=a<0?'−':'';
+  a=Math.abs(a);
+  const us=[[1e3,'kA'],[1,'A'],[1e-3,'mA'],[1e-6,'µA'],[1e-9,'nA']];
+  for (const [f,n] of us){ if (a>=f) return s+trim3(a/f)+' '+n; }
+  return s+trim3(a/1e-12)+' pA';
+}
+function fmtV(v){
+  if (!isFinite(v)) return '—';
+  const s=v<0?'−':'';
+  v=Math.abs(v);
+  if (v>=1) return s+trim3(v)+' V';
+  return s+trim3(v*1e3)+' mV';
+}
+function fmtOhm(v){
+  if (!isFinite(v)) return '—';
+  if (v===0) return '0 Ω';
+  const us=[[1e6,'MΩ'],[1e3,'kΩ'],[1,'Ω']];
+  for (const [f,n] of us){ if (v>=f) return trim3(v/f)+' '+n; }
+  return trim3(v/1e-3)+' mΩ';
+}
+function fmtT(s){
+  if (!isFinite(s)) return '—';
+  if (s===0) return '0 s';
+  const us=[[1,'s'],[1e-3,'ms'],[1e-6,'µs'],[1e-9,'ns']];
+  for (const [f,n] of us){ if (s>=f) return trim3(s/f)+' '+n; }
+  return trim3(s/1e-12)+' ps';
+}
+function fmtHz(f){
+  if (!isFinite(f)) return '—';
+  if (f===0) return '0 Hz';
+  const us=[[1e9,'GHz'],[1e6,'MHz'],[1e3,'kHz'],[1,'Hz']];
+  for (const [g,n] of us){ if (f>=g) return trim3(f/g)+' '+n; }
+  return trim3(f)+' Hz';
+}
+const hexByte = c => '0x' + (c & 0xFF).toString(16).toUpperCase().padStart(2,'0');
+const binByte = c => ((c & 0xFF).toString(2).padStart(8,'0')).replace(/(....)(....)/,'$1 $2');
+
+/* ================================================================
+   字形模型 —— 全站唯一数据源（§02 构建 / hero / §05 / §08 画廊 / 速查表）
+   字节序 bit7..bit0 = dp g f e d c b a；1 = 该段点亮（共阴正逻辑）
+================================================================ */
+const SEG_NAMES = ['a','b','c','d','e','f','g','dp'];
+const SEG_BITS  = { a:1, b:2, c:4, d:8, e:16, f:32, g:64, dp:128 };
+const FONT = {
+  '0':0x3F,'1':0x06,'2':0x5B,'3':0x4F,'4':0x66,'5':0x6D,'6':0x7D,'7':0x07,
+  '8':0x7F,'9':0x6F,
+  'A':0x77,'b':0x7C,'C':0x39,'d':0x5E,'E':0x79,'F':0x71,
+  'H':0x76,'L':0x38,'P':0x73,'U':0x3E,
+  '−':0x40,'°':0x63,' ':0x00
+};
+/* 段几何：100×97 视窗，六边形段厚 t=13 斜切 s=6.5，端点缩进 gap=2.5 */
+const SEG_GEO = {
+  a:{hor:1,x1:22.5,x2:77.5,y:13}, g:{hor:1,x1:22.5,x2:77.5,y:48.5}, d:{hor:1,x1:22.5,x2:77.5,y:84},
+  f:{hor:0,y1:15.5,y2:46, x:20}, b:{hor:0,y1:15.5,y2:46, x:80},
+  e:{hor:0,y1:51, y2:81.5,x:20}, c:{hor:0,y1:51, y2:81.5,x:80},
+  dp:{dot:1,cx:91,cy:90,r:5.5}
+};
+const SEG_T = 13, SEG_S = 6.5;
+function segPts(k){
+  const g = SEG_GEO[k];
+  if (g.dot) return null;
+  const t2 = SEG_T/2;
+  if (g.hor){
+    return [[g.x1+SEG_S,g.y-t2],[g.x2-SEG_S,g.y-t2],[g.x2,g.y],[g.x2-SEG_S,g.y+t2],[g.x1+SEG_S,g.y+t2],[g.x1,g.y]];
+  }
+  return [[g.x+t2,g.y1+SEG_S],[g.x+t2,g.y2-SEG_S],[g.x,g.y2],[g.x-t2,g.y2-SEG_S],[g.x-t2,g.y1+SEG_S],[g.x,g.y1]];
+}
+/* SVG：单段 path d */
+function segPathD(k){
+  const g = SEG_GEO[k];
+  if (g.dot) return '';
+  const p = segPts(k);
+  return 'M' + p.map(q=>q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' L') + ' Z';
+}
+/* SVG：整个字形（点亮/熄灭双色） */
+function glyphSvg(code, opt){
+  opt = opt || {};
+  const on = opt.on || '#ff5d5d', off = opt.off || '#38181c';
+  const glow = opt.glow===false ? '' : ' filter="url(#segGlow)"';
+  let s = '';
+  if (glow) s += '<defs><filter id="segGlow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+  for (const k of SEG_NAMES){
+    const g = SEG_GEO[k];
+    const lit = (code & SEG_BITS[k]);
+    if (g.dot){
+      s += '<circle cx="'+g.cx+'" cy="'+g.cy+'" r="'+g.r+'" fill="'+(lit?on:off)+'"'+(lit?' filter="url(#segGlow)"':'')+'/>';
+    } else {
+      s += '<path d="'+segPathD(k)+'" fill="'+(lit?on:off)+'"'+(lit?' filter="url(#segGlow)"':'')+'/>';
+    }
+  }
+  return s;
+}
+const litSegs = code => SEG_NAMES.filter(k => code & SEG_BITS[k]);
+const anode = code => (~code) & 0xFF;          /* 共阳码 = 按位取反 */
+const segOf = ch => (ch in FONT) ? FONT[ch] : 0;
+/* 扫描账：N 位、全刷新率 f(Hz) → 每位驻留 ms / 占空比 */
+function scanCalc(n, f){
+  const tdwell = 1000/(n*f);
+  return { tdwell: tdwell, duty: 1/n, fRefresh: f };
+}
+const E24 = [1.0,1.1,1.2,1.3,1.5,1.6,1.8,2.0,2.2,2.4,2.7,3.0,3.3,3.6,3.9,4.3,4.7,5.1,5.6,6.2,6.8,7.5,8.2,9.1];
+function e24Near(r){
+  if (!isFinite(r) || r<=0) return 0;
+  const p = Math.pow(10, Math.floor(Math.log10(r)));
+  const x = r/p;
+  let best = E24[0];
+  for (const v of E24) if (Math.abs(v-x) < Math.abs(best-x)) best = v;
+  return best*p;
+}
+/* 段限流：R = (VCC − VF)/I（VF ≥ VCC 时无解返回 NaN） */
+const resCalc = (vcc, vf, i) => (vcc - vf) / i;
+
+/* ---- canvas 画一只字（cx,cy = 左上角，w 宽） ---- */
+function drawGlyph(ctx, cx, cy, w, code, o){
+  o = o || {};
+  const h = w*0.97, sc = w/100;
+  const alpha = o.alpha==null ? 1 : o.alpha;
+  const on = o.on || '255,93,93', off = o.off || '26,12,14';
+  for (const k of SEG_NAMES){
+    const g = SEG_GEO[k];
+    const lit = code & SEG_BITS[k];
+    if (g.dot){
+      ctx.beginPath();
+      ctx.arc(cx+g.cx*sc, cy+g.cy*sc, g.r*sc, 0, Math.PI*2);
+      if (lit){
+        ctx.fillStyle = 'rgba('+on+','+alpha+')';
+        if (o.glow){ ctx.shadowColor='rgba('+on+','+(0.8*alpha)+')'; ctx.shadowBlur=10*sc; }
+        ctx.fill(); ctx.shadowBlur=0;
+      } else {
+        ctx.fillStyle = 'rgba('+off+','+(0.5+0.5*alpha)+')'; ctx.fill();
+      }
+      continue;
+    }
+    const p = segPts(k);
+    ctx.beginPath();
+    p.forEach((q,i)=> i ? ctx.lineTo(cx+q[0]*sc, cy+q[1]*sc) : ctx.moveTo(cx+q[0]*sc, cy+q[1]*sc));
+    ctx.closePath();
+    if (lit){
+      ctx.fillStyle = 'rgba('+on+','+alpha+')';
+      if (o.glow){ ctx.shadowColor='rgba('+on+','+(0.8*alpha)+')'; ctx.shadowBlur=10*sc; }
+      ctx.fill(); ctx.shadowBlur=0;
+    } else {
+      ctx.fillStyle = 'rgba('+off+','+(0.5+0.5*alpha)+')'; ctx.fill();
+    }
+  }
+}
+
+/* ================================================================
+   ① HERO · 计数动画：单管 0→9 + 段电流路径 + 4 位扫描时间轴
+      读数 I/fR/D 全部由模型常量计算（画面标注供对账）
+================================================================ */
+(function(){
+  const cv = $('heroScope'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const H = 170;
+  let W = 300;
+  function resize(){
+    const r = cv.parentElement.getBoundingClientRect();
+    W = Math.max(300, r.width);
+    const dpr = Math.min(devicePixelRatio||1, 2);
+    cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  new ResizeObserver(resize).observe(cv.parentElement);
+  resize();
+  /* 模型常量：所有读数由此计算 */
+  const VCC=5, VF=2.0, RS=330, ND=4, TD=2.0;
+  const ISEG=(VCC-VF)/RS;                 /* 段电流 mA 数值按 A 算再 ×1000 */
+  const IM_A = ISEG;                       /* A */
+  const FR = 1000/(ND*TD);                 /* 全刷新 Hz */
+  const DUTY = 1/ND;
+  let t0 = performance.now();
+  function frame(now){
+    const t = (now - t0)/1000;
+    const num = Math.floor(t/0.9) % 10;
+    const code = segOf(String(num));
+    ctx.clearRect(0,0,W,H);
+    /* ---- 左：单位数码管大字 + 段标签 ---- */
+    const dw = 96, dx = 26, dy = 14;
+    drawGlyph(ctx, dx, dy, dw, code, {glow:true});
+    ctx.fillStyle='#5c7264'; ctx.font='8px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillText('a', dx+50*dw/100, dy+8);
+    ctx.fillText('b', dx+87*dw/100, dy+31);
+    ctx.fillText('c', dx+87*dw/100, dy+70);
+    ctx.fillText('d', dx+50*dw/100, dy+95);
+    ctx.fillText('e', dx+13*dw/100, dy+70);
+    ctx.fillText('f', dx+13*dw/100, dy+31);
+    ctx.fillText('g', dx+50*dw/100, dy+52);
+    ctx.fillText('dp', dx+91*dw/100, dy+99);
+    /* ---- 段电流路径：VCC → R → 点亮的段 → COM → GND（粒子流速 ∝ I） ---- */
+    const px0 = dx+dw+18, px1 = Math.min(px0+120, W*0.46);
+    const py = 44;
+    ctx.strokeStyle='#3a4a40'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(px0,py); ctx.lineTo(px1,py); ctx.stroke();
+    ctx.strokeRect(px0+18,py-8,34,16);                       /* 限流电阻 */
+    ctx.beginPath(); ctx.moveTo(px0,py+34); ctx.lineTo(px1,py+34); ctx.stroke();
+    ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('VCC', px0-2, py-6);
+    ctx.fillText('330Ω', px0+21, py-12+4);
+    ctx.fillText('COM→GND', px0+2, py+30);
+    /* 粒子：点亮段数 n 越多流量越大，速度 ∝ I（恒定），数量 ∝ 点亮段数 */
+    const nlit = litSegs(code).length;
+    if (nlit){
+      const spd = 46*ISEG*1000/9.09;                          /* 9.09mA 基准速度归一 */
+      for (let k=0;k<nlit;k++){
+        const ph = ((t*spd + k*(px1-px0)/nlit) % (px1-px0));
+        const yy = (k%2) ? py : py+34;
+        ctx.fillStyle = (k%2) ? '#57d8f2' : '#ffb02e';
+        ctx.beginPath(); ctx.arc(px0+ph, yy, 2.1, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    /* ---- 中右：4 位扫描时间轴（触发式固定 16ms 窗 + 游标慢放推进） ---- */
+    const gx0 = Math.max(px1+40, W*0.52), gx1 = W-18;
+    const rows = [
+      {lab:'DIG1', col:'#ffb02e', y:22},
+      {lab:'DIG2', col:'#ffb02e', y:46},
+      {lab:'DIG3', col:'#ffb02e', y:70},
+      {lab:'DIG4', col:'#ffb02e', y:94},
+      {lab:'SEG',  col:'#57d8f2', y:132}
+    ];
+    const WIN = 16;                                            /* ms */
+    const P = 1000/FR;                                         /* 扫描周期 8ms */
+    ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='right';
+    for (const r of rows){
+      ctx.fillStyle='#5c7264'; ctx.fillText(r.lab, gx0-6, r.y+3);
+      ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(gx0,r.y); ctx.lineTo(gx1,r.y); ctx.stroke();
+    }
+    const tx = ms => gx0 + (ms/WIN)*(gx1-gx0);
+    ctx.lineWidth=1.8;
+    for (const r of rows.slice(0,4)){
+      const i = rows.indexOf(r);
+      ctx.strokeStyle=r.col;
+      ctx.beginPath();
+      let pen=false;
+      for (let x=gx0; x<=gx1; x+=2){
+        const ms = (x-gx0)/(gx1-gx0)*WIN;
+        const ph = ms % P;
+        const slot = Math.floor(ph/(P/ND));
+        const inSlot = slot===i && (ph - slot*(P/ND)) > 0.24;  /* 0.24ms 消隐 */
+        const y = inSlot ? r.y-9 : r.y;
+        if (!pen){ ctx.moveTo(x,y); pen=true; } else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    /* SEG 行：段码阶梯（本 hero 只示意当前数字的码，逐位轮换） */
+    ctx.strokeStyle='#57d8f2'; ctx.beginPath();
+    let pen=false;
+    for (let x=gx0; x<=gx1; x+=2){
+      const ms = (x-gx0)/(gx1-gx0)*WIN;
+      const slot = Math.floor((ms % P)/(P/ND));
+      const v = (slot===0) ? code : (slot===1 ? segOf('4') : slot===2 ? segOf('2') : segOf('0'));
+      const y = rows[4].y - (v/255)*22;
+      if (!pen){ ctx.moveTo(x,y); pen=true; } else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    /* 游标：1.2s 走完 16ms（慢放 75×），重画时上半数字不随游标变（hero 数字独立计时） */
+    const curMs = (t/1.2 % 1)*WIN;
+    ctx.strokeStyle='rgba(220,235,225,.55)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(tx(curMs),14); ctx.lineTo(tx(curMs),146); ctx.stroke();
+    /* ---- 读数行（fillText 供冒烟对账）---- */
+    ctx.textAlign='left'; ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"';
+    ctx.fillText('VCC = '+VCC+' V · VF = '+VF.toFixed(1)+' V · R = '+RS+' Ω', gx0, 158);
+    ctx.fillStyle='#8aa294'; ctx.font=(W<640?'9px':'10.5px')+' "IBM Plex Mono"';
+    ctx.fillText('I = '+trim3(ISEG*1000)+' mA · fR = '+trim3(FR)+' Hz · D = '+Math.round(DUTY*100)+'% · SEG = '+hexByte(code)+' ('+litSegs(code).join('')+')', gx0, 146);
+    ctx.fillStyle='#5c7264';
+    ctx.fillText('N = '+ND+' 位 · tD = '+trim3(TD)+' ms', gx0, 169);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ================================================================
+   ② §02 段码构建实验室
+================================================================ */
+let SC = { code: 0x3F };
+function renderSc(){
+  const svg = $('scGlyph'); if (!svg) return;
+  svg.innerHTML = glyphSvg(SC.code);
+  $('scBtns').querySelectorAll('button').forEach(b=>{
+    b.classList.toggle('on', !!(SC.code & SEG_BITS[b.dataset.s]));
+  });
+  $('scOut').innerHTML =
+    '<div class="row"><span>点亮段</span><b>' + (litSegs(SC.code).join(' · ') || '（全灭）') + '</b></div>' +
+    '<div class="row"><span>二进制 dp→a</span><span class="bits">' + binByte(SC.code).split('').reverse().join('') + '</span></div>' +
+    '<div class="row"><span>共阴码（1=亮）</span><span class="hex">' + hexByte(SC.code) + '</span></div>' +
+    '<div class="row"><span>共阳码（0=亮）</span><span class="hex">' + hexByte(anode(SC.code)) + '</span></div>';
+  $('scChips').querySelectorAll('button').forEach(b=>{
+    b.classList.toggle('cur', segOf(b.dataset.ch)===SC.code);
+  });
+}
+function initSc(){
+  if (!$('scBtns')) return;
+  $('scBtns').innerHTML = SEG_NAMES.map(k =>
+    '<button data-s="'+k+'" type="button">'+k+'<small>bit'+Math.log2(SEG_BITS[k])+'</small></button>'
+  ).join('');
+  $('scBtns').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if (!b) return;
+    SC.code ^= SEG_BITS[b.dataset.s];
+    renderSc();
+  });
+  const quick = ['0','1','2','3','4','5','6','7','8','9','A','b','C','d','E','F','H','L','P','U','−','°',' ','8.'];
+  $('scChips').innerHTML = quick.map(ch =>
+    '<button data-ch="'+(ch==='8.'?'8':ch)+'" type="button">'+(ch==='8.'?'8+dp':escHtml(ch===' '?'␠':ch))+'</button>'
+  ).join('');
+  $('scChips').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if (!b) return;
+    SC.code = b.textContent==='8+dp' ? (FONT['8']|0x80) : segOf(b.dataset.ch);
+    renderSc();
+  });
+  renderSc();
+}
+
+/* ================================================================
+   ③ §03 共阴 / 共阳：同一颗 b 段 LED 的电流路径（四步）
+================================================================ */
+const CC_STEPS = 4;
+function renderCc(i){
+  const box = $('ccSvg'); if (!box) return;
+  /* 左半共阴，右半共阳；i=0 电平设置 1 段电流 2 熄灭 3 反接 */
+  const VCC=5, VF=2.0, RS=330, I=(VCC-VF)/RS;
+  const flow = (i===1);
+  function panel(x0, ca, title){
+    const comY = 108;
+    let s = '<svg viewBox="0 0 430 150" style="display:block;width:100%">';
+    s += '<text x="'+x0+'" y="20" fill="'+(ca?'#ffb02e':'#34e08a')+'" font-family="IBM Plex Mono" font-size="11">'+title+'</text>';
+    /* 公共轨 */
+    s += '<line x1="'+(x0+10)+'" y1="'+comY+'" x2="'+(x0+180)+'" y2="'+comY+'" stroke="'+(ca?'#ffb02e':'#34e08a')+'" stroke-width="2"/>';
+    s += '<text x="'+(x0+10)+'" y="'+(comY+16)+'" fill="#8aa294" font-size="9" font-family="IBM Plex Mono">'+(ca?'COM = VCC 5V':'COM = GND 0V')+'</text>';
+    /* b 段 LED（三角形+杠；共阳阳极朝上接 COM，共阴阳极朝下接 COM） */
+    const lx = x0+95, ly = 44;
+    const bar = ca ? ly : ly+18;
+    s += '<line x1="'+(lx-30)+'" y1="'+(ly+9)+'" x2="'+(lx-12)+'" y2="'+(ly+9)+'" stroke="#5c7264" stroke-width="1.4"/>';
+    s += '<path d="M'+lx+' '+ly+' L'+(lx-14)+' '+(ly+9)+' L'+lx+' '+(ly+18)+' Z" fill="none" stroke="#ff5d5d" stroke-width="1.6"/>';
+    s += '<line x1="'+(lx-14)+'" y1="'+bar+'" x2="'+(lx+14)+'" y2="'+bar+'" stroke="#ff5d5d" stroke-width="2"/>';
+    s += '<text x="'+(lx+6)+'" y="'+(ly+34)+'" fill="#ff5d5d" font-size="9.5" font-family="IBM Plex Mono">b 段 LED</text>';
+    /* 限流电阻在段脚侧 */
+    s += '<rect x="'+(lx-92)+'" y="'+(ly+1)+'" width="38" height="16" fill="none" stroke="#8aa294" stroke-width="1.4"/>';
+    s += '<text x="'+(lx-73)+'" y="'+(ly-6)+'" fill="#8aa294" font-size="8.5" text-anchor="middle" font-family="IBM Plex Mono">330Ω</text>';
+    /* 段脚到 COM 的连线 */
+    s += '<line x1="'+(lx-54)+'" y1="'+(ly+9)+'" x2="'+(lx-30)+'" y2="'+(ly+9)+'" stroke="#5c7264" stroke-width="1.4"/>';
+    s += '<line x1="'+(lx)+'" y1="'+(ca?ly:ly+18)+'" x2="'+(lx)+'" y2="'+comY+'" stroke="#5c7264" stroke-width="1.4"/>';
+    /* 电平标注 */
+    const segLbl = i===3 ? '段脚反向 5V' : (ca?'0V(低)':'5V(高)');
+    const segCol = i===3 ? '#ff6478' : (i===0 ? (ca?'#57d8f2':'#34e08a') : '#5c7264');
+    s += '<text x="'+(x0+8)+'" y="'+(ly+12)+'" fill="'+segCol+'" font-size="9" font-family="IBM Plex Mono">'+segLbl+'</text>';
+    /* 状态相关叠加 */
+    if (i===1){ /* 电流粒子 */
+      s += '<text x="'+(x0+150)+'" y="'+(ly+8)+'" fill="#57d8f2" font-size="9.5" font-family="IBM Plex Mono">I='+(I*1000).toFixed(1)+'mA</text>';
+    }
+    if (i===3){ /* 反接：LED 反偏 OL */
+      s += '<text x="'+(x0+150)+'" y="'+(ly+8)+'" fill="#ff6478" font-size="9.5" font-family="IBM Plex Mono">OL 不亮</text>';
+    }
+    s += '</svg>';
+    return s;
+  }
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  html += panel(6, false, '共阴 CC');
+  html += panel(6, true, '共阳 CA');
+  html += '</div>';
+  box.innerHTML = html;
+  /* 读数 + 解说 */
+  const reads = [
+    '<span>共阴：段脚 <b>5V</b> / COM=GND</span><span>共阳：段脚 <b>0V</b> / COM=VCC</span>',
+    '<span>点亮段电流 <b>I = (VCC−VF)/R = '+(I*1000).toFixed(1)+' mA</b></span><span>VF ≈ 2.0V（红管）</span>',
+    '<span>段脚回到 <b>同电平</b> → 压差 0 → LED 截止</span><span>高阻态 = 悬空（会耦合微亮，10 节踩坑 ⑥）</span>',
+    '<span>LED 反偏：<b>OL</b>（万用表二极管挡读不通）</span><span>反接 5V 远小于击穿电压，不损坏但不亮</span>'
+  ];
+  const caps = [
+    '<b>电平设置：</b>两种管子的<b>点亮条件互为镜像</b>——共阴要段脚高于公共端，共阳要段脚低于公共端。这就是段码取反的全部物理。',
+    '<b>段电流：</b>同一颗 b 段 LED，两种接法电流大小完全一样：<code>I=(5−2)/330=9.1mA</code>。区别只在于电流是 MCU 引脚「推出去」还是「收进来」。',
+    '<b>熄灭：</b>把段脚驱动到与 COM 相同电平即灭。IO 设成输入（高阻）虽然也会灭，但引脚悬空会被邻近段耦合出幽光——驱动到确定电平才是干净的做法。',
+    '<b>反接：</b>共阴管误接成共阳 = 所有段 LED 全部反偏，整管死黑。万用表二极管挡红黑互换一测便知（04 节实验室）。'
+  ];
+  $('ccRead').innerHTML = reads[i];
+  $('ccCap').innerHTML = caps[i];
+}
+function initCc(){
+  if (!$('ccSteps')) return;
+  $('ccSteps').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if (!b) return;
+    const i = +b.dataset.i;
+    $('ccSteps').querySelectorAll('button').forEach((x,k)=>x.classList.toggle('on',k===i));
+    renderCc(i);
+  });
+  renderCc(0);
+}
+/* ================================================================
+   ④ §04 引脚判别侦探：随机生成一只 10 脚管（共阴/共阳各半），
+      红黑表笔搭脚 → 二极管挡判通断与亮段
+================================================================ */
+const PIN_N = 10;
+let PUZ = null;
+function newPuzzle(){
+  /* COM 取 3/8 双脚（惯例位），极性随机，其余 8 脚随机映射 8 段 */
+  const ca = Math.random() < 0.5;
+  const segs = SEG_NAMES.slice();
+  for (let i=segs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [segs[i],segs[j]]=[segs[j],segs[i]]; }
+  const pins = new Array(PIN_N).fill(null);
+  const order = [1,2,4,5,6,7,9,10];        /* 除 3/8 外的脚 */
+  order.forEach((p,k)=> pins[p-1] = segs[k]);
+  const found = {};                         /* 已探明的段→脚 */
+  return { ca, pins, red:null, blk:null, found:{} };
+}
+function pinTest(puz){
+  /* 返回 {lit:[段名], volt} 或 OL。二极管挡红笔输出正。 */
+  const {red, blk} = puz;
+  if (red==null || blk==null || red===blk) return null;
+  const rSeg = puz.pins[red-1], bSeg = puz.pins[blk-1];
+  const rCom = puz.pins[red-1]===null, bCom = puz.pins[blk-1]===null;   /* 3/8 脚为 COM（null） */
+  if (puz.ca){
+    /* 共阳：阳极=COM。亮 = 红笔 COM、黑笔段脚 */
+    if (rCom && bSeg) return {lit:[bSeg], volt:1.92};
+    return {lit:[], volt:null};
+  } else {
+    /* 共阴：阴极=COM。亮 = 红笔段脚、黑笔 COM */
+    if (rSeg && bCom) return {lit:[rSeg], volt:1.92};
+    return {lit:[], volt:null};
+  }
+}
+function renderPin(){
+  if (!$('pinSvg')) return;
+  const puz = PUZ;
+  const W=430, TOP=44, BOT=196, L=66, R=364;
+  let s = '<svg viewBox="0 0 430 240">';
+  /* 本体 */
+  s += '<rect x="'+L+'" y="'+TOP+'" width="'+(R-L)+'" height="'+(BOT-TOP)+'" rx="8" fill="#0b120e" stroke="#27392d" stroke-width="1.5"/>';
+  s += '<rect x="'+(L+14)+'" y="'+(TOP+24)+'" width="210" height="112" rx="4" fill="#080d0a" stroke="#1d2c22"/>';
+  /* 本体内的预览字形（显示已点亮的最近一次结果，平时全灭轮廓） */
+  s += '<g transform="translate('+(L+34)+','+(TOP+22)+') scale(1.02)">'+glyphSvg(PUZ.previewCode||0, {glow: (PUZ.previewCode||0)!==0})+'</g>';
+  s += '<text x="'+(L+120)+'" y="'+(TOP+152)+'" fill="#5c7264" font-size="9" font-family="IBM Plex Mono">实测预览</text>';
+  /* 10 脚：上排 1-5 左→右，下排 10-6 左→右（DIP 惯例逆时针）
+     引脚号印在 pad 内（丝印风格）；段标签印在 pad 外侧（上 y12 / 下 y237）*/
+  const padX = [];
+  for (let k=0;k<5;k++) padX.push(L+26+k*62);
+  for (let pin=1; pin<=PIN_N; pin++){
+    const top = pin<=5;
+    const x = top ? padX[pin-1] : padX[10-pin];
+    const y0 = top ? TOP-26 : BOT, y1 = top ? TOP : BOT+26;
+    const isRed = puz.red===pin, isBlk = puz.blk===pin;
+    const seg = puz.pins[pin-1];
+    const known = (seg===null) ? (puz.found.com) : (puz.found[seg]);
+    s += '<g>';
+    s += '<rect x="'+(x-8)+'" y="'+y0+'" width="16" height="26" rx="3" fill="'+(isRed?'rgba(255,93,93,.16)':isBlk?'rgba(87,216,242,.14)':'#0f1712')+'" stroke="'+(isRed?'#ff5d5d':isBlk?'#57d8f2':'#3a4a40')+'" stroke-width="'+(isRed||isBlk?1.8:1.2)+'" class="pin-pad" data-pin="'+pin+'" style="cursor:pointer"/>';
+    s += '<text x="'+x+'" y="'+(y0+16.5)+'" text-anchor="middle" fill="#8aa294" font-size="9.5" font-family="IBM Plex Mono" pointer-events="none">'+pin+'</text>';
+    if (seg===null){
+      s += '<text x="'+x+'" y="'+(top?12:238)+'" text-anchor="middle" fill="'+(known?'#ffb02e':'#5c7264')+'" font-size="8" font-family="IBM Plex Mono" pointer-events="none">COM</text>';
+    } else if (known){
+      s += '<text x="'+x+'" y="'+(top?12:238)+'" text-anchor="middle" fill="#ff5d5d" font-size="9.5" font-family="IBM Plex Mono" pointer-events="none">'+seg+'</text>';
+    }
+    s += '</g>';
+  }
+  s += '</svg>';
+  $('pinSvg').innerHTML = s;
+  /* 万用表读数 */
+  const t = pinTest(puz);
+  if (puz.red==null || puz.blk==null){
+    $('pinMv').textContent = '--.-';
+    $('pinMv').className = 'mv ol';
+    $('pinMvLab').innerHTML = (puz.red==null&&puz.blk==null) ? '表笔未搭脚<br>点上方引脚' :
+      ('<span style="color:#ff5d5d">红→脚'+(puz.red!=null?puz.red:'—')+'</span><br>再搭黑笔');
+  } else if (t && t.lit.length){
+    $('pinMv').textContent = t.volt.toFixed(2)+' V';
+    $('pinMv').className = 'mv';
+    $('pinMvLab').innerHTML = '<span style="color:#ff5d5d">红→脚'+puz.red+'</span> <span style="color:#57d8f2">黑→脚'+puz.blk+'</span><br>导通 · 亮段：'+t.lit.join(' ');
+  } else {
+    $('pinMv').textContent = 'OL';
+    $('pinMv').className = 'mv ol';
+    $('pinMvLab').innerHTML = '<span style="color:#ff5d5d">红→脚'+puz.red+'</span> <span style="color:#57d8f2">黑→脚'+puz.blk+'</span><br>不导通（无并联 LED 路径）';
+  }
+  /* 映射表 */
+  let cells = '';
+  for (const k of SEG_NAMES){
+    let pinLbl = '';
+    for (let p=1;p<=PIN_N;p++) if (puz.pins[p-1]===k && puz.found[k]) pinLbl = p;
+    cells += '<div class="cell'+(puz.found[k]?' hit':'')+'">'+k+(puz.found[k]?' ·'+pinLbl:'')+'</div>';
+  }
+  cells += '<div class="cell'+(puz.found.com?' hit':'')+'">COM'+(puz.found.com?' ③⑧':'')+'</div>';
+  $('pinMap').innerHTML = cells;
+  /* 进度解说 */
+  const nFound = SEG_NAMES.filter(k=>puz.found[k]).length;
+  let msg;
+  if (nFound>=8 && puz.found.com){
+    msg = '<b>破案 ✓</b> 这是一只<b>'+(puz.ca?'共阳':'共阴')+'</b>管：COM 在 3/8 脚，8 段映射如上。恭喜，5 分钟拿到了别人要翻半天手册的引脚图——点 ↺ 再来一只。';
+  } else if (t && t.lit.length){
+    const who = puz.ca ? 'COM（阳极公共端）→ 这是一只<b>共阳管</b>'
+                       : '段脚，而黑笔在 COM（阴极公共端）→ 这是一只<b>共阴管</b>';
+    msg = '<b>亮了：</b>「'+t.lit.join(' ')+'」段导通，VF≈'+t.volt.toFixed(2)+'V。红笔在 '+who+'。已探明 '+nFound+'/8 段。';
+  } else {
+    msg = '<b>OL：</b>这两个脚之间没有「正极→LED→负极」路径。策略：把一支笔<b>固定</b>在可疑脚（常试 3/8），另一支扫其余——多脚亮即找到 COM。';
+  }
+  $('pinMsg').innerHTML = msg;
+}
+function initPin(){
+  if (!$('pinSvg')) return;
+  PUZ = newPuzzle(); PUZ.previewCode = 0;
+  $('pinProbe').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if (!b) return;
+    const p = b.dataset.p;
+    $('pinProbe').querySelectorAll('button').forEach(x=>x.classList.toggle('on', x.dataset.p===p));
+    PUZ.probe = p;
+  });
+  PUZ.probe = 'red';
+  $('pinSvg').addEventListener('click', e=>{
+    const pad = e.target.closest('.pin-pad'); if (!pad) return;
+    const pin = +pad.dataset.pin;
+    if (PUZ.probe==='red') PUZ.red = (PUZ.red===pin? null : pin);
+    else PUZ.blk = (PUZ.blk===pin? null : pin);
+    const t = pinTest(PUZ);
+    if (t && t.lit.length){
+      t.lit.forEach(k=> PUZ.found[k]=true);
+      let c = 0; t.lit.forEach(k=> c |= SEG_BITS[k]);
+      PUZ.previewCode = c;
+      if (PUZ.pins[PUZ.red-1]===null || PUZ.pins[PUZ.blk-1]===null) PUZ.found.com = true;
+    } else {
+      PUZ.previewCode = 0;
+    }
+    renderPin();
+  });
+  $('pinReset').addEventListener('click', ()=>{
+    PUZ = newPuzzle(); PUZ.previewCode = 0; renderPin();
+  });
+  renderPin();
+}
+/* ================================================================
+   ⑤ §05 动态扫描 + 鬼影实验室
+   上：真实 4 位管（余辉模型 τ=5ms）· 下：逻辑分析仪 16ms 触发窗
+   时序（确定性函数，供断言）：
+     正常：位 i 高窗 = [i·slot+blank, (i+1)·slot)，段码在槽起点（消隐中）切换
+     鬼影：位 i 高窗 = [i·slot, (i+1)·slot)（无消隐），段码在槽尾 0.3ms 提前切换
+================================================================ */
+const SCAN_DIGITS = [0x4F|0x80, 0x06, 0x66, 0x06];   /* 3.141：dp 在位 1 */
+const SCAN_WIN = 16;                                   /* ms 触发窗 */
+const SCAN_TAU = 5;                                    /* 余辉时间常数 ms */
+const GHOST_T = 0.3;                                   /* 鬼影窗 ms */
+let SCAN = { f:125, ghost:false, playing:true, cur:0 };
+function scanSlotDur(){ return (1000/SCAN.f)/4; }
+/* 段码随时间（ms） */
+function segCodeAt(ms){
+  const slot = scanSlotDur(), P = slot*4;
+  const ph = ((ms % P) + P) % P;
+  const k = Math.floor(ph/slot);
+  const inSlot = ph - k*slot;
+  if (!SCAN.ghost) return SCAN_DIGITS[k];
+  return (inSlot > slot - GHOST_T) ? SCAN_DIGITS[(k+1)%4] : SCAN_DIGITS[k];
+}
+/* 位 i 选通（ms） */
+function digOn(i, ms){
+  const slot = scanSlotDur(), P = slot*4;
+  const ph = ((ms % P) + P) % P;
+  const blank = SCAN.ghost ? 0 : Math.min(0.24, slot*0.12);
+  return ph >= i*slot + blank && ph < (i+1)*slot;
+}
+/* 位 i 余辉亮度（ms 时刻） */
+function digAlpha(i, ms){
+  const slot = scanSlotDur(), P = slot*4;
+  const ph = ((ms % P) + P) % P;
+  const end = (i+1)*slot;
+  if (ph >= i*slot && ph < end) return 1;
+  const since = (ph >= end) ? ph - end : ph + P - end;
+  return Math.exp(-since/SCAN_TAU);
+}
+function scanDraw(){
+  const cv = $('scanCanvas'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const VW = 860, VH = 430;
+  const dpr = Math.min(devicePixelRatio||1,2);
+  cv.width = VW*dpr; cv.height = VH*dpr;
+  cv.style.width='100%'; cv.style.height='auto';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,VW,VH);
+  const cur = SCAN.cur;
+  const slot = scanSlotDur(), blank = SCAN.ghost ? 0 : Math.min(0.24, slot*0.12);
+  /* ---- 上半：4 位管（余辉 + 鬼影层） ---- */
+  const dw = 84, gap = 46, x0 = (VW - (dw*4 + gap*3))/2, dy = 16;
+  for (let i=0;i<4;i++){
+    const x = x0 + i*(dw+gap);
+    const a = digAlpha(i, cur);
+    drawGlyph(ctx, x, dy, dw, SCAN_DIGITS[i], {alpha:a, glow:a>0.35});
+    /* 鬼影层：本位选通窗的尾 0.3ms 段码已变成下一位的 → 叠一层新码 */
+    if (SCAN.ghost && digOn(i,cur)){
+      const P = slot*4, ph = ((cur % P) + P) % P;
+      const kk = Math.floor(ph/slot), inSlot = ph - kk*slot;
+      if (inSlot > slot - GHOST_T)
+        drawGlyph(ctx, x, dy, dw, SCAN_DIGITS[(i+1)%4], {alpha:.38, glow:true, on:'255,157,120'});
+    }
+    ctx.fillStyle = digOn(i,cur) ? '#ffb02e' : '#5c7264';
+    ctx.font='10px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillText('DIG'+(i+1), x+dw/2, dy+dw*0.97+18);
+    ctx.fillStyle='#3d4f45'; ctx.font='8.5px "IBM Plex Mono"';
+    ctx.fillText((digAlpha(i,cur)*100).toFixed(0)+'%', x+dw/2, dy+dw*0.97+32);
+  }
+  /* ---- 下半：逻辑分析仪 ---- */
+  const gx0=70, gx1=840;
+  const rows = [
+    {lab:'DIG1', col:'#ffb02e', y:206, hi:9},
+    {lab:'DIG2', col:'#ffb02e', y:234, hi:9},
+    {lab:'DIG3', col:'#ffb02e', y:262, hi:9},
+    {lab:'DIG4', col:'#ffb02e', y:290, hi:9},
+    {lab:'SEG[7:0]', col:'#57d8f2', y:390, amp:56}
+  ];
+  const tx = ms => gx0 + (ms/SCAN_WIN)*(gx1-gx0);
+  /* 时间网格 */
+  ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='center';
+  for (let ms=0; ms<=SCAN_WIN; ms+=2){
+    ctx.strokeStyle='rgba(39,57,45,.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(tx(ms),196); ctx.lineTo(tx(ms),404); ctx.stroke();
+    if (ms%4===0){ ctx.fillStyle='#5c7264'; ctx.fillText(ms+'ms', tx(ms), 418); }
+  }
+  ctx.textAlign='right';
+  for (const r of rows){
+    ctx.fillStyle='#5c7264'; ctx.fillText(r.lab, gx0-6, r.y+3);
+    ctx.strokeStyle='#1d2c22';
+    ctx.beginPath(); ctx.moveTo(gx0,r.y); ctx.lineTo(gx1,r.y); ctx.stroke();
+  }
+  /* 位选方波 */
+  ctx.lineWidth=2;
+  for (let i=0;i<4;i++){
+    const r = rows[i];
+    ctx.strokeStyle=r.col;
+    ctx.beginPath();
+    let pen=false;
+    for (let x=gx0; x<=gx1; x+=1.5){
+      const ms = (x-gx0)/(gx1-gx0)*SCAN_WIN;
+      const y = digOn(i,ms) ? r.y-r.hi : r.y;
+      if (!pen){ ctx.moveTo(x,y); pen=true; } else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  /* SEG 阶梯线（值 0-255 → y 向上） */
+  const sr = rows[4];
+  ctx.strokeStyle=sr.col; ctx.lineWidth=2;
+  ctx.beginPath();
+  let pen=false;
+  for (let x=gx0; x<=gx1; x+=0.8){
+    const ms = (x-gx0)/(gx1-gx0)*SCAN_WIN;
+    const v = segCodeAt(ms);
+    const y = sr.y - (v/255)*sr.amp;
+    if (!pen){ ctx.moveTo(x,y); pen=true; } else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  /* SEG 每槽 hex 标注（用暗背景色，不参与采样色） */
+  ctx.fillStyle='#8aa294'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
+  for (let k=0; k*slot<SCAN_WIN; k++){
+    const msC = k*slot + slot/2;
+    if (msC>SCAN_WIN) break;
+    ctx.fillText(hexByte(segCodeAt(msC)), tx(msC), sr.y+14);
+  }
+  /* 游标 */
+  const cx = tx(cur);
+  ctx.strokeStyle='rgba(220,235,225,.6)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(cx,190); ctx.lineTo(cx,404); ctx.stroke();
+  ctx.fillStyle='#34e08a';
+  ctx.beginPath(); ctx.arc(cx, sr.y - (segCodeAt(cur)/255)*sr.amp, 3, 0, Math.PI*2); ctx.fill();
+  /* 读数 */
+  const sc = scanCalc(4, SCAN.f);
+  $('scanRead').innerHTML =
+    '<span>f<sub>refresh</sub> = <b>'+SCAN.f+' Hz</b></span>' +
+    '<span>t<sub>dwell</sub> = <b>'+trim3(sc.tdwell)+' ms</b></span>' +
+    '<span>占空比 <b>'+Math.round(sc.duty*100)+'%</b></span>' +
+    '<span>消隐间隔 <b>'+(SCAN.ghost?'0（关断重叠）':trim3(blank)+' ms')+'</b></span>' +
+    '<span>SEG@游标 <b>'+hexByte(segCodeAt(cur))+'</b></span>';
+}
+function initScan(){
+  const cv = $('scanCanvas'); if (!cv) return;
+  let animId = 0, last = performance.now();
+  function loop(now){
+    const dt = (now-last)/1000; last = now;
+    if (SCAN.playing) SCAN.cur = (SCAN.cur + dt*(SCAN_WIN/1.4)) % SCAN_WIN;
+    scanDraw();
+    animId = requestAnimationFrame(loop);
+  }
+  animId = requestAnimationFrame(loop);
+  $('scanPlay').addEventListener('click', ()=>{
+    SCAN.playing = !SCAN.playing;
+    $('scanPlay').classList.toggle('on', SCAN.playing);
+    $('scanPlay').textContent = SCAN.playing ? '❚❚' : '▶';
+  });
+  $('scanF').addEventListener('input', e=>{
+    SCAN.f = +e.target.value;
+    $('scanFVal').textContent = SCAN.f+' Hz';
+    scanDraw();
+  });
+  $('scanGhost').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if (!b) return;
+    SCAN.ghost = b.dataset.m==='1';
+    $('scanGhost').querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
+    scanDraw();
+  });
+  $('scanFVal').textContent = SCAN.f+' Hz';
+  /* ResizeObserver 不重设内部分辨率（固定 860 逻辑宽按 css width 缩放显示） */
+  cv.style.width='100%';
+}
+
+/* ================================================================
+   ⑥ §06 限流电阻与亮度计算器
+================================================================ */
+function calcRc(){
+  if (!$('rcVcc')) return;
+  const vcc = +$('rcVcc').value, vf = +$('rcCol').value;
+  const iMa = Math.max(0.5, +$('rcI').value || 10);
+  const N = +$('rcN').value, pat = +$('rcPat').value;
+  const I = iMa/1000;
+  const rIdeal = resCalc(vcc, vf, I);
+  const r24 = e24Near(rIdeal);
+  const iReal = isFinite(rIdeal) && rIdeal>0 ? (vcc-vf)/r24 : NaN;
+  const canDrive = vcc - vf > 0.3;
+  /* 动态扫描：同亮度 → 峰值 = 目标 ×N（占空比补偿），同时给「不补偿」对照 */
+  const iPk = iReal * N;
+  const iDig = pat * iPk;
+  const iGpioSeg = iReal;
+  $('rcFormula').innerHTML =
+    'R = (VCC − VF) / I = ('+vcc+' − '+vf.toFixed(1)+') / '+(iMa*1).toFixed(1)+'mA = '+
+    (canDrive ? (rIdeal>=1000 ? trim3(rIdeal/1000)+' kΩ' : trim3(rIdeal)+' Ω') : '无解') +
+    '　→　E24 就近 <b>'+fmtOhm(r24)+'</b> → 实际 I = '+fmtA(iReal);
+  let rows =
+    '<div class="row"><span>段电流（静态 = 峰值 = 平均）</span><span class="v">'+fmtA(iReal)+'</span></div>';
+  if (N>1){
+    rows += '<div class="row"><span>扫描占空比 1/'+N+'</span><span class="v">'+(100/N).toFixed(1)+'%</span></div>';
+    rows += '<div class="row"><span>同亮度峰值（×'+N+' 补偿）</span><span class="v">'+fmtA(iPk)+'</span></div>';
+    rows += '<div class="row"><span>峰值下平均电流（=亮度）</span><span class="v">'+fmtA(iPk/N)+'</span></div>';
+    rows += '<div class="row"><span>不补偿时的平均（亮度掉到 1/'+N+'）</span><span class="v">'+fmtA(iReal/N)+'</span></div>';
+  }
+  rows += '<div class="row"><span>位选电流（「'+(pat===7?'8.':pat===6?'0/8':'1')+'」'+pat+' 段全开）</span><span class="v">'+fmtA(iDig)+'</span></div>';
+  rows += '<div class="row"><span>整管峰值功耗（I·VCC）</span><span class="v">'+fmtW(iDig*vcc)+'</span></div>';
+  $('rcRows').innerHTML = rows;
+  /* 判读 */
+  const v = [];
+  if (!canDrive){
+    v.push(['bad','电压余量不足','VCC − VF = '+((vcc-vf)*1000).toFixed(0)+'mV，恒流空间不足：换红/绿管、升压或改用带电流源的驱动芯片。']);
+  } else {
+    v.push(['good','段电流','单段 ' + fmtA(iGpioSeg) + (iGpioSeg<=0.025 ? ' ≤ 25mA：GPIO 可直驱段脚' : ' > 25mA：超 GPIO 单脚红线，必须驱动芯片/三极管')]);
+    if (N>1){
+      v.push([iPk<=0.025 ? 'good' : (iPk<=0.07 ? 'warnv' : 'bad'), '扫描峰值', fmtA(iPk) + '（×' + N + ' 补偿后）' + (iPk<=0.025 ? '：GPIO 段脚可扛' : '：超 GPIO 25mA；74HC595 单脚 35mA 上限' + (iPk<=0.035 ? ' 内' : ' 也超') + '，查手册 If(peak)')]);
+    }
+    v.push([iDig<=0.025 ? 'good' : 'bad', '位选电流', fmtA(iDig) + (iDig<=0.025 ? '：位选可直推' : '：位选必须经三极管/ULN2003/MOSFET，任何 GPIO 都扛不住')]);
+  }
+  $('rcVerdict').className = 'calc-verdict ' + (v.some(x=>x[0]==='bad') ? 'bad' : v.some(x=>x[0]==='warnv') ? 'warnv' : 'good');
+  $('rcVerdict').innerHTML = v.map(x => '<b>' + x[1] + '</b> · ' + x[2]).join('<br>');
+}
+function fmtW(w){
+  if (!isFinite(w)) return '—';
+  const us=[[1,'W'],[1e-3,'mW']];
+  for (const [f,n] of us){ if (w>=f) return trim3(w/f)+' '+n; }
+  return trim3(w/1e-6)+' µW';
+}
+/* ================================================================
+   ⑦ §07 驱动电路实验室（四场景：电路图 + 示波器 + 游标动画）
+================================================================ */
+const DRV_MODEL = {
+  vcc:5, vf:2.0, rs:330,
+  segI(){ return (this.vcc-this.vf)/this.rs; }        /* 9.09mA */
+};
+let DRV = { i:0, playing:true, t:0 };
+/* ---- 符号库（端点坐标级对齐：导线一律取符号引脚坐标） ---- */
+function symGnd(ctx,x,y){
+  ctx.strokeStyle='#8aa294'; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+8); ctx.stroke();
+  for (let k=0;k<3;k++){
+    const w = 12-k*4;
+    ctx.beginPath(); ctx.moveTo(x-w/2,y+8+k*4); ctx.lineTo(x+w/2,y+8+k*4); ctx.stroke();
+  }
+}
+function symChip(ctx,x,y,w,h,label,sub){
+  ctx.strokeStyle='#34e08a'; ctx.lineWidth=1.7;
+  ctx.strokeRect(x,y,w,h);
+  ctx.fillStyle='#dcebe1'; ctx.font='11px "IBM Plex Mono"'; ctx.textAlign='center';
+  ctx.fillText(label, x+w/2, y+h/2-3);
+  if (sub){ ctx.fillStyle='#8aa294'; ctx.font='8.5px "IBM Plex Mono"'; ctx.fillText(sub, x+w/2, y+h/2+11); }
+}
+function symRes(ctx,x,y,len,label){   /* 竖电阻，引脚 (x,y) 与 (x,y+len) */
+  const bh=18;
+  ctx.strokeStyle='#8aa294'; ctx.lineWidth=1.5;
+  ctx.strokeRect(x-5, y+(len-bh)/2, 10, bh);
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+(len-bh)/2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,y+(len+bh)/2); ctx.lineTo(x,y+len); ctx.stroke();
+  if (label){ ctx.fillStyle='#5c7264'; ctx.font='8px "IBM Plex Mono"'; ctx.textAlign='left'; ctx.fillText(label, x+8, y+len/2+2); }
+}
+function wire(ctx,x1,y1,x2,y2,col){
+  ctx.strokeStyle=col||'#3a4a40'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+}
+function node(ctx,x,y){
+  ctx.fillStyle='#3a4a40'; ctx.beginPath(); ctx.arc(x,y,2.6,0,Math.PI*2); ctx.fill();
+}
+/* 波形 pane：返回 t→x、v→y 映射与 pane 边界 */
+function wavePane(ctx,x0,y0,w,h,title,vmax,unit){
+  ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+  ctx.strokeRect(x0,y0,w,h);
+  ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+  ctx.fillText(title, x0, y0-6);
+  ctx.textAlign='right';
+  ctx.fillText(vmax+' '+unit, x0+w, y0-6);
+  for (let k=1;k<4;k++){
+    ctx.strokeStyle='rgba(39,57,45,.5)';
+    ctx.beginPath(); ctx.moveTo(x0,y0+h*k/4); ctx.lineTo(x0+w,y0+h*k/4); ctx.stroke();
+  }
+  return {
+    x0,y0,w,h,vmax,
+    tx:(t,twin)=> x0 + (t/twin)*w,
+    vy:v=> y0+h-(Math.max(0,Math.min(v,vmax)))/vmax*h
+  };
+}
+function traceLine(ctx,pane,fn,twin,col,lw){
+  ctx.strokeStyle=col; ctx.lineWidth=lw||2;
+  ctx.beginPath();
+  let pen=false;
+  for (let x=0;x<=pane.w;x+=1){
+    const t = x/pane.w*twin;
+    const y = pane.vy(fn(t));
+    if (!pen){ ctx.moveTo(pane.x0+x,y); pen=true; } else ctx.lineTo(pane.x0+x,y);
+  }
+  ctx.stroke();
+}
+function refLine(ctx,pane,v,label,col){
+  const y = pane.vy(v);
+  ctx.strokeStyle=col; ctx.lineWidth=1.2; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(pane.x0,y); ctx.lineTo(pane.x0+pane.w,y); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=col; ctx.font='8px "IBM Plex Mono"'; ctx.textAlign='left';
+  ctx.fillText(label, pane.x0+4, y-3);
+}
+/* ---- 场景绘制 ---- */
+function drawDrv(){
+  const cv = $('drvCanvas'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const VW=860, VH=392;
+  const dpr = Math.min(devicePixelRatio||1,2);
+  cv.width = VW*dpr; cv.height = VH*dpr; cv.style.width='100%'; cv.style.height='auto';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,VW,VH);
+  const M = DRV_MODEL, ISEG = M.segI()*1000;      /* mA */
+  const PANES = [];                               /* 收集用于游标 */
+  function cursor(panes, twin, t, label){
+    const x = panes[0].x0 + (t/twin)*panes[0].w;
+    ctx.strokeStyle='rgba(220,235,225,.55)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x, panes[0].y0-2); ctx.lineTo(x, panes[panes.length-1].y0+panes[panes.length-1].h+2); ctx.stroke();
+    ctx.fillStyle='#5c7264'; ctx.font='8px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText(label, Math.min(x+4, panes[0].x0+panes[0].w-34), panes[0].y0-6+10);
+  }
+  if (DRV.i===0){
+    /* ---- 场景 0：GPIO 直驱 1 位共阴 ---- */
+    symChip(ctx, 30, 70, 120, 80, 'MCU', '8×GPIO 推挽');
+    const segYs = [86,102,118,134];
+    ctx.fillStyle='#8aa294'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('a b c … dp', 152, 78);
+    for (let k=0;k<3;k++){
+      const y = segYs[k];
+      wire(ctx,150,y,178,y);
+      symRes(ctx,178,y,34, k===0?'330Ω×8':'');
+      wire(ctx,212,y,246,y);
+    }
+    wire(ctx,150,segYs[3],246,segYs[3]);
+    /* 数码管 */
+    drawGlyph(ctx, 250, 60, 96, FONT['8']|0x80, {glow:true});
+    ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('1 位共阴', 250, 24);
+    /* COM 引脚向下到 GND */
+    wire(ctx,298,156,298,196);
+    node(ctx,298,156);
+    symGnd(ctx,298,196);
+    ctx.fillStyle='#8aa294'; ctx.fillText('COM(阴极公共) 直接入地', 320, 200);
+    /* VCC 标注（MCU 内部上拉到 5V 推挽输出） */
+    ctx.fillStyle='#5c7264'; ctx.fillText('段脚输出 5V / 0V', 42, 62);
+    /* 波形 */
+    const twin = 20;                                   /* ms */
+    const p1 = wavePane(ctx, 520, 34, 310, 120, '单段电流 I(seg)', 20, 'mA');
+    traceLine(ctx, p1, t => t<5?0:ISEG, twin, '#34e08a');
+    refLine(ctx, p1, 25, '— — 25mA：GPIO 单脚红线（本场景 9.1mA ✓）', 'rgba(255,100,120,.75)');
+    const p2 = wavePane(ctx, 520, 214, 310, 120, 'COM 总电流（7 段全开）', 80, 'mA');
+    traceLine(ctx, p2, t => t<5?0:7*ISEG, twin, '#ffb02e');
+    refLine(ctx, p2, 25, '25mA 红线只约束 GPIO，COM 入地不受限', 'rgba(255,100,120,.45)');
+    PANES.push(p1,p2);
+    cursor(PANES, twin, DRV.t, 't');
+    $('drvRead').innerHTML =
+      '<span>I<sub>seg</sub> = <b>'+trim3(ISEG)+' mA</b>（(5−2)/330）</span>' +
+      '<span>「8.」7 段全开 I<sub>COM</sub> = <b>'+trim3(7*ISEG)+' mA</b>（入地，不经 GPIO）</span>' +
+      '<span>占用 <b>8 IO</b></span>';
+    $('drvCap').innerHTML = '<b>1 位 = 8 个 GPIO 硬扛，电流完全够用：</b>每段 9.1mA 低于单脚 25mA 红线；8 段总电流 63.6mA 走 GND 汇流，不占任何引脚额度。' +
+      '代价是<b>IO 开销</b>：再来一位就要 16 个 IO——多位必须复用（场景 1）。';
+  } else if (DRV.i===1){
+    /* ---- 场景 1：4 位扫描 + PNP 位驱动（共阳） ---- */
+    /* VCC 轨 */
+    wire(ctx, 40, 40, 330, 40, '#ffb02e');
+    ctx.fillStyle='#ffb02e'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('+5V', 40, 32);
+    /* PNP：发射极在轨、集电极下到 COM */
+    const ex=150, ey=40;
+    wire(ctx,ex,ey,ex,ey+14);
+    ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.7;
+    ctx.beginPath(); ctx.moveTo(ex-22,ey+14); ctx.lineTo(ex-22,ey+46); ctx.stroke();   /* 基竖线 */
+    ctx.beginPath(); ctx.moveTo(ex-22,ey+22); ctx.lineTo(ex+2,ey+14); ctx.stroke();    /* E */
+    ctx.beginPath(); ctx.moveTo(ex-22,ey+34); ctx.lineTo(ex+2,ey+46); ctx.stroke();    /* C */
+    /* 箭头（PNP 朝基极） */
+    ctx.beginPath(); ctx.moveTo(ex-22,ey+30); ctx.lineTo(ex-13,ey+32.5); ctx.lineTo(ex-16,ey+26); ctx.closePath();
+    ctx.fillStyle='#57d8f2'; ctx.fill();
+    wire(ctx,ex+2,ey+14,ex+2,ey);                       /* E 连轨 */
+    node(ctx,ex+2,ey);
+    wire(ctx,ex+2,ey+46,ex+2,76);                        /* C → 数码管 COM */
+    node(ctx,ex+2,76);
+    drawGlyph(ctx, 110, 76, 84, FONT['8']|0x80, {glow:true});
+    ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('位 1 COM（阳极）×4 位', 208, 90);
+    /* 基极电阻 → MCU 位选（引脚：电阻底 (128,116) → 竖线 → MCU 右缘 (130,150)） */
+    symRes(ctx, ex-22, ey+46, 30, '10k');
+    wire(ctx,ex-22,ey+76,ex-22,150);
+    wire(ctx,ex-22,150,130,150);
+    symChip(ctx, 20, 120, 110, 64, 'MCU', '位选 0V=开');
+    ctx.fillStyle='#8aa294'; ctx.font='8.5px "IBM Plex Mono"';
+    ctx.fillText('DIG1', 96, 146);
+    /* 段脚：MCU 拉低点亮 */
+    wire(ctx,130,166,150,166);
+    ctx.fillStyle='#5c7264'; ctx.fillText('段脚 0V 亮（灌电流）· 330Ω×8', 152, 169);
+    ctx.fillText('未画部分：8 段线经 330Ω 接段脚', 40, 210);
+    ctx.fillText('PNP 低边=高边开关：位选拉低 10k 基极 → 管 saturated', 40, 224);
+    /* 波形：位选电流方波 70mA */
+    const twin = 20;
+    const P = 8, slot = 2;                               /* 扫描周期 8ms */
+    const iDig = t => { const ph=((t%P)+P)%P; return (ph<1.76 && t>3) ? 70 : 0; };
+    const p1 = wavePane(ctx, 520, 34, 310, 160, '位选电流（7 段×10mA）', 100, 'mA');
+    traceLine(ctx, p1, iDig, twin, '#34e08a');
+    refLine(ctx, p1, 25, '25mA GPIO 红线（GPIO 直推位选 = 超限 2.8×）', 'rgba(255,100,120,.8)');
+    refLine(ctx, p1, 100, 'SS8550 PNP Ic 500mA 余量充足', 'rgba(87,216,242,.6)');
+    const p2 = wavePane(ctx, 520, 254, 310, 80, '占空比 25%（×4 补亮度后峰值）', 100, 'mA');
+    traceLine(ctx, p2, iDig, twin, '#57d8f2', 1.6);
+    PANES.push(p1,p2);
+    cursor(PANES, twin, DRV.t, 't');
+    $('drvRead').innerHTML =
+      '<span>位选峰值 <b>70 mA</b>（7 段 × 10mA）</span>' +
+      '<span>GPIO 红线 <b>25 mA</b> → 必须 PNP/NPN/ULN2003</span>' +
+      '<span>IO：8 段 + 4 位 = <b>12</b></span>';
+    $('drvCap').innerHTML = '<b>为什么位驱动管必须存在：</b>位选电流 = 该位点亮段数 × 段电流，「8.」就是 7×10=70mA——任何 GPIO 的 25mA 都扛不住。' +
+      'PNP 做高边开关（共阳 COM 在上），NPN/ULN2003 做低边（共阴），基极 10k 由 MCU 位选脚驱动，管子饱和后压降 ~0.2V 几乎不抢 VF 预算。';
+  } else if (DRV.i===2){
+    /* ---- 场景 2：74HC595 静态移位 ---- */
+    symChip(ctx, 30, 60, 120, 90, 'MCU', '3 线 SPI');
+    const pins = [['DATA',96],['CLK',120],['LATCH',144]];
+    for (const [nm,y] of pins){
+      wire(ctx,150,y,215,y);
+      ctx.fillStyle='#8aa294'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+      ctx.fillText(nm, 162, y-5);
+    }
+    symChip(ctx, 215, 52, 130, 106, '74HC595', '8bit 锁存');
+    /* 输出 8 路 → 电阻 → 管 */
+    for (let k=0;k<3;k++){
+      const y = 76+k*26;
+      wire(ctx,345,y,362,y);
+      symRes(ctx,362,y,30,'330Ω×8');
+      wire(ctx,392,y,418,y);
+    }
+    wire(ctx,345,128,418,128);
+    drawGlyph(ctx, 418, 56, 84, FONT['5'], {glow:true});
+    ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('静态显示：锁存后不再刷新', 300, 40);
+    ctx.fillText('级联 N 片仍是 3 个 IO（数据穿行）', 300, 176);
+    /* 波形：CLK/DATA/LATCH */
+    const twin = 90;                                      /* µs */
+    const bits = [1,1,1,1,1,1,0,0];                       /* 0x3F LSB first */
+    const clk = t => { const ph = t%10; return (t<80 && ph>=2 && ph<6) ? 5 : 0; };
+    const dat = t => { if (t>=80) return 0; const k = Math.floor(t/10); return bits[k] ? 5 : 0; };
+    const lat = t => t>=84 ? 5 : 0;
+    const p1 = wavePane(ctx, 520, 28, 310, 84, 'DATA（0x3F 串行，LSB first）', 5, 'V');
+    traceLine(ctx, p1, dat, twin, '#57d8f2');
+    const p2 = wavePane(ctx, 520, 150, 310, 84, 'CLK（上升沿采样）', 5, 'V');
+    traceLine(ctx, p2, clk, twin, '#ffb02e');
+    const p3 = wavePane(ctx, 520, 272, 310, 84, 'LATCH（RCLK，尾部一拍并入输出）', 5, 'V');
+    traceLine(ctx, p3, lat, twin, '#34e08a');
+    PANES.push(p1,p2,p3);
+    cursor(PANES, twin, DRV.t, 't');
+    $('drvRead').innerHTML =
+      '<span>3 IO → <b>8 段静态</b>（级联 +8 段/片不加线）</span>' +
+      '<span>t<sub>clk</sub> ≥ 20ns → 一帧 8 拍 &lt; 1µs</span>' +
+      '<span>595 单脚 ≤ <b>±35mA</b> 总 VCC ≤ 70mA</span>';
+    $('drvCap').innerHTML = '<b>移位寄存器把「IO 数量」问题变成「时间」问题：</b>DATA 按 LSB first 逐位挤进移位链，CLK 上升沿采样；' +
+      '8 位到齐后 LATCH 一拍，整字节同时出现在 QA–QH——<b>静态显示，无扫描、无鬼影、无占空比损失</b>。多片级联（QH′ 接下一片 DATA）3 线驱动任意多位。';
+  } else {
+    /* ---- 场景 3：TM1637 两线专用芯片 ---- */
+    symChip(ctx, 20, 64, 110, 96, 'MCU', '2 线开漏');
+    for (const [nm,y] of [['CLK',92],['DIO',128]]){
+      wire(ctx,130,y,196,y);
+      ctx.fillStyle='#8aa294'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+      ctx.fillText(nm, 148, y-5);
+    }
+    /* DIO 上拉 10k → +5V（引脚：(160,128) 线上节点 → 电阻 (160,100)-(160,128) → 顶接轨） */
+    node(ctx,160,128);
+    symRes(ctx, 160, 100, 28, '10k');
+    wire(ctx,160,100,160,84);
+    wire(ctx,120,84,160,84,'#ffb02e');
+    ctx.fillStyle='#ffb02e'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('+5V', 96, 87);
+    symChip(ctx, 196, 52, 130, 110, 'TM1637', '内置扫描');
+    wire(ctx,326,76,346,76); wire(ctx,326,120,346,120);
+    ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('SEG×8', 330, 66);
+    ctx.fillText('DIG×4', 330, 134);
+    for (let k=0;k<4;k++) drawGlyph(ctx, 348+k*44, 60, 40, SCAN_DIGITS[k], {glow:true});
+    ctx.fillStyle='#5c7264'; ctx.fillText('4 位一体共阳（芯片内部恒流+扫描+16 级 PWM 亮度）', 44, 186);
+    /* 波形：协议帧（字节分块，字节窗 30µs、帧间隔 38µs） */
+    const twin = 270;                                     /* µs 示意（真实 250kHz clk） */
+    const frame = [[0x40,0],[0xC0,38],[0xCF,76],[0x06,114],[0x66,152],[0x06,190],[0x8C,228]];
+    function dioVal(t){
+      for (const [byte,t0] of frame){
+        if (t>=t0 && t<t0+30){
+          const k = Math.floor((t-t0)/3.75);
+          if (k>=8) return 0;                            /* 应答/间隙 */
+          return ((byte>>k)&1) ? 5 : 0;
+        }
+      }
+      return 5;                                          /* 空闲上拉高 */
+    }
+    const clkV = t => { for (const [,t0] of frame){ if (t>=t0+2 && t<t0+30){ return ((t%3.75)<1.875)?5:0; } } return 5; };
+    const p1 = wavePane(ctx, 520, 28, 310, 100, 'DIO（命令+显存+亮度，8bit/字节）', 5, 'V');
+    traceLine(ctx, p1, dioVal, twin, '#57d8f2');
+    const p2 = wavePane(ctx, 520, 176, 310, 80, 'CLK（250kHz，空闲高）', 5, 'V');
+    traceLine(ctx, p2, clkV, twin, '#ffb02e', 1.5);
+    /* 帧字节标注 */
+    ctx.fillStyle='#5c7264'; ctx.font='8px "IBM Plex Mono"'; ctx.textAlign='left';
+    for (const [byte,t0] of frame){
+      ctx.fillText(hexByte(byte), p1.x0+(t0/twin)*p1.w+2, p1.y0+p1.h+12);
+    }
+    PANES.push(p1,p2);
+    cursor(PANES, twin, DRV.t, 't');
+    $('drvRead').innerHTML =
+      '<span>2 IO → <b>4 位全功能</b>（扫描+恒流+亮度）</span>' +
+      '<span>帧：0x40 写命令 · C0+4 字节显存 · <b>0x8x</b> 亮度 0–7</span>' +
+      '<span>官方面向<b>共阳</b>管</span>';
+    $('drvCap').innerHTML = '<b>终点站：把扫描降级成「写显存」。</b>TM1637 内部自带振荡器与扫描状态机，MCU 只在数值变化时写 4 个字节；' +
+      '亮度命令 0x88–0x8F 控制 16 级 PWM 占空比（占空比改的是每段点亮时间，不是电流，所以不偏色）。' +
+      '两线开漏 + 10k 上拉，CLK 最高 250kHz——慢线、长线都能跑。同族：MAX7219（SPI 8 位/共阴）、HT16K33（I²C 16×8 矩阵）。';
+  }
+}
+function initDrv(){
+  const cv = $('drvCanvas'); if (!cv) return;
+  let last = performance.now();
+  const TWIN = ()=> [20,20,90,270][DRV.i];       /* µs/ms 由场景定 */
+  function loop(now){
+    const dt = (now-last)/1000; last = now;
+    if (DRV.playing) DRV.t = (DRV.t + dt*TWIN()/2.2) % TWIN();
+    drawDrv();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  $('drvPlay').addEventListener('click', ()=>{
+    DRV.playing = !DRV.playing;
+    $('drvPlay').classList.toggle('on', DRV.playing);
+    $('drvPlay').textContent = DRV.playing ? '❚❚' : '▶';
+  });
+  $('drvCir').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if (!b) return;
+    DRV.i = +b.dataset.i;
+    DRV.t = 0;
+    $('drvCir').querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
+    drawDrv();
+  });
+}
+
+/* ================================================================
+   ⑧ §08 字符画廊 + §11 速查表 + hero 迷你图 + 初始化
+================================================================ */
+function initGal(){
+  if (!$('galGrid')) return;
+  const keys = ['0','1','2','3','4','5','6','7','8','9','A','b','C','d','E','F','H','L','P','U','−','°',' ','8.'];
+  $('galGrid').innerHTML = keys.map(ch=>{
+    const code = ch==='8.' ? (FONT['8']|0x80) : segOf(ch);
+    const disp = ch===' ' ? '␠' : ch==='8.' ? '8+dp' : ch;
+    return '<div class="gal-cell"><svg viewBox="0 0 100 104">'+glyphSvg(code,{glow:code!==0})+'</svg>'+
+      '<div class="ch">'+escHtml(disp)+'</div><div class="hx">'+hexByte(code)+' / '+hexByte(anode(code))+'</div></div>';
+  }).join('');
+  /* hero 迷你「4」 */
+  if ($('heroGlyphMini')){
+    $('heroGlyphMini').innerHTML =
+      '<g transform="translate(24,6) scale(0.85)">'+glyphSvg(FONT['4'])+'</g>' +
+      '<g font-family="IBM Plex Mono" font-size="9" fill="#ff6478">' +
+      '<text x="196" y="34">b</text><text x="196" y="60">c</text><text x="120" y="34">f</text><text x="120" y="60">g</text></g>';
+  }
+  /* 速查表段码表 */
+  if ($('csFont')){
+    let rows = '<tr><td style="color:#dcebe1">字</td><td>共阴</td><td>共阳</td><td style="color:#dcebe1">字</td><td>共阴</td><td>共阳</td></tr>';
+    const ks = ['0','1','2','3','4','5','6','7','8','9','A','b','C','d','E','F'];
+    for (let i=0;i<8;i++){
+      const a = ks[i], b = ks[i+8];
+      rows += '<tr><td style="color:#ff5d5d">'+escHtml(a)+'</td><td>'+hexByte(segOf(a))+'</td><td>'+hexByte(anode(segOf(a)))+'</td>'+
+              '<td style="color:#ff5d5d">'+escHtml(b)+'</td><td>'+hexByte(segOf(b))+'</td><td>'+hexByte(anode(segOf(b)))+'</td></tr>';
+    }
+    $('csFont').innerHTML = rows;
+  }
+}
+
+/* ---------------- 启动 ---------------- */
+(function initAll(){
+  initSc();
+  initCc();
+  initPin();
+  initScan();
+  calcRc();
+  ['rcVcc','rcCol','rcI','rcN','rcPat'].forEach(id=>{
+    const el = $(id); if (el) el.addEventListener('change', calcRc);
+  });
+  initDrv();
+  initGal();
+})();
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script src="component-nav.js" defer></script>
+</body>
+</html>
+
+
+
+
+

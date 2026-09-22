@@ -24,6 +24,9 @@
     ]},
     { group: '机电与连接', items: [
       ['speaker.html', '扬声器/蜂鸣器']
+    ]},
+    { group: '显示与指示', items: [
+      ['sevenseg.html', '数码管']
     ]}
   ];
 
