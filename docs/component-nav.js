@@ -24,7 +24,8 @@
       ['battery.html', '电池']
     ]},
     { group: '机电与连接', items: [
-      ['speaker.html', '扬声器/蜂鸣器']
+      ['speaker.html', '扬声器/蜂鸣器'],
+      ['microphone.html', '麦克风']
     ]},
     { group: '显示与指示', items: [
       ['sevenseg.html', '数码管']

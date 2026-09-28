@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麦克风 · 交互式图解</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23070b09'/><rect x='12' y='3' width='8' height='16' rx='4' fill='none' stroke='%2334e08a' stroke-width='2'/><path d='M8 15 v1 a8 8 0 0 0 16 0 v-1 M16 24 v5 M11 29 h10' fill='none' stroke='%2334e08a' stroke-width='2'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b09;
+  --bg2:#0a100c;
+  --panel:#0d1510;
+  --panel2:#101a13;
+  --line:#1d2c22;
+  --line2:#27392d;
+  --ink:#dcebe1;
+  --dim:#8aa294;
+  --faint:#5c7264;
+  --green:#34e08a;
+  --green-dim:#1d8a55;
+  --amber:#ffb02e;
+  --cyan:#57d8f2;
+  --red:#ff6478;
+  --violet:#b98cff;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --disp:'Chakra Petch','Noto Sans SC',sans-serif;
+  --sans:'Noto Sans SC',-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:300;
+  line-height:1.8;
+  letter-spacing:.01em;
+  overflow-x:hidden;
+}
+/* 全局网格纸背景 */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.028) 1px,transparent 1px),
+    linear-gradient(rgba(52,224,138,.014) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(52,224,138,.014) 1px,transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 120% 90% at 50% 0%,transparent 60%,rgba(0,0,0,.5));
+}
+main{position:relative;z-index:1}
+::selection{background:rgba(52,224,138,.3)}
+
+/* ============ 导航 ============ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;gap:22px;
+  padding:0 26px;height:52px;flex-wrap:wrap;
+  background:rgba(7,11,9,.82);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+nav .logo{font-family:var(--disp);font-weight:700;font-size:17px;color:var(--green);letter-spacing:.04em}
+nav .logo b{color:var(--faint);font-weight:600}
+nav a{
+  color:var(--dim);text-decoration:none;font-size:12.5px;
+  font-family:var(--mono);letter-spacing:.05em;
+  transition:color .2s;
+}
+nav a:hover{color:var(--green)}
+nav .spacer{flex:1}
+nav .live{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+nav .live i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ============ Hero ============ */
+.hero{
+  min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  padding:110px 6vw 40px;position:relative;
+}
+.hero .eyebrow{
+  font-family:var(--mono);font-size:12px;color:var(--amber);
+  letter-spacing:.32em;margin-bottom:22px;
+  display:flex;align-items:center;gap:14px;
+}
+.hero .eyebrow::before{content:"";width:44px;height:1px;background:var(--amber)}
+.hero h1{
+  font-family:var(--disp);font-weight:700;
+  font-size:clamp(52px,10vw,132px);
+  line-height:.95;letter-spacing:-.01em;
+  color:var(--ink);
+}
+.hero h1 .en{
+  display:block;font-family:var(--mono);font-weight:500;
+  font-size:clamp(14px,1.9vw,24px);color:var(--dim);
+  letter-spacing:.28em;margin-top:20px;
+}
+.hero h1 .en b{color:var(--green);font-weight:600}
+.hero p.lede{
+  max-width:660px;margin-top:34px;font-size:16px;color:var(--dim);
+}
+.hero p.lede b{color:var(--ink);font-weight:500}
+.hero .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.hero .chips span{
+  font-family:var(--mono);font-size:11.5px;padding:5px 12px;
+  border:1px solid var(--line2);border-radius:3px;color:var(--dim);
+  background:rgba(13,21,16,.6);
+}
+.hero .chips span b{color:var(--green);font-weight:500}
+.hero .scope-wrap{
+  margin-top:52px;border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;background:rgba(9,14,11,.75);position:relative;
+}
+.hero .scope-wrap::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.16) 3px 4px);
+}
+.hero canvas{display:block;width:100%;height:150px}
+.hero .scroll-hint{
+  margin-top:40px;font-family:var(--mono);font-size:11px;color:var(--faint);
+  letter-spacing:.2em;display:flex;align-items:center;gap:10px;
+}
+.hero .scroll-hint svg{animation:bounce 1.8s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* ============ 通用 section ============ */
+section{padding:96px 6vw;max-width:1280px;margin:0 auto;position:relative}
+section a{color:var(--green);text-decoration:none;border-bottom:1px dotted var(--green-dim)}
+section a:hover{border-bottom-style:solid}
+.sec-head{display:flex;align-items:baseline;gap:20px;margin-bottom:16px}
+.sec-head .no{
+  font-family:var(--mono);font-size:13px;color:var(--green);
+  letter-spacing:.1em;border:1px solid var(--green-dim);
+  padding:3px 10px;border-radius:3px;white-space:nowrap;
+}
+.sec-head h2{
+  font-family:var(--disp);font-weight:600;font-size:clamp(26px,3.6vw,40px);
+  letter-spacing:.01em;
+}
+.sec-head .en{
+  font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.24em;
+  text-transform:uppercase;margin-left:auto;white-space:nowrap;
+}
+.sec-sub{color:var(--dim);max-width:780px;margin-bottom:44px;font-size:15px}
+.sec-sub b{color:var(--ink);font-weight:500}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ §01 是什么 ============ */
+.two-col{display:grid;grid-template-columns:1.25fr .9fr;gap:44px;align-items:start}
+.prose p{margin-bottom:18px;color:var(--dim);font-size:15px}
+.prose p b{color:var(--ink);font-weight:500}
+.prose .kw{color:var(--green);font-family:var(--mono);font-size:.92em}
+.prose .kw2{color:var(--amber);font-family:var(--mono);font-size:.92em}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th{
+  font-family:var(--mono);font-weight:500;color:var(--faint);text-align:left;
+  padding:9px 12px;border-bottom:1px solid var(--line2);font-size:11.5px;letter-spacing:.06em;
+}
+.cmp-table td{
+  padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top;
+}
+.cmp-table td:first-child{color:var(--ink);font-weight:400;white-space:nowrap}
+.cmp-table .yes{color:var(--green)}
+.cmp-table .no{color:var(--red)}
+.fact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:36px}
+.fact{
+  border:1px solid var(--line);border-radius:6px;padding:20px 20px 18px;
+  background:linear-gradient(160deg,var(--panel) 0%,rgba(13,21,16,.4) 100%);
+  transition:border-color .25s,transform .25s;
+}
+.fact:hover{border-color:var(--green-dim);transform:translateY(-3px)}
+.fact .f-no{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.14em}
+.fact h4{font-family:var(--disp);font-size:16.5px;font-weight:600;margin:8px 0 8px}
+.fact h4 code{font-family:var(--mono);font-size:.85em;color:var(--green)}
+.fact p{font-size:12.8px;color:var(--dim);line-height:1.7}
+
+/* ============ 实验室通用 ============ */
+.lab{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  overflow:hidden;
+}
+.lab-bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:18px;
+  padding:16px 20px;border-bottom:1px solid var(--line);background:rgba(10,16,12,.7);
+}
+.ctrl{display:flex;align-items:center;gap:9px}
+.ctrl label{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
+.seg{display:flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden}
+.seg button{
+  font-family:var(--mono);font-size:12px;padding:7px 13px;border:none;cursor:pointer;
+  background:transparent;color:var(--dim);border-right:1px solid var(--line2);
+  transition:all .18s;letter-spacing:.02em;
+}
+.seg button:last-child{border-right:none}
+.seg button:hover{color:var(--ink);background:rgba(52,224,138,.06)}
+.seg button.on{background:var(--green);color:#052013;font-weight:600}
+.icon-btn{
+  width:32px;height:32px;border:1px solid var(--line2);border-radius:5px;background:transparent;
+  color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:14px;
+  transition:all .18s;display:flex;align-items:center;justify-content:center;
+}
+.icon-btn:hover{color:var(--green);border-color:var(--green-dim)}
+.icon-btn.play.on{color:var(--green);border-color:var(--green-dim);background:rgba(52,224,138,.08)}
+.icon-btn.rec.on{color:var(--red);border-color:rgba(255,100,120,.6);background:rgba(255,100,120,.08)}
+input[type=range]{
+  -webkit-appearance:none;width:120px;height:2px;background:var(--line2);border-radius:2px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--green);
+  cursor:pointer;box-shadow:0 0 8px rgba(52,224,138,.5);
+}
+.vc-svg{display:block;width:100%;height:auto;background:#080d0a;padding:10px 14px 0}
+.vc-cap{
+  padding:14px 20px 18px;font-size:13px;color:var(--dim);line-height:1.8;
+  border-top:1px solid var(--line);min-height:118px;
+}
+.vc-cap b{color:var(--ink);font-weight:500}
+.vc-cap code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+.vc-read{
+  display:flex;flex-wrap:wrap;gap:8px 28px;align-items:baseline;
+  padding:13px 20px;border-top:1px solid var(--line);background:rgba(10,16,12,.6);
+  font-family:var(--mono);font-size:12px;color:var(--dim);
+}
+.vc-read b{color:var(--amber);font-weight:600;font-size:13.5px}
+
+/* canvas 实验室 */
+.cc2-body{position:relative;background:#080d0a;min-width:0}
+.cc2-body::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.14) 3px 4px);
+}
+.cc2-body canvas{display:block;width:100%;height:330px}
+.cc2-read{
+  display:flex;flex-wrap:wrap;gap:8px 28px;align-items:baseline;
+  padding:13px 20px;border-top:1px solid var(--line);background:rgba(10,16,12,.6);
+  font-family:var(--mono);font-size:12px;color:var(--dim);
+}
+.cc2-read .k{font-size:10.5px;color:var(--faint);letter-spacing:.06em}
+.cc2-read b{color:var(--amber);font-weight:600;font-size:13.5px}
+.cc2-read .g{color:var(--green)}
+.cc2-read .r{color:var(--red)}
+.cc2-read .c{color:var(--cyan)}
+.cc2-note{
+  padding:0 20px 14px;font-family:var(--mono);font-size:11px;color:var(--faint);line-height:1.7;
+}
+.cc2-note b{color:var(--dim);font-weight:500}
+.cc2-body.tall canvas{height:300px}
+.cc2-body.mid canvas{height:300px}
+
+/* ============ 计算器 ============ */
+.calc{
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  display:grid;grid-template-columns:1fr 1fr;overflow:hidden;margin-bottom:26px;
+}
+.calc .inputs{padding:30px 32px;border-right:1px solid var(--line)}
+.calc .outputs{padding:30px 32px;background:#0a110d}
+.calc h5{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.22em;margin-bottom:18px}
+.calc .calc-title{
+  grid-column:1/-1;padding:16px 32px;border-bottom:1px solid var(--line);
+  font-family:var(--disp);font-size:18px;font-weight:600;
+  background:rgba(10,16,12,.7);display:flex;align-items:baseline;gap:14px;
+}
+.calc .calc-title span{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.14em}
+.field{margin-bottom:20px}
+.field label{display:block;font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-bottom:8px;letter-spacing:.06em}
+.field select{
+  width:100%;font-family:var(--mono);font-size:14px;color:var(--ink);
+  background:#080d0a;border:1px solid var(--line2);border-radius:5px;padding:10px 12px;outline:none;
+  cursor:pointer;transition:border-color .2s;
+}
+.field select:focus{border-color:var(--green-dim)}
+.out-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:13px 0;border-bottom:1px dashed var(--line);
+}
+.out-row .ok{font-size:12.5px;color:var(--dim)}
+.out-row .ok small{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.08em}
+.out-row .ov{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--green);text-align:right}
+.out-row .ov small{font-size:11px;color:var(--faint);font-weight:400;margin-left:4px}
+.out-row.big .ov{font-size:26px;color:var(--amber)}
+.out-row .ov.bad{color:var(--red);font-size:15px}
+.calc-formula{
+  grid-column:1/-1;padding:15px 32px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:12.5px;color:var(--dim);background:rgba(10,17,13,.8);line-height:1.8;
+}
+.calc-formula b{color:var(--green);font-weight:500}
+
+/* ============ 通用小卡 ============ */
+.fmt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px}
+.fmt-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.fmt-card .fh{
+  display:flex;align-items:baseline;gap:12px;padding:16px 20px 12px;border-bottom:1px solid var(--line);
+}
+.fmt-card .fh .tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:3px 8px;border-radius:3px;
+}
+.fmt-card .fh h4{font-family:var(--disp);font-size:17px;font-weight:600}
+.fmt-card .fh .en{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-left:auto}
+.fmt-card svg{display:block;width:100%;height:auto;background:#080d0a}
+.fmt-card .fb{padding:14px 20px 18px;font-size:12.8px;color:var(--dim);line-height:1.75}
+.fmt-card .fb b{color:var(--ink);font-weight:500}
+.t-do .tag{color:var(--green);border:1px solid var(--green-dim);background:rgba(52,224,138,.07)}
+.t-sma .tag{color:var(--cyan);border:1px solid rgba(87,216,242,.3);background:rgba(87,216,242,.06)}
+.t-sod .tag{color:var(--amber);border:1px solid rgba(255,176,46,.35);background:rgba(255,176,46,.06)}
+.t-zn .tag{color:var(--red);border:1px solid rgba(255,100,120,.35);background:rgba(255,100,120,.06)}
+.t-vi .tag{color:var(--violet);border:1px solid rgba(185,140,255,.35);background:rgba(185,140,255,.06)}
+.t-pd .tag{color:var(--violet);border:1px solid rgba(185,140,255,.35);background:rgba(185,140,255,.06)}
+.rule-callout{
+  margin-top:26px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;
+  border:1px solid rgba(255,176,46,.3);border-radius:8px;padding:20px 26px;
+  background:linear-gradient(120deg,rgba(255,176,46,.06),transparent 60%);
+}
+.rule-callout .mnemonic{
+  font-family:var(--disp);font-weight:700;font-size:clamp(19px,2.6vw,26px);
+  color:var(--amber);letter-spacing:.08em;white-space:nowrap;
+}
+.rule-callout .mnemonic small{display:block;font-size:11px;font-weight:500;color:var(--faint);letter-spacing:.24em;margin-top:6px;font-family:var(--mono)}
+.rule-callout p{font-size:13.5px;color:var(--dim)}
+.rule-callout p b{color:var(--ink);font-weight:500}
+
+/* ============ 家族卡 ============ */
+.fam-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.fam-card{
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  background:var(--panel);display:flex;flex-direction:column;
+  transition:border-color .25s;
+}
+.fam-card:hover{border-color:var(--line2)}
+.fam-card .pic{background:#080d0a;border-bottom:1px solid var(--line);padding:8px 14px 0}
+.fam-card .pic svg{display:block;width:100%;height:84px}
+.fam-card .body{padding:18px 22px 20px}
+.fam-card .names{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.fam-card .names .main{font-family:var(--disp);font-size:20px;font-weight:600}
+.fam-card .names .alias{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.06em}
+.fam-card .names .tag{
+  margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  padding:2px 8px;border-radius:3px;
+}
+.fam-card p{font-size:13px;color:var(--dim);margin-top:10px;line-height:1.75}
+.fam-card p b{color:var(--ink);font-weight:500}
+.fam-card .formula{
+  font-family:var(--mono);font-size:12px;color:var(--green);
+  margin-top:12px;padding:8px 12px;background:rgba(52,224,138,.06);
+  border-left:2px solid var(--green-dim);border-radius:0 3px 3px 0;
+}
+.c-rc .main,.c-rc .tag{color:var(--green)} .c-rc .tag{background:rgba(52,224,138,.1);border:1px solid var(--green-dim)}
+.c-fr .main,.c-fr .tag{color:var(--cyan)} .c-fr .tag{background:rgba(87,216,242,.08);border:1px solid rgba(87,216,242,.3)}
+.c-sb .main,.c-sb .tag{color:var(--amber)} .c-sb .tag{background:rgba(255,176,46,.08);border:1px solid rgba(255,176,46,.35)}
+.c-pd .main,.c-pd .tag{color:var(--violet)} .c-pd .tag{background:rgba(185,140,255,.08);border:1px solid rgba(185,140,255,.3)}
+.c-i2 .main,.c-i2 .tag{color:var(--red)} .c-i2 .tag{background:rgba(255,100,120,.08);border:1px solid rgba(255,100,120,.35)}
+
+/* ============ 判别树 / 选型五步 ============ */
+.dbg-steps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.dbg-step{
+  flex:1;min-width:138px;display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border:1px solid var(--line2);border-radius:6px;
+  background:var(--panel);cursor:pointer;transition:all .18s;text-align:left;
+  font-family:inherit;color:var(--dim);font-size:13px;
+}
+.dbg-step .n{
+  font-family:var(--mono);font-size:15px;font-weight:600;color:var(--faint);
+  width:1.2em;transition:color .18s;
+}
+.dbg-step:hover{border-color:var(--green-dim);color:var(--ink)}
+.dbg-step.on{border-color:var(--green);background:rgba(52,224,138,.08);color:var(--ink)}
+.dbg-step.on .n{color:var(--green)}
+.dbg-verdict{
+  border-left:2px solid var(--amber);background:rgba(255,176,46,.06);
+  padding:13px 18px;border-radius:0 5px 5px 0;font-size:13.2px;color:var(--dim);
+  margin-bottom:16px;line-height:1.75;
+}
+.dbg-verdict b{color:var(--amber);font-weight:500}
+.dbg-verdict .g{color:var(--green)}
+.dbg-verdict .r{color:var(--red)}
+
+/* ============ 终端 ============ */
+.term-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px}
+.term{
+  border:1px solid var(--line);border-radius:8px;background:#070c09;
+  overflow:hidden;display:flex;flex-direction:column;min-width:0;
+  transition:border-color .25s;
+}
+.term:hover{border-color:var(--line2)}
+.term.wide{grid-column:1/-1}
+.term-bar{
+  display:flex;align-items:center;gap:7px;padding:10px 14px;
+  border-bottom:1px solid var(--line);background:rgba(10,16,12,.85);
+}
+.term-bar i{width:10px;height:10px;border-radius:50%}
+.term-bar .d1{background:rgba(255,100,120,.55)}
+.term-bar .d2{background:rgba(255,176,46,.5)}
+.term-bar .d3{background:rgba(52,224,138,.5)}
+.term-bar span{margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.12em}
+.term-body{
+  padding:15px 18px 17px;font-family:var(--mono);font-size:12.3px;
+  line-height:1.95;overflow-x:auto;flex:1;
+}
+.term-body div{white-space:pre;min-height:1.35em}
+.t-ps{color:#3f5247;user-select:none}
+.t-cmd{
+  color:var(--green);cursor:pointer;font-family:inherit;
+  border-bottom:1px dotted transparent;transition:border-color .15s;
+}
+.t-cmd:hover{border-bottom-color:var(--green)}
+.t-cmd.copied{color:#052013;background:var(--green);border-radius:2px;padding:0 4px}
+.t-out{color:var(--dim)}
+.t-hl{color:var(--amber)}
+.t-cmt{color:#516657}
+.t-tag{color:var(--cyan)}
+.lnx-note{
+  margin-top:26px;padding:18px 22px;border-left:2px solid var(--cyan);
+  background:rgba(87,216,242,.05);border-radius:0 6px 6px 0;font-size:13.5px;color:var(--dim);
+}
+.lnx-note b{color:var(--cyan);font-weight:500}
+.lnx-note code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* ============ 踩坑 ============ */
+.pit-list{display:flex;flex-direction:column;gap:12px}
+.pit{
+  display:grid;grid-template-columns:44px 1fr;gap:18px;align-items:start;
+  border:1px solid var(--line);border-radius:6px;padding:17px 20px;background:var(--panel);
+  transition:border-color .2s;
+}
+.pit:hover{border-color:rgba(255,100,120,.4)}
+.pit .symptom{
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--red);
+  border:1px solid rgba(255,100,120,.35);border-radius:4px;padding:5px 7px;text-align:center;
+  line-height:1.5;background:rgba(255,100,120,.05);height:fit-content;
+}
+.pit .fix b{display:block;font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.pit .fix b code{font-family:var(--mono);font-size:.88em;color:var(--green)}
+.pit .fix p{font-size:12.8px;color:var(--dim);line-height:1.7}
+.pit .fix p code{font-family:var(--mono);font-size:.9em;color:var(--amber)}
+
+/* ============ 速查 ============ */
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.qr-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.qr-card .qh{padding:15px 20px 10px;border-bottom:1px solid var(--line)}
+.qr-card .qh h4{font-family:var(--disp);font-size:16.5px;font-weight:600}
+.qr-card .qh span{font-family:var(--mono);font-size:10px;color:var(--faint);margin-left:10px;letter-spacing:.12em}
+.qr-card .qb{padding:8px 20px 16px}
+
+/* ============ footer ============ */
+footer{
+  border-top:1px solid var(--line);padding:44px 6vw 60px;margin-top:40px;
+  display:flex;flex-wrap:wrap;gap:24px;align-items:baseline;justify-content:space-between;
+}
+footer .f-l{font-family:var(--mono);font-size:11.5px;color:var(--faint);line-height:2.1}
+footer .f-l b{color:var(--dim);font-weight:500}
+footer a{color:var(--faint);text-decoration:none;border-bottom:1px dotted var(--faint)}
+footer a:hover{color:var(--green);border-color:var(--green)}
+footer .f-r{font-family:var(--disp);font-weight:700;font-size:22px;color:var(--green)}
+footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-size:10px;color:var(--faint);letter-spacing:.18em;text-align:right;margin-top:6px}
+
+/* ============ 响应式 ============ */
+@media (max-width:1000px){
+  .two-col,.qr-grid{grid-template-columns:1fr}
+  .calc{grid-template-columns:1fr}
+  .calc .inputs{border-right:none;border-bottom:1px solid var(--line)}
+}
+@media (max-width:720px){
+  .fam-grid,.fmt-grid,.fact-grid,.term-grid{grid-template-columns:1fr}
+  nav a{display:none}
+  section{padding:70px 5vw}
+  .sec-head .en{display:none}
+  .rule-callout{grid-template-columns:1fr;gap:14px}
+  .rule-callout .mnemonic{white-space:normal}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">MIC<b>·</b>LAB</div>
+  <a href="#s1">概述</a><a href="#s2">原理</a><a href="#s3">参数</a><a href="#s4">电路</a><a href="#s5">MEMS</a><a href="#s6">指向</a><a href="#s7">采声</a><a href="#s8">实战</a><a href="#s9">踩坑</a>
+  <button class="pnav-open" aria-label="打开器件导航" title="全部器件">☰ 器件</button>
+  <div class="spacer"></div>
+  <div class="live"><i></i>ACOUSTIC → ELECTRIC</div>
+</nav>
+
+<main>
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="eyebrow">ACOUSTIC-TO-ELECTRIC TRANSDUCER · SOUND PRESSURE → VOLTS · 图解硬件器件</div>
+  <h1>麦克风<span class="en">MICROPHONE &amp; <b>MEMS</b></span></h1>
+  <p class="lede">
+    <a href="speaker.html">扬声器页</a>把「电→力→声」走了一遍，麦克风把这条链<b>整个倒过来跑</b>：声压推振膜，
+    音圈在磁场里运动，<b>e = B·L·v</b>——法拉第定律让声音直接发电。驻极体（ECM）用一层<b>永久带电的薄膜</b>省掉 48V 幻象电源，
+    一颗 2.2kΩ 偏置电阻就让它统治了三十年嵌入式拾音；如今 MEMS 把振膜刻进硅片，
+    出厂就是 <b>PDM / I2S 数字流</b>——连 ADC 都省了。
+    <b>往下滚动：换能原理步进实验室、灵敏度声学账本计算器、ECM 读放电路实验室（偏置/耦合/削波/差分）、PDM 码流实验室、指向性极坐标，以及真的能点亮你电脑麦克风的实时采声实验室。</b>
+  </p>
+  <div class="chips">
+    <span><b>94 dB SPL = 1 Pa</b> 声压基准点</span>
+    <span><b>−38 dBV/Pa → 12.6 mV</b> 灵敏度就是账本</span>
+    <span><b>R 2.2 kΩ</b> ECM 一颗电阻的偏置艺术</span>
+    <span><b>PDM · I2S</b> MEMS 数字直连 SoC</span>
+  </div>
+  <div class="scope-wrap"><canvas id="heroScope"></canvas></div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    SCROLL · 换能原理实验室在 02 节 · 实时采声实验室在 07 节
+  </div>
+</header>
+
+<!-- ================= §01 ================= -->
+<section id="s1">
+  <div class="sec-head reveal"><span class="no">01</span><h2>它是什么，为什么需要它</h2><span class="en">What &amp; Why</span></div>
+  <div class="two-col">
+    <div class="prose reveal">
+      <p>
+        麦克风（microphone，业内也叫 mic / 咪头 / 拾音器）是<b>声电换能器</b>：把空气的振动变成电压的振动。
+        你的设备要「听得见」——语音唤醒、声控灯、噪声监测、通话降噪——第一步都是它。
+        和扬声器一样，它是少数<b>每天与模拟世界打交道</b>的器件：输入是 20µPa 起步的声压，输出是毫伏级电压，
+        中间隔着整个「小信号 + 高增益 + 抗干扰」的模拟艺术。
+      </p>
+      <p>
+        两大家族分野在<span class="kw">换能物理量</span>：<b>动圈式</b>用电磁感应（e = B·L·v，扬声器的亲兄弟，话筒线圈在磁隙里当发电机）；
+        <b>电容式</b>用极板间距变化（C = εA/d）把声压变成电容调制，再变成电压。录音棚电容麦需要 48V 幻象电源建立电场，
+        而<b>驻极体（electret condenser microphone, ECM）</b>把电荷永久冻在氟化聚合物薄膜里——<b>电场白送</b>，
+        只需 2–10V 给内置的 JFET 阻抗变换器供电，于是两根引脚 + 一颗电阻就是一个拾音前端。
+      </p>
+      <p>
+        嵌入式今天的答案是 <b>MEMS 麦克风</b>：硅刻蚀的振膜 + 背腔 + 内置 ASIC，输出<b>模拟差分</b>、<b>PDM</b> 或 <b>I2S</b>。
+        芯片尺寸 3×4mm、可回流焊、一致性好——手机、智能音箱清一色 MEMS。<b>选哪种界面</b>是系统级决策：
+        模拟要自己搭 ADC 前级，PDM 只需一路时钟 + 一根数据线，I2S 则像挂了一颗音频 codec。
+      </p>
+      <p>
+        关键认知：<b>麦克风的输出小得可怜</b>。典型 ECM 灵敏度 −38 dBV/Pa：94dB 的正常喊话只输出 12.6mV RMS，
+        距离 ADC 的 1V 级满量程还差 40dB——<b>拾音链的本质是「低噪声放大 100 倍」的工程</b>，本页 §03 计算器和 §04 电路实验室都在算这笔账。
+      </p>
+    </div>
+    <div class="reveal">
+      <table class="cmp-table">
+        <tr><th>换能家族</th><th>原理</th><th>嵌入式角色</th></tr>
+        <tr><td>动圈式</td><td>e = BLv · 音圈切割磁力线</td><td class="no">舞台/卡拉OK · 需话放</td></tr>
+        <tr><td>电容式</td><td>ΔC 调制 · 需 48V 幻象</td><td class="no">录音棚 · 基准测量</td></tr>
+        <tr><td>驻极体 ECM</td><td>预极化 + 内置 JFET</td><td class="yes">传统嵌入式主力</td></tr>
+        <tr><td>MEMS 模拟</td><td>硅振膜 + ASIC 缓冲</td><td class="yes">手机/音箱 · 差分输出</td></tr>
+        <tr><td>MEMS PDM</td><td>1bit ΣΔ 码流</td><td class="yes">SoC 数字口直连</td></tr>
+        <tr><td>MEMS I2S</td><td>自带抽取滤波</td><td class="yes">免 codec · 主控直采</td></tr>
+        <tr><td>压电式</td><td>正压电效应拾振</td><td>接触式 / 结构传声</td></tr>
+      </table>
+      <div class="fact-grid">
+        <div class="fact">
+          <div class="f-no">SPEC · 01</div>
+          <h4>灵敏度 <code>−38 dBV/Pa</code></h4>
+          <p>94dB SPL（1 Pa）输入时的输出电压。−38dBV = 12.6mV；每差 6dB 电压差一倍——<b>灵敏度是整条增益链的起点账</b>。</p>
+        </div>
+        <div class="fact">
+          <div class="f-no">SPEC · 02</div>
+          <h4>信噪比 <code>SNR 58–65 dBA</code></h4>
+          <p>94dB SPL 信号与自身底噪（A 计权）之差。ECM 约 58–62dB，好 MEMS 65dB+——安静环境听写才不掉字。</p>
+        </div>
+        <div class="fact">
+          <div class="f-no">SPEC · 03</div>
+          <h4>指向性 <code>POLAR</code></h4>
+          <p>对哪个方向灵敏。ECM/MEMS 的振膜小、声学路径对称，<b>天生全向</b>；心形指向要双进声孔或阵列波束成形（06 节）。</p>
+        </div>
+        <div class="fact">
+          <div class="f-no">SPEC · 04</div>
+          <h4>供电 <code>2–10V / 1.8–3.6V</code></h4>
+          <p>ECM 经 Rbias 从信号脚「蹭电」（典型 0.5mA）；MEMS 是正经 VDD——<b>有的 PDM 型号严格 1.8V</b>，接 3.3V 会永久哑掉。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= §02 ================= -->
+<section id="s2">
+  <div class="sec-head reveal"><span class="no">02</span><h2>换能原理实验室 · 声压怎样变成电压</h2><span class="en">Transduction Lab</span></div>
+  <p class="sec-sub reveal">
+    声音是空气的<b>纵波</b>：分子被挤密又拉开，瞬时声压围绕大气压上下起伏。麦克风要做的只有一件事——
+    让这团起伏去<b>推一块很轻的振膜</b>，再把振膜的位移换成电。点下面四步，看动圈式怎么用 <b>e = B·L·v</b> 发电，
+    再看电容式怎么用 <b>ΔC</b> 调制电荷。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>换能过程</label>
+        <div class="seg" id="trSteps">
+          <button data-i="0" class="on" type="button">① 静默</button>
+          <button data-i="1" type="button">② 1 Pa 声压</button>
+          <button data-i="2" type="button">③ 声压 ×4</button>
+          <button data-i="3" type="button">④ 440Hz 交变</button>
+        </div>
+      </div>
+      <div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">动圈 demo：B = 0.8 T · L = 2.5 m</span></div>
+    </div>
+    <div id="trSvg" class="vc-svg"></div>
+    <div class="vc-read" id="trRead"></div>
+    <div class="vc-cap" id="trCap"></div>
+  </div>
+  <div class="fmt-grid">
+    <div class="fmt-card t-do reveal"><div class="fh"><span class="tag">DYNAMIC</span><h4>动圈 · 扬声器倒着用</h4><span class="en">e = B·L·v</span></div>
+      <svg viewBox="0 0 300 104">
+        <rect x="26" y="30" width="10" height="44" fill="none" stroke="#ffb02e" stroke-width="1.6"/>
+        <path d="M36 30 h8 v44 h-8" fill="none" stroke="#8aa294" stroke-width="1.4"/>
+        <line x1="44" y1="38" x2="58" y2="38" stroke="#57d8f2" stroke-width="1.4"/>
+        <path d="M58 38 l-5 -2.6 v5.2 z" fill="#57d8f2"/>
+        <line x1="44" y1="66" x2="58" y2="66" stroke="#57d8f2" stroke-width="1.4"/>
+        <path d="M58 66 l-5 -2.6 v5.2 z" fill="#57d8f2"/>
+        <circle cx="66" cy="46" r="4" fill="none" stroke="#34e08a" stroke-width="1.8"/>
+        <circle cx="66" cy="58" r="4" fill="none" stroke="#34e08a" stroke-width="1.8"/>
+        <path d="M70 52 h18" stroke="#34e08a" stroke-width="1.6"/>
+        <path d="M88 52 h10" stroke="#dcebe1" stroke-width="1.6"/>
+        <text x="26" y="24" fill="#ffb02e" font-size="8.5" font-family="IBM Plex Mono,monospace">磁体 B</text>
+        <text x="60" y="30" fill="#57d8f2" font-size="8.5" font-family="IBM Plex Mono,monospace">磁隙</text>
+        <text x="120" y="44" fill="#8aa294" font-size="9" font-family="IBM Plex Mono,monospace">音圈以速度 v 运动</text>
+        <text x="120" y="62" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">→ 感应电动势 e = BLv</text>
+        <text x="120" y="88" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">输出 mV 级 · 需低噪声话放 40–60dB</text>
+      </svg>
+      <div class="fb">同一颗器件正着用是扬声器、反着用是话筒——对讲机的喇叭麦一体方案正是这么干的。动圈输出阻抗低（几十–几百 Ω）但灵敏度只有 <b>1–2 mV/Pa</b>，比 ECM 低 10–20dB，需要干净的话放才堪一用。</div></div>
+    <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">ELECTRET</span><h4>驻极体 · 冻住的电荷</h4><span class="en">C = εA/d</span></div>
+      <svg viewBox="0 0 300 104">
+        <rect x="30" y="34" width="86" height="36" fill="none" stroke="#8aa294" stroke-width="1.4"/>
+        <line x1="46" y1="36" x2="46" y2="68" stroke="#34e08a" stroke-width="2.4"/>
+        <text x="46" y="28" text-anchor="middle" fill="#34e08a" font-size="8.5" font-family="IBM Plex Mono,monospace">振膜(驻极体)</text>
+        <line x1="66" y1="36" x2="66" y2="68" stroke="#57d8f2" stroke-width="1.8" stroke-dasharray="4 3"/>
+        <text x="76" y="28" fill="#57d8f2" font-size="8.5" font-family="IBM Plex Mono,monospace">背极板</text>
+        <path d="M56 46 h3 M56 58 h3 M60 46 h3 M60 58 h3" stroke="#5c7264" stroke-width="1"/>
+        <text x="63" y="88" text-anchor="middle" fill="#5c7264" font-size="8" font-family="IBM Plex Mono,monospace">d ≈ 20 µm 随声压变化</text>
+        <rect x="150" y="30" width="34" height="44" fill="none" stroke="#ffb02e" stroke-width="1.6"/>
+        <text x="167" y="50" text-anchor="middle" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">JFET</text>
+        <text x="167" y="64" text-anchor="middle" fill="#5c7264" font-size="8" font-family="IBM Plex Mono,monospace">G D S</text>
+        <path d="M116 52 h34" stroke="#8aa294" stroke-width="1.4"/>
+        <path d="M184 44 h30 M184 60 h30" stroke="#8aa294" stroke-width="1.4"/>
+        <text x="222" y="42" fill="#8aa294" font-size="8.5" font-family="IBM Plex Mono,monospace">G: 几 GΩ 阻抗</text>
+        <text x="222" y="58" fill="#8aa294" font-size="8.5" font-family="IBM Plex Mono,monospace">D/S: kΩ 级输出</text>
+      </svg>
+      <div class="fb">驻极体薄膜上的电荷<b>半永久不跑</b>（100 年衰减几个 %），背极板与振膜构成 ~15pF 的小电容：声压改变间距 d → C 变化 → 高阻节点电压波动。吉欧级源阻抗必须先过 <b>JFET 阻抗变换</b>才能出门——这就是 ECM「必须给电」的原因，也是它两脚有极性的原因。</div></div>
+    <div class="fmt-card t-sod reveal"><div class="fh"><span class="tag">MEMS</span><h4>MEMS · 刻在硅上的振膜</h4><span class="en">SILICON MIC</span></div>
+      <svg viewBox="0 0 300 104">
+        <rect x="24" y="26" width="72" height="52" fill="none" stroke="#b98cff" stroke-width="1.6"/>
+        <line x1="40" y1="32" x2="40" y2="72" stroke="#34e08a" stroke-width="2.2"/>
+        <text x="40" y="22" text-anchor="middle" fill="#34e08a" font-size="8" font-family="IBM Plex Mono,monospace">硅振膜</text>
+        <line x1="58" y1="32" x2="58" y2="72" stroke="#57d8f2" stroke-width="1.6"/>
+        <g stroke="#5c7264" stroke-width="1">
+          <path d="M66 40 h14 M66 48 h14 M66 56 h14 M66 64 h14"/>
+        </g>
+        <text x="73" y="88" text-anchor="middle" fill="#5c7264" font-size="8" font-family="IBM Plex Mono,monospace">背腔声学孔</text>
+        <rect x="130" y="30" width="52" height="44" fill="none" stroke="#ffb02e" stroke-width="1.6"/>
+        <text x="156" y="48" text-anchor="middle" fill="#ffb02e" font-size="9" font-family="IBM Plex Mono,monospace">ASIC</text>
+        <text x="156" y="62" text-anchor="middle" fill="#5c7264" font-size="8" font-family="IBM Plex Mono,monospace">AMP+ΣΔ</text>
+        <path d="M96 52 h34" stroke="#8aa294" stroke-width="1.4"/>
+        <path d="M182 52 h14 M196 40 v24 M196 40 h20 M196 64 h20" stroke="#34e08a" stroke-width="1.6" fill="none"/>
+        <text x="222" y="44" fill="#34e08a" font-size="8.5" font-family="IBM Plex Mono,monospace">模拟 / PDM / I2S</text>
+        <text x="222" y="60" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">SMD 可回流焊</text>
+      </svg>
+      <div class="fb">振膜、背极板、背腔、放大器、ΣΔ 调制器全部封进 3×4×1mm 的表贴封装，<b>底部或顶部一个进声孔</b>（选封装时先看声孔朝向！）。一致性极佳：同一型号灵敏度散布 ±1dB，而 ECM 要 ±3dB——双麦阵列波束成形只能用 MEMS。</div></div>
+    <div class="fmt-card t-zn reveal"><div class="fh"><span class="tag">SCALE</span><h4>声压的数量级</h4><span class="en">20 µPa → 20 Pa</span></div>
+      <svg viewBox="0 0 300 104">
+        <line x1="22" y1="70" x2="286" y2="70" stroke="#27392d" stroke-width="1.4"/>
+        <g font-family="IBM Plex Mono,monospace" font-size="8" fill="#8aa294" text-anchor="middle">
+          <text x="40" y="84">0 dB</text><text x="94" y="84">40</text><text x="148" y="84">60</text>
+          <text x="202" y="84">94</text><text x="258" y="84">120</text>
+        </g>
+        <g fill="#5c7264">
+          <circle cx="40" cy="62" r="2.4"/><circle cx="94" cy="54" r="2.4"/><circle cx="148" cy="46" r="2.4"/>
+          <circle cx="202" cy="36" r="3.6" fill="#34e08a"/><circle cx="258" cy="26" r="2.4"/>
+        </g>
+        <text x="40" y="55" text-anchor="middle" fill="#5c7264" font-size="7.5" font-family="IBM Plex Mono,monospace">听阈 20µPa</text>
+        <text x="148" y="38" text-anchor="middle" fill="#5c7264" font-size="7.5" font-family="IBM Plex Mono,monospace">交谈</text>
+        <text x="202" y="26" text-anchor="middle" fill="#34e08a" font-size="7.5" font-family="IBM Plex Mono,monospace">1 Pa 规格点</text>
+        <text x="258" y="18" text-anchor="middle" fill="#5c7264" font-size="7.5" font-family="IBM Plex Mono,monospace">痛阈 20Pa</text>
+        <text x="22" y="100" fill="#5c7264" font-size="8" font-family="IBM Plex Mono,monospace">SPL = 20·lg(p / 20µPa) · 每翻倍 +6dB</text>
+      </svg>
+      <div class="fb">0dB SPL 是人耳听阈（20µPa），94dB 是 <b>1 Pa</b>——灵敏度规格点；对话 60–70dB，地铁 100dB，喷气机 130dB。<b>整个可听范围 1:10⁶</b>，所以音频链路里说增益永远用 dB：每 20dB = 电压 ×10。</div></div>
+  </div>
+</section>
+
+<!-- ================= §03 ================= -->
+<section id="s3">
+  <div class="sec-head reveal"><span class="no">03</span><h2>计算器 · 灵敏度声学账本与偏置网络</h2><span class="en">Sensitivity &amp; Bias Math</span></div>
+  <p class="sec-sub reveal">
+    拾音链第一笔账：<b>多响的声音 × 多灵敏的麦克风 × 多少增益 = 多大的电压</b>，离 ADC 满量程还剩几 dB？
+    第二笔账：ECM 的 <b>Rbias 决定直流工作点</b>、<b>Cout 决定低频下限</b>——两颗元件就是一台「前端设计」。
+    改下面的下拉框，看读数实时对账。
+  </p>
+  <div class="calc reveal">
+    <div class="calc-title">声压 → 电压 → ADC 裕量计算器<span>ACOUSTIC BUDGET</span></div>
+    <div class="inputs">
+      <h5>INPUT · 输入</h5>
+      <div class="field"><label>声源声压级 SPL</label>
+        <select id="lSpl">
+          <option value="40">40 dB（深夜图书馆）</option>
+          <option value="55">55 dB（办公室底噪）</option>
+          <option value="70" selected>70 dB（正常交谈）</option>
+          <option value="85">85 dB（车间）</option>
+          <option value="94">94 dB（规格点 1 Pa）</option>
+          <option value="100">100 dB（地铁进站）</option>
+          <option value="110">110 dB（大声喊叫/近讲）</option>
+        </select>
+      </div>
+      <div class="field"><label>麦克风灵敏度 Sens</label>
+        <select id="lSens">
+          <option value="-42">−42 dBV/Pa（低灵敏 ECM）</option>
+          <option value="-38" selected>−38 dBV/Pa（典型 ECM）</option>
+          <option value="-35">−35 dBV/Pa（高灵敏 ECM）</option>
+          <option value="-26">−26 dBV/Pa（带运放模组 MAX4466）</option>
+          <option value="-18">−18 dBV/Pa（动圈+话放）</option>
+        </select>
+      </div>
+      <div class="field"><label>链路增益 Gain</label>
+        <select id="lGain">
+          <option value="0">0 dB（直连示波器）</option>
+          <option value="20">+20 dB（×10）</option>
+          <option value="40" selected>+40 dB（×100 典型前端）</option>
+          <option value="60">+60 dB（×1000 话放满档）</option>
+        </select>
+      </div>
+    </div>
+    <div class="outputs">
+      <h5>OUTPUT · 输出</h5>
+      <div class="out-row"><span class="ok">瞬时声压<small>p = 1Pa × 10^((SPL−94)/20)</small></span><span class="ov" id="oPa">—</span></div>
+      <div class="out-row"><span class="ok">麦克风裸输出<small>V = Sens × p</small></span><span class="ov" id="oMic">—</span></div>
+      <div class="out-row"><span class="ok">增益后输出<small>Vrms = 裸输出 × 10^(Gain/20)</small></span><span class="ov" id="oOut">—</span></div>
+      <div class="out-row"><span class="ok">输出峰值<small>Vpk = Vrms × √2</small></span><span class="ov" id="oPk">—</span></div>
+      <div class="out-row big"><span class="ok">相对 ADC 满量程<small>3.3V ADC · dBFS</small></span><span class="ov" id="oDbfs">—</span></div>
+      <div class="out-row"><span class="ok">裕量判定<small>−18…−6 dBFS 为健康档点</small></span><span class="ov" id="oVerdict">—</span></div>
+    </div>
+    <div class="calc-formula" id="lFormula"></div>
+  </div>
+
+  <div class="calc reveal">
+    <div class="calc-title">ECM 偏置与耦合网络计算器<span>RBIAS &amp; COUPLING</span></div>
+    <div class="inputs">
+      <h5>INPUT · 输入</h5>
+      <div class="field"><label>电源 VDD</label>
+        <select id="bVdd">
+          <option value="3.3" selected>3.3 V（MCU 域）</option>
+          <option value="5">5 V（USB）</option>
+          <option value="9">9 V（老式驻极体手册推荐）</option>
+        </select>
+      </div>
+      <div class="field"><label>偏置电阻 Rbias</label>
+        <select id="bR">
+          <option value="1">1 kΩ</option>
+          <option value="2.2" selected>2.2 kΩ（数据手册标配）</option>
+          <option value="4.7">4.7 kΩ</option>
+          <option value="10">10 kΩ</option>
+          <option value="47">47 kΩ（省电但危险）</option>
+        </select>
+      </div>
+      <div class="field"><label>耦合电容 Cout</label>
+        <select id="bC">
+          <option value="0.1">0.1 µF</option>
+          <option value="1" selected>1 µF</option>
+          <option value="4.7">4.7 µF</option>
+          <option value="10">10 µF</option>
+        </select>
+      </div>
+      <div class="field"><label>下级输入阻抗 Rin</label>
+        <select id="bRin">
+          <option value="1">1 kΩ</option>
+          <option value="10" selected>10 kΩ（典型运放偏置网络）</option>
+          <option value="100">100 kΩ</option>
+          <option value="1000">1 MΩ（高阻运放）</option>
+        </select>
+      </div>
+    </div>
+    <div class="outputs">
+      <h5>OUTPUT · 输出（ECM 静态电流按 0.45 mA 建模）</h5>
+      <div class="out-row"><span class="ok">工作点<small>Vdc = VDD − Id × R</small></span><span class="ov" id="oVdc">—</span></div>
+      <div class="out-row"><span class="ok">正/负摆幅余量<small>距 VDD / 距地</small></span><span class="ov" id="oHead">—</span></div>
+      <div class="out-row"><span class="ok">耦合高通截止<small>fc = 1/(2π·Rin·Cout)</small></span><span class="ov" id="oFc">—</span></div>
+      <div class="out-row"><span class="ok">偏置功耗<small>P = Id² × R</small></span><span class="ov" id="oPr">—</span></div>
+      <div class="out-row big"><span class="ok">偏置健康度<small>工作点应落在 0.3–0.8 VDD</small></span><span class="ov" id="oBiasVerdict">—</span></div>
+      <div class="out-row"><span class="ok">低频判定<small>fc 应 ≤ 需求下限的 1/3</small></span><span class="ov" id="oFcVerdict">—</span></div>
+    </div>
+    <div class="calc-formula" id="bFormula"></div>
+  </div>
+
+  <div class="rule-callout reveal">
+    <div class="mnemonic">增益留 6dB · 偏置坐中间<small>+6dB HEADROOM · BIAS AT MID-RAIL</small></div>
+    <p>
+      「最大声压时削波，小声时听不见」的解法不是把增益拧到刚好，而是<b>让最大预期声压落在 −6…−10 dBFS</b>：
+      峰值因子（crest factor）的人声在 12–18dB，正弦满幅 ≠ 语音满幅。偏置同理：Vdc 逼近任何一条轨，
+      半个波形先削——47kΩ 偏置在 3.3V 下工作点掉到地，就是 04 节场景①的「贴地死」。耦合 fc 别卡在需求下限上，
+      <b>人声 300Hz 的系统用 fc ≤ 100Hz</b> 的一阶高通才不至于低频相位发闷。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §04 ================= -->
+<section id="s4">
+  <div class="sec-head reveal"><span class="no">04</span><h2>ECM 读放电路实验室 · 四个必懂的接法</h2><span class="en">Readout Circuits</span></div>
+  <p class="sec-sub reveal">
+    一颗两脚 ECM 从「会振的电容」变成「ADC 能吃的信号」，要过四关：<b>偏置电阻</b>（工作点坐哪儿）、<b>耦合电容</b>（直流往哪隔）、
+    <b>增益档位</b>（削波与底噪的平衡）、<b>差分接收</b>（MEMS 时代的新功课）。切换场景与模式——左边电路在走流，
+    右边示波器在算波形，读数全部由模型实时生成。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>电路</label>
+        <div class="seg" id="ccMCir">
+          <button data-i="0" class="on" type="button">偏置电阻</button>
+          <button data-i="1" type="button">耦合电容</button>
+          <button data-i="2" type="button">增益削波</button>
+          <button data-i="3" type="button">差分接收</button>
+        </div>
+      </div>
+      <div class="ctrl" id="ccMModeWrap">
+        <div class="seg" id="ccMMode"></div>
+      </div>
+      <div class="ctrl"><button class="icon-btn play on" id="ccMPlay" title="暂停/播放" type="button">❚❚</button></div>
+    </div>
+    <div class="cc2-body"><canvas id="ccMCanvas"></canvas></div>
+    <div class="cc2-read" id="ccMRead"></div>
+    <div class="cc2-note" id="ccMNote"></div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">偏置坐中 · 隔直再放大<small>BIAS MID · COUPLE THEN GAIN</small></div>
+    <p>
+      ECM 的 JFET 是<b>漏极开路</b>输出：Rbias 不只是供电，它和静态电流一起<b>决定工作点</b> Vdc = VDD − Id·R（04 节场景①）。
+      交流信号骑在这个直流上，所以进放大器之前必须经 <b>Cout 隔直</b>、在下一级重新偏置到中轨（场景②）——省掉它的代价是把 2.3V 直流也放大 8 倍，输出直接顶死电源轨。
+      增益预算用 03 节计算器算好再定 Rf/Rg（场景③）；上 MEMS 后改考差分接收：<b>只接一半 = 幅度减半 + 共模噪声全额</b>（场景④）。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §05 ================= -->
+<section id="s5">
+  <div class="sec-head reveal"><span class="no">05</span><h2>MEMS 三界面与 PDM 码流实验室</h2><span class="en">MEMS Interfaces &amp; PDM Lab</span></div>
+  <p class="sec-sub reveal">
+    同一颗硅振膜，ASIC 出口不同就是三种器件：<b>模拟</b>（差分/单端，进 ADC）、<b>PDM</b>（1bit 高速码流，主控抽取）、
+    <b>I2S</b>（自带抽取滤波，像挂了颗 codec）。PDM 是最「嵌入式」的一种：<b>一根时钟下去，一根数据回来</b>，
+    码流里 1 的密度就是瞬时声压——拖动幅度滑块，看 ΣΔ 调制器怎么用 1bit 表达正弦。
+  </p>
+  <div class="fam-grid">
+    <div class="fam-card c-fr reveal">
+      <div class="pic"><svg viewBox="0 0 300 84">
+        <rect x="24" y="18" width="60" height="48" rx="4" fill="none" stroke="#57d8f2" stroke-width="2"/>
+        <circle cx="54" cy="42" r="12" fill="none" stroke="#57d8f2" stroke-width="1.4"/>
+        <line x1="54" y1="30" x2="54" y2="18" stroke="#57d8f2" stroke-width="1.4"/>
+        <text x="100" y="34" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">OUT+ / OUT− 差分</text>
+        <text x="100" y="52" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">Vcm ≈ 0.9V · 抗共模干扰</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">MEMS 模拟</span><span class="alias">ANALOG OUT</span><span class="tag">差分</span></div>
+        <p>振膜电容 → 内部放大器 → <b>模拟电压</b>。差分输出去 ADC 差分输入可白拿 6dB SNR、抵消电源共模。代表：ICS-40300、SPK0838HT4H。适合已有音频 ADC/codec 的板子。</p>
+        <div class="formula">V = Sens × p · 全差分 → 共模抑制</div>
+      </div>
+    </div>
+    <div class="fam-card c-pd reveal">
+      <div class="pic"><svg viewBox="0 0 300 84">
+        <rect x="24" y="18" width="60" height="48" rx="4" fill="none" stroke="#b98cff" stroke-width="2"/>
+        <circle cx="54" cy="42" r="12" fill="none" stroke="#b98cff" stroke-width="1.4"/>
+        <path d="M84 34 h24 v-6 h12 v18 h-36 z M84 52 h48" stroke="#b98cff" stroke-width="1.6" fill="none"/>
+        <text x="150" y="34" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">CLK → 1–4.5 MHz</text>
+        <text x="150" y="52" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">DATA ← 1bit 密度码流</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">MEMS PDM</span><span class="alias">PULSE DENSITY</span><span class="tag">两线</span></div>
+        <p>内部 ΣΔ 调制器输出 1bit 流：声压大 → 1 的密度高。主控给时钟、收数据，<b>低通抽取 64×</b> 成 PCM。抗干扰强（数字传输）、走线短即可。代表：SPH0641LU4H、MP23DB01。注意<b>多数严格 1.8V 供电</b>。</p>
+        <div class="formula">密度 = (1 + x)/2 · x 为归一化声压</div>
+      </div>
+    </div>
+    <div class="fam-card c-i2 reveal">
+      <div class="pic"><svg viewBox="0 0 300 84">
+        <rect x="24" y="18" width="60" height="48" rx="4" fill="none" stroke="#ff6478" stroke-width="2"/>
+        <circle cx="54" cy="42" r="12" fill="none" stroke="#ff6478" stroke-width="1.4"/>
+        <path d="M84 28 h56 M84 42 h56 M84 56 h56" stroke="#ff6478" stroke-width="1.6"/>
+        <text x="152" y="32" fill="#8aa294" font-size="9.5" font-family="IBM Plex Mono,monospace">WS BCK DATA</text>
+        <text x="152" y="52" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">16–32kHz 字率 · 24bit 左对齐</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">MEMS I2S</span><span class="alias">DIGITAL MIC</span><span class="tag">免 codec</span></div>
+        <p>把抽取滤波器也封进封装：输出<b>标准 I2S 主模式</b>，主控的 SAI/I2S 外设直接当 slave 收。免 ADC、免滤波、免算力。代表：ICS-43434、SPH0645LU4H-1。坑在<b>MSB 对齐偏移一个 BCK</b>（08 节实战代码有解法）。</p>
+        <div class="formula">BCK 0.5–3.2MHz · WS 16–50kHz · 64×BCK/WS</div>
+      </div>
+    </div>
+    <div class="fam-card c-rc reveal">
+      <div class="pic"><svg viewBox="0 0 300 84">
+        <rect x="24" y="18" width="60" height="48" rx="4" fill="none" stroke="#34e08a" stroke-width="2"/>
+        <circle cx="54" cy="42" r="12" fill="none" stroke="#34e08a" stroke-width="1.4"/>
+        <path d="M84 34 q10 8 0 16 M94 30 q16 12 0 24" stroke="#34e08a" stroke-width="1.4" fill="none"/>
+        <text x="140" y="34" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">双进声孔 = 声学延迟</text>
+        <text x="140" y="52" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">两颗 MEMS = 波束成形</text>
+      </svg></div>
+      <div class="body">
+        <div class="names"><span class="main">指向性方案</span><span class="alias">DIRECTIVITY</span><span class="tag">阵列</span></div>
+        <p>单颗 MEMS 天生全向（06 节）。要心形指向：底部进声孔 + 内部声学延迟（部分型号支持）；要波束成形：<b>两颗以上 MEMS + 相位差算法</b>，这就是智能音箱「6 麦环形阵」的由来——精度要求声中心距 ±0.1mm，ECM 做不到。</p>
+        <div class="formula">d·sinθ 相延迟 → 波束加权</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lab reveal" style="margin-top:26px">
+    <div class="lab-bar">
+      <div class="ctrl"><label>输入包络幅度</label><input type="range" id="pdmAmp" min="0" max="100" value="60" style="width:190px"><span id="pdmAmpVal" style="font-family:var(--mono);font-size:12px;color:var(--green);min-width:42px">60%</span></div>
+      <div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">CLK 2.4 MHz · 过采样 OSR 64 · 一阶 ΣΔ</span></div>
+      <div class="ctrl"><button class="icon-btn play on" id="pdmPlay" title="暂停/播放" type="button">❚❚</button></div>
+    </div>
+    <div class="cc2-body mid"><canvas id="pdmCanvas"></canvas></div>
+    <div class="cc2-read" id="pdmRead"></div>
+    <div class="cc2-note">DATA 的 <b>1 密度</b>追踪输入包络：正峰处几乎全 1、负峰处几乎全 0、过零处 50%。主控侧 64 抽 1 + 低通（CIC/FIR）即还原 PCM——这就是「PDM 麦克风内部只做调制，滤波留给 SoC」的分工。幅度拉满时密度触 0%/100%，对应 ADC 满量程削波。</div>
+  </div>
+
+  <div class="fmt-grid">
+    <div class="fmt-card t-pd reveal"><div class="fh"><span class="tag">I2S</span><h4>I2S 数字麦帧格式</h4><span class="en">WS / BCK / SD</span></div>
+      <svg viewBox="0 0 300 118">
+        <g font-family="IBM Plex Mono,monospace" font-size="8" fill="#8aa294">
+          <text x="6" y="18">WS</text>
+          <path d="M30 16 h34 v-10 h64 v20 h64 v-20 h48" fill="none" stroke="#ffb02e" stroke-width="1.8"/>
+          <text x="38" y="34" fill="#ffb02e" font-size="7.5">L</text><text x="102" y="34" fill="#ffb02e" font-size="7.5">R</text><text x="166" y="34" fill="#ffb02e" font-size="7.5">L</text>
+          <text x="6" y="58">BCK</text>
+          <path d="M30 56 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8" fill="none" stroke="#57d8f2" stroke-width="1.4"/>
+          <text x="6" y="82">SD</text>
+          <g stroke="#34e08a" stroke-width="1.4">
+            <path d="M34 84 v-14 M50 84 v-14 M58 84 v-14 M74 84 v-14 M106 84 v-14 M122 84 v-14 M138 84 v-14 M170 84 v-14 M186 84 v-14 M202 84 v-14"/>
+          </g>
+          <text x="150" y="60" fill="#5c7264" font-size="7.5">每 WS 半帧 16×BCK 示意（真实 32–64×）</text>
+          <text x="6" y="104" fill="#dcebe1" font-size="8">MSB-first · 数据在 WS 翻转后第 1 个 BCK 上升沿更新</text>
+          <text x="6" y="116" fill="#ff6478" font-size="7.5">SPH0645 坑：数据晚一个 BCK → 需 WS 相移或数据右移 1bit</text>
+        </g>
+      </svg>
+      <div class="fb">I2S 帧三线：<b>WS</b> 选左右声道（麦克风通常只占一个声道，另一个恒为静音数据）、<b>BCK</b> 位时钟、<b>SD</b> 数据。24bit 有效数据<b>左对齐</b>在 32bit 槽里。SPH0645 的 MSB 比 Philips 标准晚一个 BCK，STM32 上要么用 SAI 的 MSBJUSTIFY 模式、要么软件右移一位——不然永远是 2 倍幅度的错位噪声。</div></div>
+    <div class="fmt-card t-do reveal"><div class="fh"><span class="tag">SIGNAL</span><h4>PDM vs PCM 一图流</h4><span class="en">DENSITY = AMPLITUDE</span></div>
+      <svg viewBox="0 0 300 118">
+        <g font-family="IBM Plex Mono,monospace" font-size="8" fill="#8aa294">
+          <text x="6" y="16">模拟输入</text>
+          <path d="M60 30 q30 -22 60 0 t60 0 t60 0" fill="none" stroke="#34e08a" stroke-width="2"/>
+          <text x="6" y="52">PDM</text>
+          <g stroke="#b98cff" stroke-width="1.4">
+            <path d="M62 62 v-10 M68 62 v-10 M78 62 v-10 M86 62 v-10 M94 62 v-10 M100 62 v-10 M110 62 v-10 M116 62 v-10 M124 62 v-10 M132 62 v-10 M140 62 v-10 M150 62 v-10 M158 62 v-10 M166 62 v-10 M174 62 v-10 M182 62 v-10 M192 62 v-10 M200 62 v-10 M208 62 v-10 M216 62 v-10 M224 62 v-10 M232 62 v-10 M242 62 v-10 M250 62 v-10 M258 62 v-10 M266 62 v-10"/>
+          </g>
+          <text x="150" y="86" fill="#5c7264" font-size="7.5">密的地方=正峰 · 疏的地方=负峰</text>
+          <text x="6" y="108">PCM（抽取后）</text>
+          <path d="M60 112 l0 -0" fill="none"/>
+          <g stroke="#ffb02e" stroke-width="2">
+            <path d="M60 108 v-2 M72 106 v-2 M84 102 v-2 M96 98 v-2 M108 94 v-2 M120 92 v-2 M132 92 v-2 M144 94 v-2 M156 98 v-2 M168 102 v-2 M180 106 v-2 M192 108 v-2"/>
+          </g>
+          <text x="204" y="104" fill="#5c7264" font-size="7.5">64 bit → 1 sample</text>
+        </g>
+      </svg>
+      <div class="fb">PDM 的信息在<b>密度</b>不在边沿：0V ↔ 50%，+满幅 ↔ 100%，−满幅 ↔ 0%。所以示波器上看 PDM 像乱码是正常的——<b>它是给滤波器看的，不是给人看的</b>。抽取率 64× 意味着 2.4MHz 时钟出 37.5kHz 采样率，带宽 ~18kHz，刚好覆盖可听域。</div></div>
+  </div>
+</section>
+
+<!-- ================= §06 ================= -->
+<section id="s6">
+  <div class="sec-head reveal"><span class="no">06</span><h2>指向性与频响实验室 · 它听见哪个方向</h2><span class="en">Polar &amp; Response Lab</span></div>
+  <p class="sec-sub reveal">
+    全向（omni）麦克风对四面八方一视同仁；心形（cardioid）正面灵、背面死——<b>0.5×(1+cos θ)</b> 这条玫瑰线就是「歌手话筒背对监听音箱」的全部秘密。
+    切换指向图案、拖动声源角，读出每个方向的衰减；右侧对比 ECM 与 MEMS 的频响差异。
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl"><label>指向图案</label>
+        <div class="seg" id="polPat">
+          <button data-i="0" class="on" type="button">全向</button>
+          <button data-i="1" type="button">心形</button>
+          <button data-i="2" type="button">超心形</button>
+          <button data-i="3" type="button">8 字</button>
+        </div>
+      </div>
+      <div class="ctrl"><label>声源角 θ</label><input type="range" id="polTheta" min="0" max="360" value="30" style="width:190px"><span id="polThetaVal" style="font-family:var(--mono);font-size:12px;color:var(--green);min-width:56px">30°</span></div>
+      <div class="ctrl"><span style="font-family:var(--mono);font-size:11px;color:var(--faint)">0° = 正面（振膜朝向）</span></div>
+    </div>
+    <div class="cc2-body mid"><canvas id="polCanvas"></canvas></div>
+    <div class="cc2-read" id="polRead"></div>
+    <div class="cc2-note">r(θ) 是<b>相对灵敏度</b>：全向恒 1；心形背面 180° 处 r=0（理论无限抑制，实际 −25dB 量级）；8 字与 cos|θ| 同型，侧面 90° 全死。MEMS/ECM 单颗为全向——其余图案要靠声学结构（双进声孔）或阵列算法实现。</div>
+  </div>
+  <div class="fmt-grid">
+    <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">FR</span><h4>频响 · ECM vs MEMS</h4><span class="en">FREQ RESPONSE</span></div>
+      <svg viewBox="0 0 300 110">
+        <line x1="20" y1="90" x2="286" y2="90" stroke="#27392d" stroke-width="1.4"/>
+        <g font-family="IBM Plex Mono,monospace" font-size="7.5" fill="#5c7264" text-anchor="middle">
+          <text x="30" y="101">20</text><text x="86" y="101">100</text><text x="150" y="101">1k</text><text x="214" y="101">10k</text><text x="268" y="101">20k</text>
+        </g>
+        <path d="M20 46 C60 44 70 50 86 48 C120 46 150 48 180 47 C210 46 230 42 248 38 C262 36 274 40 286 44" fill="none" stroke="#34e08a" stroke-width="2"/>
+        <path d="M20 58 C50 56 66 62 86 60 C110 58 130 57 150 58 C175 59 195 62 212 60 C228 57 244 46 258 40 C268 36 278 38 286 42" fill="none" stroke="#57d8f2" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="24" y="30" fill="#34e08a" font-size="8" font-family="IBM Plex Mono,monospace">MEMS：20–20k 平坦 + HF 微抬</text>
+        <text x="24" y="76" fill="#57d8f2" font-size="8" font-family="IBM Plex Mono,monospace">ECM：50Hz 起步 · 6–8k 有小峰</text>
+        <text x="20" y="108" fill="#5c7264" font-size="7.5" font-family="IBM Plex Mono,monospace">纵轴相对灵敏度（dB）· 对数频率轴</text>
+      </svg>
+      <div class="fb">ECM 低频受振膜张力与<b>耦合 fc</b>（03 节）限制，高频在 6–8kHz 常有谐振小峰；MEMS 靠激光刻蚀的一致性，20Hz–20kHz 平坦、顶端还故意抬 2–4dB（<b>HF roll-up</b>，提升语音明亮感）。语音识别链路优先选平坦的。</div></div>
+    <div class="fmt-card t-sod reveal"><div class="fh"><span class="tag">NOISE</span><h4>底噪与动态范围</h4><span class="en">SNR BUDGET</span></div>
+      <svg viewBox="0 0 300 110">
+        <rect x="20" y="24" width="264" height="66" fill="none" stroke="#27392d" stroke-width="1.2"/>
+        <g font-family="IBM Plex Mono,monospace" font-size="7.5">
+          <text x="24" y="20" fill="#5c7264">94 dB SPL 规格声压</text>
+          <rect x="24" y="28" width="150" height="10" fill="rgba(52,224,138,.25)" stroke="#34e08a" stroke-width="1"/>
+          <text x="178" y="37" fill="#34e08a">信号 94dB</text>
+          <rect x="24" y="46" width="34" height="10" fill="rgba(255,176,46,.3)" stroke="#ffb02e" stroke-width="1"/>
+          <text x="62" y="55" fill="#ffb02e">SNR 62dB</text>
+          <rect x="24" y="62" width="18" height="10" fill="rgba(185,140,255,.3)" stroke="#b98cff" stroke-width="1"/>
+          <text x="46" y="71" fill="#b98cff">SNR 65dB（好 MEMS）</text>
+          <text x="24" y="88" fill="#5c7264">底噪 = 94 − SNR</text>
+          <text x="24" y="104" fill="#5c7264">ECM 32–36dB SPL · MEMS 29–31dB SPL 等效底噪</text>
+        </g>
+      </svg>
+      <div class="fb">SNR 65dBA 意味着等效输入底噪 29dB SPL——比深夜卧室还安静 10dB。<b>但链路里任何一处增益不足的环节都会把这 65dB 白白扔掉</b>：第一级放大器噪声直接加进总账，这就是「麦克风之后第一颗运放要挑低噪」的原因（常用 LMV721/AD8605，噪声 &lt;10nV/√Hz）。</div></div>
+  </div>
+</section>
+
+<!-- ================= §07 ================= -->
+<section id="s7">
+  <div class="sec-head reveal"><span class="no">07</span><h2>实时采声实验室 · 你的浏览器就是声卡</h2><span class="en">Live Capture Lab</span></div>
+  <p class="sec-sub reveal">
+    上半屏<b>波形</b>（时域）、下半屏<b>频谱</b>（频域）——正是 ADC + FFT 在 MCU 上的分工预演。
+    默认播放本地合成的 440Hz + 泛音信号（离线可用）；点 <b>● MIC</b> 授权真麦克风，看你自己的声音长什么样：元音的基频峰、
+    噪声的连续谱、削波的平顶，一目了然。<b>信号全程留在本机，不上传任何数据。</b>
+  </p>
+  <div class="lab reveal">
+    <div class="lab-bar">
+      <div class="ctrl">
+        <button class="icon-btn rec" id="liveMic" title="启用/停用本机麦克风（getUserMedia）" type="button">●</button>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--faint)" id="liveState">仿真信号 · 440Hz + 880Hz 泛音</span>
+      </div>
+      <div class="ctrl"><label>合成频率</label><input type="range" id="liveF" min="100" max="2000" value="440" style="width:150px"><span id="liveFVal" style="font-family:var(--mono);font-size:12px;color:var(--green);min-width:56px">440 Hz</span></div>
+      <div class="ctrl"><label>合成幅度</label><input type="range" id="liveA" min="0" max="100" value="45" style="width:120px"></div>
+      <div class="ctrl"><button class="icon-btn play on" id="livePlay" title="暂停/播放" type="button">❚❚</button></div>
+    </div>
+    <div class="cc2-body tall"><canvas id="liveCanvas"></canvas></div>
+    <div class="cc2-read" id="liveRead"></div>
+    <div class="cc2-note">实况模式即 <code>AnalyserNode</code> 的 getByteTimeDomainData / getByteFrequencyData——等价于 MCU 的 DMA 环形缓冲 + 定长 FFT。电平条读完数：峰值逼近 0dBFS 时<b>先降模拟增益</b>，别靠数字端硬削。</div>
+  </div>
+  <div class="rule-callout reveal">
+    <div class="mnemonic">看波形识症状<small>READ THE SCOPE</small></div>
+    <p>
+      平滑正弦 = 纯音；毛刺森林 + 底部隆起 = 白噪声；<b>平顶/平底</b> = 削波（降增益）；低频缓慢漂移 = 电源纹波或风噪；
+      频谱里孤立的 50Hz/100Hz 线 = 工频串扰。采集链调试的第一步永远是「录 5 秒看一眼」，比任何猜想都快——本实验室就是你的那「一眼」。
+    </p>
+  </div>
+</section>
+
+<!-- ================= §08 ================= -->
+<section id="s8">
+  <div class="sec-head reveal"><span class="no">08</span><h2>实战与选型五步</h2><span class="en">Lab Practice</span></div>
+  <p class="sec-sub reveal">
+    按<b>选型五步</b>走一遍（点步骤看依据），再抄三个平台的采集代码：Arduino 模拟前端声级计、STM32 I2S 直采数字麦、Linux ALSA 录音与链路检查。<b>命令可点击复制。</b>
+  </p>
+  <div class="dbg-steps reveal" id="selSteps"></div>
+  <div class="dbg-verdict reveal" id="selVerdict"></div>
+
+  <div class="term-grid">
+    <div class="term reveal">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>Arduino · ECM + ADC 声级计</span></div>
+      <div class="term-body">
+        <div><span class="t-cmt">/* ECM + 2.2k 偏置 → A0 · 工作点约 2.3V */</span></div>
+        <div><span class="t-tag">const</span> <span class="t-tag">int</span> N = <span class="t-hl">256</span>;</div>
+        <div><span class="t-tag">int</span> baseline = <span class="t-hl">0</span>;   <span class="t-cmt">/* 上电时环境安静段的 ADC 基线 */</span></div>
+        <div> </div>
+        <div><span class="t-tag">void</span> <span class="t-tag">setup</span>(){</div>
+        <div><span class="t-ps">   </span>Serial.begin(<span class="t-hl">115200</span>);</div>
+        <div><span class="t-ps">   </span><span class="t-tag">long</span> s = <span class="t-hl">0</span>;                        <span class="t-cmt">/* 前 500 次取均值当基线 */</span></div>
+        <div><span class="t-ps">   </span><span class="t-tag">for</span> (<span class="t-tag">int</span> i = <span class="t-hl">0</span>; i &lt; <span class="t-hl">500</span>; i++) s += analogRead(A0);</div>
+        <div><span class="t-ps">   </span>baseline = s / <span class="t-hl">500</span>;</div>
+        <div>}</div>
+        <div> </div>
+        <div><span class="t-tag">void</span> <span class="t-tag">loop</span>(){</div>
+        <div><span class="t-ps">   </span><span class="t-tag">long</span> acc = <span class="t-hl">0</span>;                       <span class="t-cmt">/* 平均绝对值 ≈ 粗声级 */</span></div>
+        <div><span class="t-ps">   </span><span class="t-tag">for</span> (<span class="t-tag">int</span> i = <span class="t-hl">0</span>; i &lt; N; i++) acc += abs(analogRead(A0) - baseline);</div>
+        <div><span class="t-ps">   </span>Serial.println(acc / N);            <span class="t-cmt">/* 阈值判断声控灯够用 */</span></div>
+        <div>}</div>
+        <div> </div>
+        <div><span class="t-cmt">/* ADC 采样率 ~9kHz：语音不清但测响度/检测拍手足够。想采音频请上外置 ADC 或数字麦 */</span></div>
+      </div>
+    </div>
+    <div class="term reveal">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>STM32 HAL · I2S 直采 SPH0645</span></div>
+      <div class="term-body">
+        <div><span class="t-cmt">/* I2S2 主收 · 32kHz 字率 · 24bit 左对齐进 16bit 半字 */</span></div>
+        <div><span class="t-ps"> </span><span class="t-tag">static</span> <span class="t-tag">int16_t</span> pcm[<span class="t-hl">256</span>];</div>
+        <div><span class="t-ps"> </span>HAL_I2S_Receive_DMA(&amp;hi2s2, (<span class="t-tag">uint16_t</span>*)raw, <span class="t-hl">512</span>);</div>
+        <div> </div>
+        <div><span class="t-cmt">/* SPH0645 数据比标准 I2S 晚一个 BCK：32bit 槽取高 16bit 前右移一位 */</span></div>
+        <div><span class="t-ps"> </span><span class="t-tag">for</span> (<span class="t-tag">int</span> i = <span class="t-hl">0</span>; i &lt; <span class="t-hl">256</span>; i++)</div>
+        <div><span class="t-ps">   </span>pcm[i] = (<span class="t-tag">int16_t</span>)(raw[<span class="t-hl">2</span>*i] &gt;&gt; <span class="t-hl">1</span>);  <span class="t-cmt">/* MSB 对齐修正 */</span></div>
+        <div> </div>
+        <div><span class="t-cmt">/* CubeMX 要点：Standard Philips + 32bit · 主时钟输出关 ·</span></div>
+        <div><span class="t-cmt">   VDD 3.3V 可用（LU4H-1 版本）；WS 极性反了就全采到 0 */</span></div>
+      </div>
+    </div>
+    <div class="term wide reveal">
+      <div class="term-bar"><i class="d1"></i><i class="d2"></i><i class="d3"></i><span>Linux · ALSA 录音与链路体检</span></div>
+      <div class="term-body">
+        <div><span class="t-cmt"># 列出录音设备：USB 声卡/内置阵列麦/模拟 MIC 都在这</span></div>
+        <div><span class="t-ps">$ </span><code class="t-cmd" data-copy="arecord -l">arecord -l</code></div>
+        <div><span class="t-out">card 1: ArrayUAC [Mic Array UAC], device 0 … </span></div>
+        <div><span class="t-cmt"># 录 5 秒 16kHz 单声道 wav（语音识别标准格式）</span></div>
+        <div><span class="t-ps">$ </span><code class="t-cmd" data-copy="arecord -D hw:1,0 -f S16_LE -r 16000 -c 1 -d 5 voice.wav">arecord -D hw:1,0 -f S16_LE -r 16000 -c 1 -d 5 voice.wav</code></div>
+        <div><span class="t-cmt"># 打开麦克风增益并确认不是静音（很多无声问题就死在这一步）</span></div>
+        <div><span class="t-ps">$ </span><code class="t-cmd" data-copy="alsamixer -c 1    # F6 选卡 → F4 录音页 → MIC Boost +20dB">alsamixer -c 1</code>  <span class="t-cmt"># F4 切 Capture 页</span></div>
+        <div><span class="t-cmt"># 电平表实时监测：全 0 = 前端断了；削顶 = 降 Boost</span></div>
+        <div><span class="t-ps">$ </span><code class="t-cmd" data-copy="arecord -V mono -f S16_LE /dev/null">arecord -V mono -f S16_LE /dev/null</code></div>
+        <div><span class="t-cmt"># 查链路归属：谁抢占了设备（PulseAudio/PipeWire/浏览器）</span></div>
+        <div><span class="t-ps">$ </span><code class="t-cmd" data-copy="fuser -v /dev/snd/pcmC1D0c ; pactl list sources short">fuser -v /dev/snd/pcmC1D0c; pactl list sources short</code></div>
+      </div>
+    </div>
+  </div>
+  <div class="lnx-note reveal">
+    <b>SPH0645 的「半个采样」玄学：</b>示波器看 I2S 时钟全对、数据全是 0xFF/0x00 交替——先查 <code>WS 极性</code>（左右声道弄反时数据落在空声道里）；
+    数据有但声音像碎玻璃——是 <b>MSB 晚一个 BCK</b> 的对齐问题（上面代码的右移修正）。另外 I2S 麦克风是<b>主模式输出</b>：MCU 只做时钟主机、数据从机，
+    CubeMX 里把 Receive 方向配成 slave 之外的方向是新手第一大坑。
+  </div>
+</section>
+
+<!-- ================= §09 ================= -->
+<section id="s9">
+  <div class="sec-head reveal"><span class="no">09</span><h2>踩坑指南 · 症状 → 病因</h2><span class="en">Troubleshooting</span></div>
+  <div class="pit-list reveal">
+    <div class="pit">
+      <div class="symptom">完全<br>无声</div>
+      <div class="fix">
+        <b>偏置电阻漏接 / 接错位置</b>
+        <p>两脚 ECM 的 JFET 要从<b>输出脚经 Rbias 到 VDD</b> 蹭电，另一脚接地。Rbias 没接、或把它接到 GND 侧——FET 没电，输出恒 0。
+          万用表先量输出脚直流：健康工作点在 <code>VDD 的 0.5–0.8 倍</code>（03 节计算器），读 0V 或 VDD 都是偏置网络断了。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="symptom">输出<br>一条死线</div>
+      <div class="fix">
+        <b>直耦把直流放大到顶轨</b>
+        <p>省掉耦合电容把 ECM 输出直接接进高增益放大器：2.3V 直流 ×8 = 18V，单电源输出直接钉死在轨上（04 节场景②）——示波器一条 3.1V 直线，
+          什么交流都看不见。<code>Cout 隔直 + 下级重新偏置到 VDD/2</code>，两个元件救回整条链。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="symptom">大声<br>破音</div>
+      <div class="fix">
+        <b>增益预算超了 ADC 满量程</b>
+        <p>110dB 近讲 + −38dBV 灵敏度 + 60dB 增益 = 峰值 3.6V，3.3V ADC 直接削顶（04 节场景③梯形波）。用 03 节计算器按<b>最大预期声压</b>反推增益，
+          留 6dB 余量；或选带 AGC/压缩的 codec（WM8960 类）让芯片替你动态调。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="symptom">声音<br>闷/发虚</div>
+      <div class="fix">
+        <b>耦合 fc 卡在频段中间</b>
+        <p>0.1µF 进 10kΩ 的高通 fc = 159Hz——人声基频男低 85Hz、女声 165Hz 全被压掉 3dB 以上还附赠相位扭转。要么加 C 到 1µF+，
+          要么提高 Rin。低频「有但虚」多半是 fc 落在了 100–300Hz：<code>fc = 1/(2π·Rin·Cout)</code> 一算便知。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="symptom">ADC<br>读数漂</div>
+      <div class="fix">
+        <b>源阻抗超过 ADC 采样保持的胃口</b>
+        <p>MCU ADC 要求源阻抗 &lt;10kΩ（采样电容充不满读数就漂）。ECM 输出阻抗 ≈ Rbias 且随信号摆动，10kΩ 偏置直连 ADC 是重灾区。
+          加一级<b>运放跟随器</b>（阻抗降到 Ω 级）或换 100k 输入的 SAR 前端；也可以牺牲采样率换长采样时间。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="symptom">嗡嗡<br>工频声</div>
+      <div class="fix">
+        <b>电源纹波与共模噪声全额进链</b>
+        <p>50Hz/100Hz 线状谱 = 电源（USB 五毛线尤其脏）或地环路；全频段隆起 = 模拟地与数字地混走。对策按序：Rbias 的 VDD 加 RC 去耦（100Ω+10µF）、
+          模拟地单点汇流、换<b>差分 MEMS</b> 让共模在接收端抵消（04 节场景④的 ×2 改善就是这么来的）。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="symptom">PDM<br>无数据</div>
+      <div class="fix">
+        <b>时钟没喂 / 电压不对 / 线接反</b>
+        <p>PDM 麦没有 CLK 就是死器件：查主控时钟输出（1–4.5MHz）、查 CLK 与 DATA 是否弄反（示波器上看谁是你自己输出的）。
+          部分型号（MP23DB01 等）<b>供电严格 1.8V</b>，接 3.3V 轻则畸变重则永久哑——买料时把 VDD 列为第一筛选项。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="symptom">装上<br>板就聋</div>
+      <div class="fix">
+        <b>声孔被 PCB 封死了</b>
+        <p>底部进声孔（bottom-port）MEMS 要求封装正下方 PCB 开孔通到后腔，声孔被阻焊层/铜皮/外壳封住 = 物理性耳聋。
+          布局时先定声孔位置再走线；顶部进声孔（top-port）则要保证外壳开孔对准且留 0.5mm 以上气隙。改版比改电路贵多了。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= §10 ================= -->
+<section id="s10">
+  <div class="sec-head reveal"><span class="no">10</span><h2>速查表</h2><span class="en">Quick Reference</span></div>
+  <div class="qr-grid">
+    <div class="qr-card reveal">
+      <div class="qh"><h4>五类麦克风对比</h4><span>TYPE MATRIX</span></div>
+      <div class="qb"><table class="cmp-table">
+        <tr><th>类型</th><th>输出</th><th>供电</th><th>典型用途</th></tr>
+        <tr><td>动圈</td><td>1–2 mV/Pa 无源</td><td>—</td><td>舞台话筒 · 对讲</td></tr>
+        <tr><td>电容（48V）</td><td>mV 级需话放</td><td>幻象 48V</td><td>录音棚 · 测量</td></tr>
+        <tr><td>ECM 驻极体</td><td>12.6 mV @−38dBV</td><td>2–10V 经 Rbias</td><td>传统嵌入式</td></tr>
+        <tr><td>MEMS 模拟</td><td>差分 Vcm≈0.9V</td><td>1.8–3.6V</td><td>手机 · 音箱</td></tr>
+        <tr><td>MEMS PDM/I2S</td><td>1bit 流 / I2S 帧</td><td>1.8V 或 3.3V</td><td>语音助手前端</td></tr>
+      </table></div>
+    </div>
+    <div class="qr-card reveal">
+      <div class="qh"><h4>公式集</h4><span>FORMULAS</span></div>
+      <div class="qb"><table class="cmp-table">
+        <tr><th>量</th><th>公式</th><th>备注</th></tr>
+        <tr><td>声压级</td><td>SPL = 20lg(p/20µPa)</td><td>94dB = 1 Pa</td></tr>
+        <tr><td>输出电压</td><td>V = 10^(Sens/20) × p</td><td>−38dBV→12.6mV</td></tr>
+        <tr><td>动圈电动势</td><td>e = B·L·v</td><td>扬声器的逆过程</td></tr>
+        <tr><td>偏置工作点</td><td>Vdc = VDD − Id·R</td><td>坐中 0.3–0.8VDD</td></tr>
+        <tr><td>耦合高通</td><td>fc = 1/(2π·Rin·C)</td><td>1µF+10k→16Hz</td></tr>
+        <tr><td>PDM 密度</td><td>ρ = (1+x)/2</td><td>x 归一化声压</td></tr>
+        <tr><td>心形指向</td><td>r = 0.5(1+cos θ)</td><td>180° 处 r=0</td></tr>
+      </table></div>
+    </div>
+    <div class="qr-card reveal">
+      <div class="qh"><h4>典型档位</h4><span>TYPICAL VALUES</span></div>
+      <div class="qb"><table class="cmp-table">
+        <tr><th>参数</th><th>典型值</th><th>备注</th></tr>
+        <tr><td>ECM 灵敏度</td><td>−38 ~ −42 dBV/Pa</td><td>±3dB 散布</td></tr>
+        <tr><td>ECM 静态电流</td><td>0.1–0.5 mA</td><td>经 Rbias</td></tr>
+        <tr><td>Rbias @3.3V</td><td>2.2 kΩ</td><td>工作点≈2.3V</td></tr>
+        <tr><td>MEMS SNR</td><td>58–65 dBA</td><td>越高越安静</td></tr>
+        <tr><td>PDM CLK</td><td>1–4.5 MHz</td><td>OSR 64 常用</td></tr>
+        <tr><td>I2S 字率</td><td>16–50 kHz</td><td>BCK=64×WS</td></tr>
+      </table></div>
+    </div>
+    <div class="qr-card reveal">
+      <div class="qh"><h4>链路增益速配</h4><span>GAIN PRESETS</span></div>
+      <div class="qb"><table class="cmp-table">
+        <tr><th>场景</th><th>总增益</th><th>建议链路</th></tr>
+        <tr><td>声控开关</td><td>20–40 dB</td><td>ECM+比较器</td></tr>
+        <tr><td>声级计</td><td>20 dB+对数</td><td>ECM+检波</td></tr>
+        <tr><td>语音识别</td><td>40–60 dB</td><td>MEMS+codec AGC</td></tr>
+        <tr><td>录音笔</td><td>60 dB 低噪</td><td>I2S MEMS 直采</td></tr>
+        <tr><td>对讲机</td><td>动态压缩</td><td>动圈+AGC 话放</td></tr>
+      </table></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="f-l">
+    <b>参考</b> · Knowles / TDK / Infineon MEMS 与 ECM 数据手册 · IEC 61094 测量麦克风 · Android CDD 音频输入规范 · 跨页：<a href="speaker.html">扬声器</a>（逆向换能）· <a href="opamp.html">运放</a>增益级 · <a href="capacitor.html">电容</a>耦合与高通 · <a href="transistor.html">三极管</a>JFET 阻抗变换<br>
+    本页为单文件交互式图解，可离线打开 · 波形由浏览器实时渲染 · 实时采声经 getUserMedia 本地处理，不上传任何数据
+  </div>
+  <div class="f-r">MIC·LAB<small>HW-BASIC · MAINTAINED WITH ♥ FOR EMBEDDED ENGINEERS</small></div>
+</footer>
+
+<script>
+/* ================================================================
+   麦克风交互引擎
+   ① hero 声→电剖面动画（声波 → 振膜 → JFET → 输出波形）
+   ② §02 换能原理步进   ③ §03 灵敏度/偏置计算器
+   ④ §04 ECM 读放电路实验室（4 场景）  ⑤ §05 PDM 码流实验室
+   ⑥ §06 指向性极坐标   ⑦ §07 实时采声（getUserMedia/仿真）
+   ⑧ §08 选型五步 + 终端复制
+================================================================ */
+
+/* ---------------- 工具 ---------------- */
+const $ = id => document.getElementById(id);
+const trim3 = n => parseFloat(n.toPrecision(3));
+function fmtV(v){
+  if (!isFinite(v)) return '—';
+  const s=v<0?'−':'';
+  v=Math.abs(v);
+  if (v>=1) return s+trim3(v)+' V';
+  if (v===0) return '0 V';
+  return s+trim3(v*1e3)+' mV';
+}
+function fmtHz(f){
+  if (!isFinite(f)) return '—';
+  if (f===0) return '0 Hz';
+  const us=[[1e9,'GHz'],[1e6,'MHz'],[1e3,'kHz'],[1,'Hz']];
+  for (const [g,n] of us){ if (f>=g) return trim3(f/g)+' '+n; }
+  return trim3(f)+' Hz';
+}
+function fmtT(s){
+  if (!isFinite(s)) return '—';
+  if (s===0) return '0 s';
+  const us=[[1,'s'],[1e-3,'ms'],[1e-6,'µs']];
+  for (const [f,n] of us){ if (s>=f) return trim3(s/f)+' '+n; }
+  return trim3(s/1e-9)+' ns';
+}
+function fmtOhm(v){
+  if (!isFinite(v)) return '—';
+  if (v===0) return '0 Ω';
+  const us=[[1e6,'MΩ'],[1e3,'kΩ'],[1,'Ω']];
+  for (const [f,n] of us){ if (v>=f) return trim3(v/f)+' '+n; }
+  return trim3(v/1e-3)+' mΩ';
+}
+function fmtDb(v){
+  if (!isFinite(v)) return '—';
+  if (v===Infinity||v===-Infinity) return '−∞ dB';
+  return (v>=0?'+':'')+trim3(v)+' dB';
+}
+
+/* ================================================================
+   ① HERO · 声→电剖面：声波 → 振膜间距变化 → FET → 输出双迹
+      读数全部由模型常量计算，禁止硬编码物理量
+================================================================ */
+(function(){
+  const cv = $('heroScope'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const H = 150;
+  let W = 300;
+  function resize(){
+    const r = cv.parentElement.getBoundingClientRect();
+    W = Math.max(300, r.width);
+    const dpr = Math.min(devicePixelRatio||1, 2);
+    cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  new ResizeObserver(resize).observe(cv.parentElement);
+  resize();
+  /* 模型常量：所有读数由此计算 */
+  const SPL=94, SENS=-38, F=440;
+  const PA=Math.pow(10,(SPL-94)/20);        /* 声压 Pa（94dB→1Pa） */
+  const VRMS=Math.pow(10,SENS/20)*PA;       /* 输出 Vrms */
+  const VPK=VRMS*Math.SQRT2;                /* 峰值 */
+  const TM=1000/F;                          /* 周期 ms */
+  const hist=[];
+  let vph=0, last=performance.now();
+  function frame(now){
+    const dt=Math.min(.05,(now-last)/1000); last=now;
+    vph += dt*Math.PI*2/2.0;            /* 视觉慢放：2s 一周（真实 440Hz 不可见） */
+    const disp=Math.sin(vph);
+    hist.push(disp); if (hist.length>560) hist.shift();
+    ctx.clearRect(0,0,W,H);
+    /* ---- 剖面：左侧声源 → ECM 电容剖面 → 输出 ---- */
+    const cx=Math.max(96,W*0.20), cy=62;
+    /* 声波：左侧弧线从声源扩散 */
+    ctx.strokeStyle='#57d8f2';
+    for (let k=0;k<3;k++){
+      const t=((now/1500)+k/3)%1;
+      const r=8+t*40, al=(1-t)*.75;
+      ctx.globalAlpha=al; ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.arc(cx-96,cy,r,-Math.PI*0.42,Math.PI*0.42);
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#8aa294'; ctx.font='9px "IBM Plex Mono"'; ctx.textAlign='center';
+    ctx.fillText('声源',cx-96,cy-46);
+    /* ECM 外壳 */
+    ctx.fillStyle='#141d16'; ctx.strokeStyle='#5c7264'; ctx.lineWidth=1.5;
+    ctx.fillRect(cx-40,cy-30,86,60); ctx.strokeRect(cx-40,cy-30,86,60);
+    /* 振膜（随声压弯曲） */
+    const mb=cy+disp*6;
+    ctx.strokeStyle='#34e08a'; ctx.lineWidth=2.2;
+    ctx.beginPath(); ctx.moveTo(cx-24,cy-22);
+    ctx.quadraticCurveTo(cx-18,mb,cx-24,cy+22); ctx.stroke();
+    /* 驻极体背极板（固定，开孔） */
+    ctx.strokeStyle='#57d8f2'; ctx.lineWidth=1.8;
+    ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(cx-4,cy-22); ctx.lineTo(cx-4,cy+22); ctx.stroke();
+    ctx.setLineDash([]);
+    /* 间距 d 标注 */
+    ctx.strokeStyle='#ffb02e'; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(cx-24,cy-28); ctx.lineTo(cx-4,cy-28); ctx.stroke();
+    ctx.fillStyle='#ffb02e'; ctx.font='9px "IBM Plex Mono"';
+    ctx.fillText('d ≈ 20µm',cx-14,cy-34);
+    /* 内置 JFET */
+    ctx.strokeStyle='#8aa294'; ctx.lineWidth=1.5;
+    ctx.strokeRect(cx+18,cy-14,26,28);
+    ctx.fillStyle='#8aa294'; ctx.font='8.5px "IBM Plex Mono"';
+    ctx.fillText('JFET',cx+31,cy+2);
+    /* 输出引脚 */
+    ctx.beginPath(); ctx.moveTo(cx+46,cy-6); ctx.lineTo(cx+64,cy-6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+18,cy+22); ctx.lineTo(cx+18,cy+30); ctx.stroke();
+    ctx.fillStyle='#5c7264';
+    ctx.fillText('G',cx+9,cy-10); ctx.fillText('D',cx+56,cy-10);
+    /* 画面标注（供读数对账） */
+    ctx.fillStyle='#8aa294'; ctx.font='9.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('SPL '+SPL+' dB = '+PA.toFixed(2)+' Pa',cx-40,cy+40);
+    ctx.fillStyle='#5c7264'; ctx.font='9px "IBM Plex Mono"';
+    ctx.fillText('Sens '+SENS+' dBV/Pa',cx+70,cy-20);
+    ctx.fillText('C ≈ 15 pF',cx+70,cy-8);
+    ctx.fillText('f = '+F+' Hz',cx+70,cy+4);
+    /* ---- 底部输出迹线 ---- */
+    const gy0=104, gy1=142, mid=(gy0+gy1)/2, gx0=22, gx1=W-22;
+    ctx.strokeStyle='#1d2c22'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(gx0,mid); ctx.lineTo(gx1,mid); ctx.stroke();
+    ctx.strokeStyle='#34e08a'; ctx.lineWidth=1.8; ctx.beginPath();
+    for (let i=0;i<hist.length;i++){
+      const x=gx1-(hist.length-1-i)*((gx1-gx0)/560);
+      const yy=mid-hist[i]*15;
+      if (i===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy);
+    }
+    ctx.stroke();
+    ctx.fillStyle='#5c7264'; ctx.font='8.5px "IBM Plex Mono"'; ctx.textAlign='left';
+    ctx.fillText('输出 V(t)',gx0,gy0+9);
+    /* 读数行：全部由常量计算生成 */
+    ctx.font=(W<620?'9.5px':'11px')+' "IBM Plex Mono"'; ctx.textAlign='left'; ctx.fillStyle='#8aa294';
+    const rt=SPL+' dB SPL → '+PA.toFixed(2)+' Pa   Sens '+SENS+' dBV/Pa   V = '+(VRMS*1e3).toFixed(1)+' mVrms · '+(VPK*1e3).toFixed(1)+' mVpk   f '+F+' Hz   T = 1/f '+TM.toFixed(3)+' ms';
+    ctx.fillText(rt+'   （声压↑1倍 +6dB）', Math.max(22,W*0.05), H-4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ================================================================
+   ② §02 换能原理实验室（动圈 e=BLv 步进 + 电容 ΔC 解说）
+================================================================ */
+const TR_B=0.8, TR_L=2.5, TR_V1=0.001;
+const TR_E1=TR_B*TR_L*TR_V1;    /* 1 Pa → v=1mm/s → e=2.0 mV */
+const TR_STEPS=[
+ {t:'静默 · 无声压',
+  read:'v = 0 → e = B·L·v = '+TR_B+' × '+TR_L.toFixed(1)+' × 0 = <b>0.00 mV</b>',
+  cap:'<b>安静环境：</b>瞬时声压围绕大气压起伏 ≈ 0，振膜停在中位。注意「静默」不是「没有空气」——大气压 101.3kPa 一直压着振膜，麦克风只对<b>变化量</b>敏感：电容式经 JFET 后直流工作点被隔离，动圈的变压器也隔直，输出永远是交流。'},
+ {t:'1 Pa 声压（94 dB SPL）',
+  read:'v = '+TR_V1*1e3+' mm/s → e = B·L·v = '+TR_B+' × '+TR_L.toFixed(1)+' × '+TR_V1.toFixed(3)+' = <b>'+(TR_E1*1e3).toFixed(1)+' mV</b>',
+  cap:'<b>声波到达：</b>密集区空气把振膜推向内，稀疏区拉它回来——振膜随声压同相运动，带着音圈在磁隙里以速度 v 切割磁力线。法拉第定律给出感应电动势 <code>e = B·L·v</code>（0.8T × 2.5m × 1mm/s = 2.0mV）——正好是动圈话筒「1–2mV/Pa」的典型灵敏度，比 ECM 低 10 倍以上。'},
+ {t:'声压 ×4（+12 dB）',
+  read:'v ×4 → e = <b>'+(TR_E1*4*1e3).toFixed(1)+' mV</b>（线性 ×4）',
+  cap:'<b>线性换能：</b>声压翻倍 → 振膜速度翻倍 → 电动势翻倍。链路每一环都成比例，所以 12dB 的声压差就是电压 ×4——这也是 dB 刻度的由来：SPL 每差 20dB = 电压差 10 倍。注意「×4」靠的是声压，不是靠你把增益拧大：增益链的失真也得是线性的才行。'},
+ {t:'440Hz 交变 · 输出正弦',
+  read:'e(t) = B·L·v(t) ≤ <b>'+(TR_E1*1e3).toFixed(1)+' mV</b> · 每秒交变 <b>440 次</b>',
+  cap:'<b>交流才是声音：</b>声压以 440Hz 正弦起伏，输出电压就是 440Hz 正弦——麦克风是「透明」的换能器，波形形状原样传递（在频响平坦的频段内）。直流声压（比如关门的单次脉冲）对应单次脉冲输出；持续的恒定压力差（比如对着振膜吹气）只会把振膜顶偏、输出一次跳变后归零——<b>吹气测麦其实测的是风噪冲击</b>。'},
+];
+function renderTr(i){
+  const st=TR_STEPS[i];
+  const mode=i;
+  const disp = mode===0?0:(mode===1?0.35:(mode===2?1:0));   /* 振膜偏移视觉幅度 */
+  const ac = mode===3;
+  const vm = mode===0?0:(mode===1?TR_V1:(mode===2?TR_V1*4:0));
+  const em = mode===0?0:(mode===1?TR_E1:(mode===2?TR_E1*4:0));
+  /* 空气分子点阵：密疏随声压 */
+  let dots='';
+  const dens=[26,46,66,86,106];
+  for (const bx of dens){
+    const ph=(bx/130)*Math.PI*2 + (ac? 0 : Math.PI/2);
+    const off=Math.sin(ph)*(ac?0.5:(mode>=1?0.35*mode:0))*10;
+    for (let r=0;r<4;r++){
+      dots+='<circle cx="'+(bx+off)+'" cy="'+(44+r*22)+'" r="2" fill="#5c7264" opacity="'+(0.5+0.4*(mode>=1?Math.abs(Math.sin(ph)):0))+'"/>';
+    }
+  }
+  const waveLbl = mode===0?'无声':(mode===1?'1 Pa':(mode===2?'4 Pa':'440Hz 交变'));
+  /* 音圈位置：交流模式画在中位（振动中），静态模式按声压偏移 */
+  const coilTop = ac?100:104;
+  const coilBot = ac?128:124;
+  const memY = 114-(ac?0:disp*6);
+  $('trSvg').innerHTML=
+  '<svg viewBox="0 0 640 250" xmlns="http://www.w3.org/2000/svg">'+
+  '<g font-family="IBM Plex Mono,monospace">'+
+  '  <text x="26" y="30" fill="#dcebe1" font-size="10.5">空气纵波（分子密疏）</text>'+
+  '  <text x="26" y="46" fill="#5c7264" font-size="8.5">密 → 推 · 疏 → 拉</text>'+
+     dots+
+  '  <text x="150" y="36" fill="#8aa294" font-size="10.5">'+waveLbl+' · 传播方向 →</text>'+
+  /* 磁路 + 音圈 */
+  '  <rect x="216" y="70" width="18" height="88" fill="#2b3038" stroke="rgba(255,255,255,.2)"/>'+
+  '  <text x="225" y="62" text-anchor="middle" fill="#dcebe1" font-size="9.5">N</text>'+
+  '  <rect x="252" y="70" width="18" height="88" fill="#2b3038" stroke="rgba(255,255,255,.2)"/>'+
+  '  <text x="261" y="62" text-anchor="middle" fill="#dcebe1" font-size="9.5">S</text>'+
+  '  <g stroke="#57d8f2" stroke-width="1.4">'+
+  '    <line x1="238" y1="76" x2="238" y2="94"/><path d="M238 100 l-3 -6 h6 z" fill="#57d8f2" stroke="none"/>'+
+  '    <line x1="250" y1="76" x2="250" y2="94"/><path d="M250 100 l-3 -6 h6 z" fill="#57d8f2" stroke="none"/>'+
+  '  </g>'+
+  '  <text x="244" y="176" text-anchor="middle" fill="#57d8f2" font-size="9">B = '+TR_B.toFixed(1)+' T</text>'+
+  /* 音圈（两根导线，在磁隙中） */
+  '  <g stroke="#ffb02e" stroke-width="2.6">'+
+  '    <line x1="238" y1="'+coilTop+'" x2="238" y2="'+coilBot+'"/>'+
+  '    <line x1="250" y1="'+coilTop+'" x2="250" y2="'+coilBot+'"/></g>'+
+  /* 振膜（连接声波与音圈） */
+  '  <path d="M216 '+memY+' q18 0 34 0" fill="none" stroke="#34e08a" stroke-width="2.4"/>'+
+  '  <line x1="234" y1="'+memY+'" x2="238" y2="'+coilTop+'" stroke="#34e08a" stroke-width="1.6"/>'+
+  '  <line x1="252" y1="'+coilTop+'" x2="258" y2="'+memY+'" stroke="#34e08a" stroke-width="1.6"/>'+
+  '  <text x="244" y="196" text-anchor="middle" fill="#34e08a" font-size="9.5">振膜 + 音圈 L = '+TR_L.toFixed(1)+' m</text>'+
+  /* 输出电压表 */
+  '  <g transform="translate(330,40)">'+
+  '    <text x="120" y="0" text-anchor="middle" fill="#dcebe1" font-size="10.5">输出电压</text>'+
+  '    <circle cx="120" cy="62" r="34" fill="none" stroke="#5c7264" stroke-width="1.6"/>'+
+  '    <text x="120" y="58" text-anchor="middle" fill="#ffb02e" font-size="12">'+(em*1e3).toFixed(1)+'</text>'+
+  '    <text x="120" y="72" text-anchor="middle" fill="#8aa294" font-size="9">mV</text>'+
+  '    <line x1="120" y1="62" x2="'+(120+(mode===0?0:22))+'" y2="'+(62-(mode===0?28:(mode===1?16:(mode===2?28:8))))+'" stroke="#ffb02e" stroke-width="2"/>'+
+  '    <text x="120" y="116" text-anchor="middle" fill="#5c7264" font-size="8.5">v = '+(vm===0?'0':(vm*1e3).toFixed(vm*1e3<1?2:0))+' mm/s · e = B·L·v</text>'+
+  '  </g>'+
+  /* 电容式对照小图 */
+  '  <g transform="translate(330,140)">'+
+  '    <text x="0" y="0" fill="#dcebe1" font-size="10.5">电容式对照：ΔC 而非动圈</text>'+
+  '    <line x1="16" y1="18" x2="16" y2="70" stroke="#34e08a" stroke-width="2.2"/>'+
+  '    <line x1="34" y1="18" x2="34" y2="70" stroke="#57d8f2" stroke-width="1.8" stroke-dasharray="4 3"/>'+
+  '    <text x="25" y="14" text-anchor="middle" fill="#5c7264" font-size="8">C = εA/d</text>'+
+  '    <text x="60" y="34" fill="#8aa294" font-size="9">声压 → d 变 → C 变</text>'+
+  '    <text x="60" y="52" fill="#8aa294" font-size="9">驻极体自偏 · 无需 48V</text>'+
+  '    <text x="60" y="70" fill="#5c7264" font-size="8.5">JFET 阻抗变换后输出</text>'+
+  '  </g>'+
+  '</g></svg>';
+  $('trRead').innerHTML='<span style="color:var(--faint)">状态</span> <b>'+st.t+'</b>'+
+    ' <span style="color:var(--faint)">·</span> <span style="color:var(--dim)">'+st.read+'</span>';
+  $('trCap').innerHTML=st.cap;
+}
+
+/* ================================================================
+   ③ §03 计算器
+================================================================ */
+function micPa(spl){ return Math.pow(10,(spl-94)/20); }
+function micVol(spl,sensDb){ return Math.pow(10,sensDb/20)*micPa(spl); }
+function calcLev(){
+  const spl=+$('lSpl').value, sens=+$('lSens').value, gain=+$('lGain').value;
+  const pa=micPa(spl);
+  const vmic=micVol(spl,sens);
+  const vout=vmic*Math.pow(10,gain/20);
+  const vpk=vout*Math.SQRT2;
+  const vfull=3.3/2/Math.SQRT2;             /* ADC 满幅对应 RMS（0..3.3 双向摆） */
+  const dbfs=20*Math.log10(vout/vfull);
+  $('oPa').textContent=pa>=1?(trim3(pa)+' Pa'):(trim3(pa*1e3)+' mPa');
+  $('oMic').textContent=fmtV(vmic);
+  $('oOut').textContent=fmtV(vout)+' rms';
+  $('oPk').textContent=fmtV(vpk);
+  const ov=$('oDbfs');
+  ov.textContent=fmtDb(dbfs);
+  ov.className='ov'+(dbfs>-3?' bad':'');
+  const vd=$('oVerdict');
+  if (dbfs>0){ vd.textContent='已削波 ⚠'; vd.className='ov bad'; }
+  else if (dbfs>-6){ vd.textContent='临界 · 再大声就削'; vd.className='ov bad'; }
+  else if (dbfs<-30){ vd.textContent='余量过大 · 小信号贴底噪'; vd.className='ov'; }
+  else { vd.textContent='健康档点 ✓'; vd.className='ov'; }
+  $('lFormula').innerHTML='<b>V = 10^('+sens+'/20) × '+pa.toPrecision(3)+' Pa × 10^('+gain+'/20) = '+fmtV(vout)+
+    'rms</b> · 相对 3.3V ADC 满幅（Vrms(full) = '+(vfull).toFixed(3)+'V）：20·lg(V/'+vfull.toFixed(3)+') = '+fmtDb(dbfs)+
+    ' dBFS · 人声峰值因子 12–18dB，系统设计按最大声压 +6dB 余量';
+}
+const ECM_ID=0.45e-3;    /* ECM 静态电流建模值（mA→A） */
+function calcBias(){
+  const vdd=+$('bVdd').value, r=+$('bR').value*1e3, c=+$('bC').value*1e-6, rin=+$('bRin').value*1e3;
+  const vraw=vdd-ECM_ID*r;
+  const vdc=Math.max(0.2,Math.min(vdd-0.15,vraw));   /* JFET 压入线性区时钳位 */
+  const sat=vraw<0.2, top=vraw>vdd-0.15;
+  const fc=1/(2*Math.PI*rin*c);
+  const pr=ECM_ID*ECM_ID*r;
+  $('oVdc').textContent=vdc.toFixed(2)+' V'+(sat?'（贴地 ⚠）':(top?'（贴轨 ⚠）':''));
+  $('oVdc').className='ov'+((sat||top)?' bad':'');
+  $('oHead').textContent=Math.min(vdd-vdc,vdc).toFixed(2)+' V';
+  $('oFc').textContent=fc>=1000?trim3(fc/1000)+' kHz':trim3(fc)+' Hz';
+  $('oPr').textContent=(pr*1e3).toFixed(3)+' mW';
+  const bv=$('oBiasVerdict');
+  const healthy=vdc>=0.3*vdd&&vdc<=0.8*vdd;
+  bv.textContent=healthy?'偏置健康 ✓':(sat?'R 太大 · 工作点掉底':(top?'R 太小 · 工作点顶轨':'工作点偏移'));
+  bv.className='ov'+(healthy?'':' bad');
+  const fv=$('oFcVerdict');
+  const fOK=fc<=100;
+  fv.textContent=fOK?('≤100Hz ✓ 人声全通'):('fc='+trim3(fc)+'Hz 压低频 ⚠');
+  fv.className='ov'+(fOK?'':' bad');
+  $('bFormula').innerHTML='<b>Vdc = '+vdd+' − '+(ECM_ID*1e3).toFixed(2)+'mA × '+fmtOhm(r)+' = '+vraw.toFixed(2)+'V'+
+    (sat?'（钳位 0.20V）':'')+'</b> · fc = 1/(2π×'+fmtOhm(rin)+'×'+trim3(c*1e6)+'µF) = '+trim3(fc)+' Hz · 偏置功耗 '+
+    (pr*1e3).toFixed(3)+'mW · 健康区 0.3–0.8×VDD = '+(0.3*vdd).toFixed(2)+'–'+(0.8*vdd).toFixed(2)+'V';
+}
+
+/* ================================================================
+   ④ §04 ECM 读放电路实验室（4 场景 × 2 模式）
+      模型常量：VDD 3.3 · ECM Id 0.45mA · SPL 由场景设定
+      场景① 110dB 近讲 → Vpk 0.11V · 场景③ 104dB → Vpk 56.3mV
+================================================================ */
+const CCV=$('ccMCanvas');
+const CX=CCV?CCV.getContext('2d'):null;
+const CCH=330;
+/* ---- 电路绘图小件 ---- */
+function ccMWire(pts,color){
+  CX.strokeStyle=color||'#9aa79d'; CX.lineWidth=1.8;
+  CX.beginPath(); CX.moveTo(pts[0][0],pts[0][1]);
+  for (let i=1;i<pts.length;i++) CX.lineTo(pts[i][0],pts[i][1]);
+  CX.stroke();
+}
+function ccMNode(x,y,color){
+  CX.fillStyle=color||'#9aa79d';
+  CX.beginPath(); CX.arc(x,y,3,0,Math.PI*2); CX.fill();
+}
+function ccMGnd(x,y,color){
+  CX.strokeStyle=color||'#5c7264'; CX.lineWidth=1.6;
+  CX.beginPath(); CX.moveTo(x,y); CX.lineTo(x,y+8); CX.stroke();
+  for (const w of [12,8,4.5]){
+    CX.beginPath(); CX.moveTo(x-w/2,y+8+w/6); CX.lineTo(x+w/2,y+8+w/6); CX.stroke();
+  }
+}
+function ccMChip(x,y,w,h,label,color,sub){
+  CX.fillStyle='#0a100c'; CX.fillRect(x,y,w,h);
+  CX.strokeStyle=color; CX.lineWidth=1.8; CX.strokeRect(x,y,w,h);
+  CX.fillStyle=color; CX.font='11px "IBM Plex Mono"'; CX.textAlign='center';
+  CX.fillText(label,x+w/2,y+h/2+(sub?-3:4));
+  if (sub){ CX.fillStyle='#8aa294'; CX.font='9px "IBM Plex Mono"'; CX.fillText(sub,x+w/2,y+h/2+11); }
+}
+function ccMBox(x,y,w,h,label,color){
+  CX.fillStyle='#080d0a'; CX.fillRect(x,y,w,h);
+  CX.strokeStyle=color||'#9aa79d'; CX.lineWidth=1.7; CX.strokeRect(x,y,w,h);
+  CX.fillStyle=color||'#9aa79d'; CX.font='9.5px "IBM Plex Mono"'; CX.textAlign='center';
+  CX.fillText(label,x+w/2,y+h/2+3.5);
+}
+function ccMRes(x,y,label,color){          /* 竖置电阻盒 */
+  CX.strokeStyle=color||'#8aa79d'; CX.lineWidth=1.7;
+  CX.strokeRect(x-13,y,26,44);
+  CX.fillStyle=color||'#8aa79d'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+  CX.fillText(label,x,y-7);
+}
+function ccMCap(x,y,label,color){          /* 竖置耦合电容（上端进下端出） */
+  CX.strokeStyle=color||'#8aa29d'; CX.lineWidth=2.2;
+  CX.beginPath(); CX.moveTo(x-10,y-4); CX.lineTo(x+10,y-4); CX.stroke();
+  CX.beginPath(); CX.moveTo(x-10,y+4); CX.lineTo(x+10,y+4); CX.stroke();
+  CX.fillStyle=color||'#8aa79d'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+  CX.fillText(label,x+26,y+3);
+}
+function ccMMic(x,y,color,sub){            /* ECM 符号：圆 + 内置 FET 简画 */
+  CX.strokeStyle=color||'#9aa79d'; CX.lineWidth=1.8;
+  CX.beginPath(); CX.arc(x,y,22,0,Math.PI*2); CX.stroke();
+  CX.strokeStyle=color||'#9aa79d'; CX.lineWidth=1.2;
+  CX.strokeRect(x-9,y-8,18,16);
+  CX.fillStyle=color||'#9aa79d'; CX.font='7.5px "IBM Plex Mono"'; CX.textAlign='center';
+  CX.fillText('FET',x,y+3);
+  if (sub){ CX.fillStyle=color||'#9aa79d'; CX.font='9px "IBM Plex Mono"'; CX.fillText(sub,x,y+38); }
+}
+function ccMFlowPath(pts,now,color,speed){
+  const L=[]; let tot=0;
+  for (let i=1;i<pts.length;i++){ const d=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]); L.push(d); tot+=d; }
+  const off=(now*(speed||120)/1000)%26;
+  for (let s=off; s<tot; s+=26){
+    let dd=s,i=0;
+    while (i<L.length && dd>L[i]){ dd-=L[i]; i++; }
+    if (i>=L.length) break;
+    const f=dd/L[i];
+    const qx=pts[i][0]+(pts[i+1][0]-pts[i][0])*f;
+    const qy=pts[i][1]+(pts[i+1][1]-pts[i][1])*f;
+    CX.fillStyle=color; CX.shadowColor=color; CX.shadowBlur=6;
+    CX.beginPath(); CX.arc(qx,qy,2.4,0,Math.PI*2); CX.fill(); CX.shadowBlur=0;
+  }
+}
+function ccMReadout(rows){
+  $('ccMRead').innerHTML=rows.map(r=>'<span class="k">'+r[0]+'</span> <b class="'+(r[2]||'')+'">'+r[1]+'</b>').join('');
+}
+/* ---- 波形 pane（右半，逻辑宽 920） ---- */
+function ccMPane(vT,vB,title){
+  const x0=Math.max(560,0.60*920), x1=896, gy0=40, gy1=250;
+  const py=v=>gy0+(gy1-gy0)*(1-(v-vB)/(vT-vB));
+  CX.strokeStyle='#1d2c22'; CX.lineWidth=1; CX.strokeRect(x0,gy0,x1-x0,gy1-gy0);
+  CX.font='9.5px "IBM Plex Mono"'; CX.fillStyle='#5c7264'; CX.textAlign='right';
+  const steps=6;
+  for (let k=0;k<=steps;k++){
+    const v=vB+(vT-vB)*k/steps;
+    if (Math.abs(v)<0.001&&(vT<0||vB>0)) continue;
+    CX.fillText(v.toFixed(vT-vB>10?1:2),x0-6,py(v)+3);
+  }
+  CX.textAlign='left'; CX.fillStyle='#5c7264'; CX.font='9.5px "IBM Plex Mono"';
+  CX.fillText(title,x0+8,gy0-8);
+  return {x0,x1,gy0,gy1,py};
+}
+function ccMRefLine(p,v,label,color){
+  CX.strokeStyle=color||'rgba(255,176,46,.55)'; CX.setLineDash([6,5]); CX.lineWidth=1.2;
+  CX.beginPath(); CX.moveTo(p.x0,p.py(v)); CX.lineTo(p.x1,p.py(v)); CX.stroke(); CX.setLineDash([]);
+  CX.fillStyle='#8aa294'; CX.textAlign='left'; CX.font='9px "IBM Plex Mono"';
+  CX.fillText(label,p.x0+8,Math.max(p.py(v)-6,p.gy0+10));
+}
+/* ---- 场景模型公共量 ---- */
+const CM_VDD=3.3, CM_ID=0.45e-3, CM_SENS=-38;
+const CM_V110=micVol(110,CM_SENS)*Math.SQRT2;   /* 110dB 近讲 Vpk ≈ 0.112V */
+const CM_V104=micVol(104,CM_SENS)*Math.SQRT2;   /* 104dB     Vpk ≈ 0.056V */
+const SCN=[
+ { /* ① 偏置电阻：2.2k ✓ vs 100k 贴地 */
+   modes:['R 2.2k ✓','R 100k ⚠'],
+   note:'<b>场景 ①：</b>两脚 ECM 内置 JFET 是<b>漏极开路</b>：Rbias 从 VDD 供出 0.45mA 静态电流，工作点 <b>Vdc = 3.3 − 0.45mA×R</b>。R=2.2k → 2.31V，落在 0.3–0.8×VDD 健康区，±0.11V 的近讲信号双向都有余量；R=100k → 压降 45V 远超电源，FET 被压进变阻区，输出贴在 0.30V、摆幅窒息——「省电的偏置」直接聋掉。手册推荐 1k–4.7k@3.3V、2.2k 是绝对主流。',
+   draw(now,W){
+     const bigR=CCM.mode===1;
+     const R=bigR?100:2.2, Rk=R*1e3;
+     const vraw=CM_VDD-CM_ID*Rk;
+     const vdc=bigR?0.30:vraw;
+     const vsw=bigR?0.06:CM_V110;
+     const bus=278;
+     /* 顶部电源轨 */
+     CX.strokeStyle='#34e08a'; CX.lineWidth=2;
+     CX.beginPath(); CX.moveTo(120,54); CX.lineTo(400,54); CX.stroke();
+     CX.fillStyle='#34e08a'; CX.font='11px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('+3.3V',92,58);
+     /* Rbias */
+     ccMWire([[230,54],[230,72]]);
+     ccMRes(230,72,bigR?'100k':'2.2k',bigR?'#ff6478':'#8aa79d');
+     ccMWire([[230,116],[230,146]]);
+     /* ECM（顶接 Rbias 下地） */
+     ccMMic(230,176,bigR?'#ff6478':'#34e08a','ECM '+CM_SENS+'dBV');
+     ccMWire([[230,198],[230,bus]],'#5c7264');
+     ccMGnd(230,bus,'#5c7264');
+     /* 探测点到波形 pane */
+     ccMNode(230,146,bigR?'#ff6478':'#34e08a');
+     ccMWire([[230,146],[340,146]],'rgba(138,162,148,.4)');
+     CX.setLineDash([4,4]);
+     ccMWire([[340,146],[340,258]],'rgba(138,162,148,.35)');
+     CX.setLineDash([]);
+     CX.fillStyle='#5c7264'; CX.font='8.5px "IBM Plex Mono"'; CX.textAlign='left';
+     CX.fillText('探测 MIC_OUT',346,150);
+     /* 供电电流粒子：VDD→R→FET→GND */
+     ccMFlowPath([[230,54],[230,72],[230,116],[230,146],[230,198],[230,bus]],now,bigR?'#ff6478':'#34e08a',60);
+     /* 声波示意 */
+     CX.strokeStyle='#57d8f2';
+     for (let k=0;k<2;k++){
+       const t=((now/1300)+k/2)%1, r=8+t*20, al=(1-t)*.6;
+       CX.globalAlpha=al;
+       CX.beginPath(); CX.arc(150,176,r,-Math.PI*0.45,Math.PI*0.45); CX.stroke();
+     }
+     CX.globalAlpha=1;
+     CX.fillStyle='#57d8f2'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('110dB 近讲',130,216);
+     /* 波形 pane */
+     const p=ccMPane(3.6,0,'MIC_OUT 节点电压（直流 + 交流）');
+     ccMRefLine(p,CM_VDD,'VDD 3.3V','rgba(52,224,138,.4)');
+     ccMRefLine(p,vdc,'Vdc '+(bigR?'0.30V 贴地 ⚠':'2.31V 工作点'));
+     const ph0=(now/1000*0.6)%1;
+     CX.strokeStyle='#34e08a'; CX.lineWidth=2.2; CX.beginPath();
+     for (let i=0;i<=460;i++){
+       const f=i/460;
+       const v=vdc+vsw*Math.sin((f*3+ph0)*Math.PI*2);
+       const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
+       if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
+     }
+     CX.stroke();
+     ccMReadout([
+       ['静态电流','0.45 mA','c'],
+       ['Rbias',bigR?'100 kΩ ⚠':'2.2 kΩ ✓',bigR?'r':'g'],
+       ['工作点',vdc.toFixed(2)+' V'+(bigR?'（贴地 ⚠）':'（0.70×VDD ✓）'),bigR?'r':'g'],
+       ['信号摆幅','±'+(bigR?0.06:CM_V110).toFixed(2)+' V'+(bigR?'（压缩）':''),bigR?'r':''],
+       ['余量',bigR?'0.30 V（单边）':Math.min(CM_VDD-vdc,vdc).toFixed(2)+' V（双向）',bigR?'r':'g'],
+       ['判定',bigR?'FET 变阻区 · 摆幅窒息':'0.3–0.8×VDD 健康区 ✓',bigR?'r':'g'],
+     ]);
+   }},
+ { /* ② 耦合电容：隔直 ✓ vs 直耦顶轨 */
+   modes:['Cout 1µF ✓','直耦 ⚠'],
+   note:'<b>场景 ②：</b>ECM 输出是「2.31V 直流 ± 0.11V 交流」的混合体。经 <b>1µF 耦合电容</b>，直流被隔断、下级把信号重新偏置在 VDD/2=1.65V，×8 放大后输出 1.65±0.88V 干净正弦（fc = 1/(2π·10k·1µF) = 15.9Hz，人声全通）。省掉电容直耦：2.31V 直流也被放大 8 倍 = 18.5V，单电源输出直接<b>钉死在 3.18V</b>——波形一条死线，交流完全淹没。这就是「隔直再放大」铁律的由来（<a href="capacitor.html">电容页</a>的高通）。',
+   draw(now,W){
+     const hasC=CCM.mode===0;
+     const AV=8, VOFF=1.65;
+     const bus=278;
+     /* 电源轨 + Rbias + ECM（同场景①简画） */
+     CX.strokeStyle='#34e08a'; CX.lineWidth=2;
+     CX.beginPath(); CX.moveTo(100,54); CX.lineTo(360,54); CX.stroke();
+     CX.fillStyle='#34e08a'; CX.font='11px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('+3.3V',74,58);
+     ccMWire([[170,54],[170,72]]);
+     ccMRes(170,72,'2.2k','#8aa79d');
+     ccMWire([[170,116],[170,140]]);
+     ccMMic(170,168,'#34e08a','ECM');
+     ccMWire([[170,190],[170,bus]],'#5c7264');
+     ccMGnd(170,bus,'#5c7264');
+     ccMNode(170,140,'#8aa79d');
+     ccMFlowPath([[170,54],[170,72],[170,116],[170,140],[170,190],[170,bus]],now,'#34e08a',60);
+     /* 耦合电容 or 直耦 */
+     if (hasC){
+       ccMWire([[170,140],[240,140]]);
+       ccMCap(250,140,'1µF','#57d8f2');
+       ccMWire([[260,140],[300,140]],'#57d8f2');
+       ccMNode(250,140,'#57d8f2');
+       CX.fillStyle='#57d8f2'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+       CX.fillText('隔直',250,124);
+     } else {
+       ccMWire([[170,140],[300,140]],'#ff6478');
+       CX.fillStyle='#ff6478'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+       CX.fillText('直流直入 ⚠',238,128);
+     }
+     /* 运放：偏置网络 + 同相放大三角 */
+     ccMWire([[300,140],[330,140]]);
+     ccMWire([[330,140],[330,196]]);
+     ccMWire([[330,196],[316,196]]);
+     ccMRes(316,196,'10k','#8aa294');   /* 下偏置 Rin→GND 简画为 Rin */
+     ccMWire([[316,240],[316,bus]],'#5c7264');
+     ccMGnd(316,bus,'#5c7264');
+     /* 三角运放 */
+     CX.strokeStyle='#ffb02e'; CX.lineWidth=1.8;
+     CX.beginPath(); CX.moveTo(346,116); CX.lineTo(346,196); CX.lineTo(416,156); CX.closePath(); CX.stroke();
+     CX.fillStyle='#ffb02e'; CX.font='11px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('×'+AV,400,160);
+     CX.fillStyle='#5c7264'; CX.font='8.5px "IBM Plex Mono"';
+     CX.fillText('OUT',430,156);
+     /* 输出引线到 pane */
+     ccMWire([[416,156],[440,156]],'#ffb02e');
+     ccMNode(416,156,'#ffb02e');
+     CX.setLineDash([4,4]);
+     ccMWire([[440,156],[440,258],[520,258]],'rgba(255,176,46,.35)');
+     CX.setLineDash([]);
+     CX.fillStyle='#5c7264'; CX.font='8.5px "IBM Plex Mono"'; CX.textAlign='left';
+     CX.fillText('探测放大器输出',446,150);
+     const p=ccMPane(3.6,0,'放大器输出（增益 ×8 · 偏置 1.65V）');
+     ccMRefLine(p,VOFF,'偏置 1.65V');
+     const ph0=(now/1000*0.6)%1;
+     if (hasC){
+       ccMRefLine(p,3.3,'VDD 3.3V','rgba(52,224,138,.4)');
+       CX.strokeStyle='#34e08a'; CX.lineWidth=2.2; CX.beginPath();
+       for (let i=0;i<=460;i++){
+         const f=i/460;
+         const v=VOFF+CM_V110*AV*Math.sin((f*3+ph0)*Math.PI*2);
+         const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
+         if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
+       }
+       CX.stroke();
+       ccMReadout([
+         ['Cout','1 µF ✓','g'],
+         ['fc', (1/(2*Math.PI*10e3*1e-6)).toFixed(1)+' Hz（Rin=10k）','c'],
+         ['输出',VOFF.toFixed(2)+' ± '+(CM_V110*AV).toFixed(2)+' V','g'],
+         ['直流成分','0 V（被隔断 ✓）','g'],
+         ['增益','×8（同相）','c'],
+         ['判定','干净正弦 · 余量 '+(VOFF-CM_V110*AV).toFixed(2)+'V','g'],
+       ]);
+     } else {
+       const vdead=Math.min(3.3-0.12,(CM_VDD-CM_ID*2.2e3)*AV);
+       ccMRefLine(p,vdead,'死线 '+vdead.toFixed(2)+'V ⚠','rgba(255,100,120,.6)');
+       CX.strokeStyle='#34e08a'; CX.lineWidth=2.2; CX.beginPath();
+       for (let i=0;i<=460;i++){
+         const f=i/460;
+         const v=vdead+0.02*Math.sin((f*3+ph0)*Math.PI*2);
+         const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
+         if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
+       }
+       CX.stroke();
+       ccMReadout([
+         ['Cout','（省略）⚠','r'],
+         ['直流路径','2.31 V × 8 = '+((CM_VDD-CM_ID*2.2e3)*AV).toFixed(1)+' V','r'],
+         ['输出',vdead.toFixed(2)+' V 死线 ⚠','r'],
+         ['交流','完全淹没','r'],
+         ['判定','隔直再放大 · 别省这两毛钱','r'],
+       ]);
+     }
+   }},
+ { /* ③ 增益削波：×8 ✓ vs ×63 双削 */
+   modes:['增益 ×8 ✓','增益 ×63 ⚠'],
+   note:'<b>场景 ③：</b>104dB 的中量级输入（Vpk 56.3mV）下：增益 ×8 输出 ±0.45V，干净；增益 ×63 理论输出 ±3.55V，超出 1.65V±1.53V 的可用摆窗，<b>上下双削</b>成梯形——谐波暴增，听感就是破音。增益不是越大越好：把最大预期声压的输出算到 −6dBFS（03 节计算器），剩下的动态范围留给小信号；要同时照顾大喊与耳语，用 codec 的 <b>AGC</b> 动态压。',
+   draw(now,W){
+     const bigG=CCM.mode===1;
+     const AV=bigG?63:8, VOFF=1.65;
+     const vth=CM_V104*AV;                  /* 理论峰值 */
+     const vclipHi=3.12, vclipLo=0.20;      /* 轨附近削波点 */
+     const bus=278;
+     /* 前端简画：ECM → 耦合 → 带反馈网络的运放 */
+     CX.strokeStyle='#34e08a'; CX.lineWidth=2;
+     CX.beginPath(); CX.moveTo(100,54); CX.lineTo(330,54); CX.stroke();
+     CX.fillStyle='#34e08a'; CX.font='11px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('+3.3V',74,58);
+     ccMWire([[160,54],[160,72]]);
+     ccMRes(160,72,'2.2k','#8aa79d');
+     ccMWire([[160,116],[160,140]]);
+     ccMMic(160,168,'#34e08a','ECM');
+     ccMWire([[160,190],[160,bus]],'#5c7264');
+     ccMGnd(160,bus,'#5c7264');
+     ccMFlowPath([[160,54],[160,72],[160,116],[160,140],[160,190],[160,bus]],now,'#34e08a',60);
+     ccMNode(160,140,'#8aa79d');
+     ccMWire([[160,140],[218,140]]);
+     ccMCap(228,140,'1µF','#57d8f2');
+     ccMWire([[238,140],[286,140]],'#57d8f2');
+     /* 运放 + Rf/Rg */
+     CX.strokeStyle='#ffb02e'; CX.lineWidth=1.8;
+     CX.beginPath(); CX.moveTo(286,118); CX.lineTo(286,178); CX.lineTo(356,148); CX.closePath(); CX.stroke();
+     CX.fillStyle='#ffb02e'; CX.font='11px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('×'+AV,342,152);
+     /* Rf 环（上）与 Rg（下） */
+     ccMWire([[286,130],[262,130],[262,96],[356,96],[356,148]]);
+     ccMBox(292,86,56,20,bigG?'Rf 62k':'Rf 10k','#8aa29d');
+     ccMWire([[286,168],[262,168]]);
+     ccMBox(292,178,56,20,'Rg 1k','#8aa79d');
+     ccMWire([[320,198],[320,bus]],'#5c7264');
+     ccMGnd(320,bus,'#5c7264');
+     ccMNode(356,148,'#ffb02e');
+     ccMWire([[356,148],[386,148]],'#ffb02e');
+     CX.setLineDash([4,4]);
+     ccMWire([[386,148],[386,258],[460,258]],'rgba(255,176,46,.35)');
+     CX.setLineDash([]);
+     CX.fillStyle='#5c7264'; CX.font='8.5px "IBM Plex Mono"'; CX.textAlign='left';
+     CX.fillText('探测输出',392,142);
+     CX.fillStyle='#57d8f2'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('104dB 输入',130,216);
+     const p=ccMPane(3.6,0,'输出（偏置 1.65V · 输入 104dB SPL）');
+     ccMRefLine(p,VOFF,'偏置 1.65V');
+     const ph0=(now/1000*0.6)%1;
+     CX.strokeStyle='#34e08a'; CX.lineWidth=2.2; CX.beginPath();
+     for (let i=0;i<=460;i++){
+       const f=i/460;
+       let v=VOFF+vth*Math.sin((f*3+ph0)*Math.PI*2);
+       v=Math.min(vclipHi,Math.max(vclipLo,v));
+       const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
+       if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
+     }
+     CX.stroke();
+     if (bigG){
+       ccMRefLine(p,vclipHi,'削顶 3.12V','rgba(255,100,120,.55)');
+       ccMReadout([
+         ['增益','×'+AV+' ⚠','r'],
+         ['输入 Vpk',(CM_V104*1e3).toFixed(1)+' mV（104dB SPL）','c'],
+         ['理论输出','±'+vth.toFixed(2)+' V','r'],
+         ['实际','削到 '+vclipLo.toFixed(2)+'–'+vclipHi.toFixed(2)+' V（双削）','r'],
+         ['判定','梯形化 · 谐波暴增破音','r'],
+         ['修法','降增益 / 上 AGC','g'],
+       ]);
+     } else {
+       ccMRefLine(p,3.3,'VDD 3.3V','rgba(52,224,138,.4)');
+       ccMReadout([
+         ['增益','×'+AV+'（Rf 10k/Rg 1.3k）','g'],
+         ['输入 Vpk',(CM_V104*1e3).toFixed(1)+' mV（104dB SPL）','c'],
+         ['输出',VOFF.toFixed(2)+' ± '+vth.toFixed(2)+' V','g'],
+         ['削波','无 ✓','g'],
+         ['余量','±'+(VOFF-vth).toFixed(2)+' V','g'],
+         ['判定','最大声压落在 −6dBFS 附近 ✓','g'],
+       ]);
+     }
+   }},
+ { /* ④ 差分接收：全差分 ✓ vs 单端 ⚠ */
+   modes:['差分接收 ✓','单端取一端 ⚠'],
+   note:'<b>场景 ④：</b>MEMS 模拟麦输出是挂在 Vcm≈0.9V 上的<b>差分对</b>：OUT+ 与 OUT− 反相摆动 ±0.5V。全差分接收（差分 ADC 或减法器）取两者之差 → ±1.0V 满信号，且电源/地上的共模噪声在相减时<b>成对抵消</b>。只接 OUT+、OUT− 悬空：有效信号立刻减半（±0.25V），共模噪声却全额进链——SNR 双重恶化约 6dB+。手机板那些走线凌乱却干净的音频，秘密就是差分。',
+   draw(now,W){
+     const diff=CCM.mode===0;
+     const VCM=0.9, VD=0.5, VCMN=0.06;
+     const bus=278;
+     /* MEMS 盒 + VDD */
+     CX.strokeStyle='#34e08a'; CX.lineWidth=2;
+     CX.beginPath(); CX.moveTo(120,54); CX.lineTo(400,54); CX.stroke();
+     CX.fillStyle='#34e08a'; CX.font='11px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('+1.8V',92,58);
+     ccMWire([[230,54],[230,84]]);
+     ccMChip(190,84,80,56,'MEMS','#b98cff','模拟差分');
+     ccMWire([[230,140],[230,bus]],'#5c7264');
+     ccMGnd(230,bus,'#5c7264');
+     ccMFlowPath([[230,54],[230,84],[230,140],[230,bus]],now,'#b98cff',50);
+     /* OUT+ / OUT− */
+     ccMWire([[270,100],[320,100]],diff?'#57d8f2':'#57d8f2');
+     ccMNode(270,100,'#57d8f2');
+     CX.fillStyle='#57d8f2'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+     CX.fillText('OUT+',296,92);
+     if (diff){
+       ccMWire([[270,124],[320,124]],'#ffb02e');
+       ccMNode(270,124,'#ffb02e');
+       CX.fillStyle='#ffb02e'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+       CX.fillText('OUT−',296,140);
+       /* 差分运放（减法） */
+       CX.strokeStyle='#34e08a'; CX.lineWidth=1.8;
+       CX.beginPath(); CX.moveTo(320,84); CX.lineTo(320,140); CX.lineTo(392,112); CX.closePath(); CX.stroke();
+       CX.fillStyle='#34e08a'; CX.font='10px "IBM Plex Mono"'; CX.textAlign='center';
+       CX.fillText('V+ − V−',378,116);
+       ccMWire([[320,100],[320,100]]);
+     } else {
+       /* OUT− 悬空 × */
+       ccMWire([[270,124],[306,124]],'#ff6478');
+       CX.strokeStyle='#ff6478'; CX.lineWidth=2;
+       CX.beginPath(); CX.moveTo(306,116); CX.lineTo(322,132); CX.moveTo(322,116); CX.lineTo(306,132); CX.stroke();
+       CX.fillStyle='#ff6478'; CX.font='9px "IBM Plex Mono"'; CX.textAlign='center';
+       CX.fillText('悬空 ⚠',314,146);
+       /* 单端运放 */
+       CX.strokeStyle='#ffb02e'; CX.lineWidth=1.8;
+       CX.beginPath(); CX.moveTo(320,84); CX.lineTo(320,140); CX.lineTo(392,112); CX.closePath(); CX.stroke();
+       CX.fillStyle='#ffb02e'; CX.font='10px "IBM Plex Mono"'; CX.textAlign='center';
+       CX.fillText('×1 单端',378,116);
+       ccMWire([[320,100],[320,112]]);
+     }
+     ccMNode(392,112,diff?'#34e08a':'#ffb02e');
+     ccMWire([[392,112],[420,112]],diff?'#34e08a':'#ffb02e');
+     CX.setLineDash([4,4]);
+     ccMWire([[420,112],[420,258],[470,258]],'rgba(138,162,148,.35)');
+     CX.setLineDash([]);
+     CX.fillStyle='#5c7264'; CX.font='8.5px "IBM Plex Mono"'; CX.textAlign='left';
+     CX.fillText('探测接收输出',426,106);
+     const p=ccMPane(2.4,-0.6,'输出（Vcm 0.9V · 差分 ±0.5V）');
+     ccMRefLine(p,VCM,'Vcm 0.90V');
+     const ph0=(now/1000*0.6)%1;
+     /* OUT+ / OUT− 细线 */
+     CX.strokeStyle='rgba(87,216,242,.5)'; CX.lineWidth=1.3; CX.beginPath();
+     for (let i=0;i<=460;i++){
+       const f=i/460;
+       const v=VCM+VD*Math.sin((f*3+ph0)*Math.PI*2);
+       const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
+       if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
+     }
+     CX.stroke();
+     CX.strokeStyle='rgba(255,176,46,.5)'; CX.lineWidth=1.3; CX.beginPath();
+     for (let i=0;i<=460;i++){
+       const f=i/460;
+       const v=VCM-VD*Math.sin((f*3+ph0)*Math.PI*2);
+       const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
+       if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
+     }
+     CX.stroke();
+     /* 接收输出：差分 ±0.5 或 单端 ±0.25+共模纹波 */
+     CX.strokeStyle='#34e08a'; CX.lineWidth=2.2; CX.beginPath();
+     for (let i=0;i<=460;i++){
+       const f=i/460;
+       const s=Math.sin((f*3+ph0)*Math.PI*2);
+       const v=diff?VD*s:(VD/2*s+VCMN*Math.sin((f*0.75+ph0)*Math.PI*2));
+       const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
+       if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
+     }
+     CX.stroke();
+     CX.fillStyle='#5c7264'; CX.font='8.5px "IBM Plex Mono"'; CX.textAlign='left';
+     CX.fillText('青 OUT+ · 黄 OUT− · 粗线 接收输出',p.x0+8,p.gy1-8);
+     ccMReadout(diff?[
+       ['拓扑','全差分接收 ✓','g'],
+       ['Vcm','0.90 V（共模）','c'],
+       ['差分幅度','±'+VD.toFixed(2)+' V','g'],
+       ['共模抑制','相减抵消 · CMRR 60dB+','g'],
+       ['有效信号','满幅 ±0.50V ✓','g'],
+     ]:[
+       ['拓扑','单端取 OUT+ ⚠','r'],
+       ['信号','减半 ±'+(VD/2).toFixed(2)+' V','r'],
+       ['共模噪声','全额进链 ±0.06 V','r'],
+       ['SNR','双重恶化 ≈6dB','r'],
+       ['修法','差分 ADC / 减法器','g'],
+     ]);
+   }},
+];
+const CCM={scene:0,mode:0,playing:true,t0:performance.now(),frozen:performance.now()};
+function ccMBuildMode(){
+  const s=SCN[CCM.scene];
+  $('ccMMode').innerHTML=s.modes.map((m,i)=>'<button data-m="'+i+'"'+(i===CCM.mode?' class="on"':'')+'>'+m+'</button>').join('');
+}
+function ccMSetScene(i){
+  CCM.scene=i; CCM.mode=0;
+  CCM.t0=performance.now();
+  $('ccMCir').querySelectorAll('button').forEach((b,k)=>b.classList.toggle('on',k===i));
+  ccMBuildMode();
+  $('ccMNote').innerHTML=SCN[i].note;
+}
+function ccMLoop(now){
+  if (!CX) return;
+  const W=CCV.width/Math.min(devicePixelRatio||1,2);
+  CX.clearRect(0,0,W,CCH);
+  const VW=920, s=W/VW;
+  CX.save();
+  if (s<1){ CX.translate(0,(CCH-CCH*s)/2); CX.scale(s,s); }
+  SCN[CCM.scene].draw(CCM.playing?now:CCM.frozen,VW);
+  CX.restore();
+  requestAnimationFrame(ccMLoop);
+}
+
+/* ================================================================
+   ⑤ §05 PDM 码流实验室（一阶 ΣΔ · 密度=幅度）
+================================================================ */
+const PDM_FCLK=2.4e6, PDM_OSR=64;
+function pdmBit(st,x){                     /* 一阶 ΣΔ：st={acc,y} 可跨帧保持 */
+  st.acc += x - st.y;
+  st.y = st.acc>=0 ? 1 : -1;
+  return st.y;
+}
+function pdmDens(x){                       /* 恒输入 x 的长期密度：(1+x)/2 */
+  const st={acc:0,y:1};
+  let s=0;
+  for (let i=0;i<4000;i++) s+=pdmBit(st,x);
+  return (s/4000+1)/2;
+}
+const PD={amp:.6, t:0, playing:true, st:{acc:0,y:1}, bits:[], env:[]};
+const PDVC=$('pdmCanvas');
+const PC=PDVC?PDVC.getContext('2d'):null;
+function pdmTick(now){
+  if (!PC) return;
+  const W=PDVC.width/Math.min(devicePixelRatio||1,2);
+  const Hh=300;
+  const dt=1/60;
+  if (PD.playing) PD.t+=dt*0.25;           /* 包络慢速滚动 */
+  PC.clearRect(0,0,W,Hh);
+  const NB=32, bw=(W-72)/NB;
+  /* 生成当前窗口 bits + 包络 */
+  PD.bits.length=0; PD.env.length=0;
+  for (let k=0;k<NB;k++){
+    const f=k/NB;
+    const x=0.5+0.5*PD.amp*Math.sin((f*1.0+PD.t)*Math.PI*2);
+    PD.env.push(x);
+    PD.bits.push(pdmBit(PD.st,x));
+  }
+  /* ---- CLK 线（青）---- */
+  const cy0=44, cy1=88, gx0=36, gx1=W-36;
+  PC.strokeStyle='#57d8f2'; PC.lineWidth=1.8; PC.beginPath();
+  for (let k=0;k<NB;k++){
+    const x0=gx0+k*bw;
+    PC.lineTo(x0,cy1); PC.lineTo(x0,cy0); PC.lineTo(x0+bw/2,cy0); PC.lineTo(x0+bw/2,cy1);
+  }
+  PC.stroke();
+  PC.fillStyle='#5c7264'; PC.font='9px "IBM Plex Mono"'; PC.textAlign='right';
+  PC.fillText('CLK',gx0-8,cy0+8);
+  PC.textAlign='left'; PC.fillStyle='#8aa294'; PC.font='10.5px "IBM Plex Mono"';
+  PC.fillText('PDM 码流实验室 · 一阶 ΣΔ 调制',gx0,26);
+  /* ---- DATA 线（绿）---- */
+  const dy0=112, dy1=156;
+  PC.strokeStyle='#34e08a'; PC.lineWidth=2.2; PC.beginPath();
+  for (let k=0;k<NB;k++){
+    const x0=gx0+k*bw, hi=PD.bits[k]>0;
+    const y=hi?dy0:dy1;
+    if (k===0) PC.moveTo(x0,y);
+    else PC.lineTo(x0,y);
+    PC.lineTo(x0+bw,y);
+  }
+  PC.stroke();
+  PC.fillStyle='#5c7264'; PC.font='9px "IBM Plex Mono"'; PC.textAlign='right';
+  PC.fillText('DATA',gx0-8,dy0+8);
+  PC.textAlign='left';
+  PC.fillText('1 密度 → 瞬时声压',gx0,Hh-12);
+  /* ---- 包络与抽取恢复（琥珀）---- */
+  const ey0=196, ey1=252, mid=(ey0+ey1)/2;
+  PC.strokeStyle='rgba(52,224,138,.07)'; PC.lineWidth=1;
+  for (let i=1;i<4;i++){ PC.beginPath(); PC.moveTo(gx0,ey0+(ey1-ey0)*i/4); PC.lineTo(gx1,ey0+(ey1-ey0)*i/4); PC.stroke(); }
+  PC.strokeStyle='rgba(138,162,148,.35)';
+  PC.beginPath(); PC.moveTo(gx0,mid); PC.lineTo(gx1,mid); PC.stroke();
+  PC.strokeStyle='#ffb02e'; PC.lineWidth=2; PC.beginPath();
+  for (let k=0;k<NB;k++){
+    const x=gx0+k*bw+bw/2, y=mid-(PD.env[k]-0.5)*(ey1-ey0)*1.9;
+    if (k===0) PC.moveTo(x,y); else PC.lineTo(x,y);
+  }
+  PC.stroke();
+  PC.fillStyle='#5c7264'; PC.font='9px "IBM Plex Mono"'; PC.textAlign='right';
+  PC.fillText('PCM',gx0-8,ey0+8);
+  PC.textAlign='left'; PC.fillStyle='#ffb02e'; PC.font='9px "IBM Plex Mono"';
+  PC.fillText('64× 抽取 + 低通后的恢复波形',gx0,ey0-8);
+  /* 当前窗密度 */
+  let ones=0;
+  for (const b of PD.bits) if (b>0) ones++;
+  const densNow=ones/NB;
+  const xPk=0.5+0.5*PD.amp, xTr=0.5-0.5*PD.amp;
+  $('pdmRead').innerHTML=
+    '<span class="k">CLK</span> <b>'+fmtHz(PDM_FCLK)+'</b>'+
+    '<span class="k">OSR</span> <b>'+PDM_OSR+' → PCM '+fmtHz(PDM_FCLK/PDM_OSR)+'</b>'+
+    '<span class="k">包络幅度</span> <b class="g">'+Math.round(PD.amp*100)+'%</b>'+
+    '<span class="k">峰值密度</span> <b class="c">'+(pdmDens(xPk)*100).toFixed(0)+'%</b>'+
+    '<span class="k">谷值密度</span> <b class="c">'+(pdmDens(xTr)*100).toFixed(0)+'%</b>'+
+    '<span class="k">当前窗密度</span> <b>'+Math.round(densNow*100)+'%</b>';
+  requestAnimationFrame(pdmTick);
+}
+if (PDVC&&PC){
+  new ResizeObserver(()=>{
+    const r=PDVC.parentElement.getBoundingClientRect();
+    const w=Math.max(320,r.width);
+    const dpr=Math.min(devicePixelRatio||1,2);
+    PDVC.width=w*dpr; PDVC.height=300*dpr; PDVC.style.height='300px';
+    PC.setTransform(dpr,0,0,dpr,0,0);
+  }).observe(PDVC.parentElement);
+  $('pdmAmp').addEventListener('input',e=>{
+    PD.amp=+e.target.value/100;
+    $('pdmAmpVal').textContent=e.target.value+'%';
+  });
+  $('pdmPlay').addEventListener('click',()=>{
+    PD.playing=!PD.playing;
+    $('pdmPlay').classList.toggle('on',PD.playing);
+    $('pdmPlay').textContent=PD.playing?'❚❚':'▶';
+  });
+  requestAnimationFrame(pdmTick);
+}
+
+/* ================================================================
+   ⑥ §06 指向性极坐标实验室
+================================================================ */
+const POL=[
+ {n:'全向 OMNI', en:'OMNI', f:t=>1, fm:'r = 1',
+  desc:'所有方向一视同仁：ECM/MEMS 单颗的默认形态。拾环境声、不挑嘴位，但也无法拒绝噪声。'},
+ {n:'心形 CARDIOID', en:'CARDIOID', f:t=>Math.max(0,0.5*(1+Math.cos(t))), fm:'r = 0.5(1+cos θ)',
+  desc:'正面最灵、180° 背面归零：歌手话筒的标准图案。单指向要双进声孔的声学延迟或阵列算法。'},
+ {n:'超心形 SUPER', en:'SUPER', f:t=>Math.max(0,0.37+0.63*Math.cos(t)), fm:'r = 0.37+0.63cos θ',
+  desc:'比心形更窄的前瓣（−3dB 约 ±63°）+ 一点侧后瓣残留：摄像/会议拾音的折中选择。'},
+ {n:'8 字 FIG-8', en:'FIG-8', f:t=>Math.abs(Math.cos(t)), fm:'r = |cos θ|',
+  desc:'前后灵、左右死（90° 全抑制）：铝带话筒的天然图案，也用于双麦阵列的差分单元。'},
+];
+const POLS={pat:0, theta:Math.PI/6};
+const POLCV=$('polCanvas');
+const PLC=POLCV?POLCV.getContext('2d'):null;
+function polR(pat,theta){ return POL[pat].f(theta); }
+function polDb(r){ return r<=0.005?-Infinity:20*Math.log10(r); }
+function polDraw(){
+  if (!PLC) return;
+  const W=POLCV.width/Math.min(devicePixelRatio||1,2);
+  const Hh=300;
+  PLC.clearRect(0,0,W,Hh);
+  const pat=POLS.pat, theta=POLS.theta;
+  const cx=Math.min(W*0.30,260), cy=Hh/2, R=112;
+  /* 同心圆网格 */
+  PLC.strokeStyle='rgba(52,224,138,.08)'; PLC.lineWidth=1;
+  for (const k of [0.25,0.5,0.75,1]){
+    PLC.beginPath(); PLC.arc(cx,cy,R*k,0,Math.PI*2); PLC.stroke();
+  }
+  PLC.strokeStyle='rgba(52,224,138,.12)';
+  for (const a of [0,Math.PI/4,Math.PI/2,Math.PI*3/4]){
+    PLC.beginPath(); PLC.moveTo(cx-R*Math.cos(a),cy-R*Math.sin(a)); PLC.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a)); PLC.stroke();
+  }
+  PLC.setLineDash([4,4]);
+  PLC.beginPath(); PLC.moveTo(cx-R,cy); PLC.lineTo(cx+R,cy); PLC.stroke();
+  PLC.setLineDash([]);
+  PLC.fillStyle='#5c7264'; PLC.font='9px "IBM Plex Mono"'; PLC.textAlign='center';
+  PLC.fillText('0°',cx+R+18,cy+3); PLC.fillText('90°',cx,cy-R-10);
+  PLC.fillText('180°',cx-R-24,cy+3); PLC.fillText('270°',cx,cy+R+16);
+  PLC.font='8px "IBM Plex Mono"'; PLC.textAlign='left';
+  PLC.fillText('1.0',cx+3,cy-R+10); PLC.fillText('0.5',cx+3,cy-R/2+10);
+  /* 极坐标曲线 */
+  PLC.strokeStyle='#34e08a'; PLC.lineWidth=2.4; PLC.beginPath();
+  for (let i=0;i<=360;i++){
+    const t=i/360*Math.PI*2;
+    const r=POL[pat].f(t);
+    const x=cx+r*R*Math.cos(t), y=cy-r*R*Math.sin(t);
+    if (i===0) PLC.moveTo(x,y); else PLC.lineTo(x,y);
+  }
+  PLC.closePath(); PLC.stroke();
+  /* 振膜朝向箭头 */
+  PLC.strokeStyle='#8aa294'; PLC.lineWidth=1.6;
+  PLC.beginPath(); PLC.moveTo(cx,cy); PLC.lineTo(cx+R+26,cy); PLC.stroke();
+  PLC.beginPath(); PLC.moveTo(cx+R+26,cy); PLC.lineTo(cx+R+18,cy-4); PLC.lineTo(cx+R+18,cy+4); PLC.closePath();
+  PLC.fillStyle='#8aa294'; PLC.fill();
+  /* 声源方向：黄点 + 引线 */
+  const sr=POL[pat].f(theta);
+  const sx=cx+(R+40)*Math.cos(theta), sy=cy-(R+40)*Math.sin(theta);
+  const ex=cx+Math.max(sr,0.02)*R*Math.cos(theta), ey=cy-Math.max(sr,0.02)*R*Math.sin(theta);
+  PLC.strokeStyle='rgba(255,176,46,.6)'; PLC.setLineDash([3,4]); PLC.lineWidth=1.2;
+  PLC.beginPath(); PLC.moveTo(sx,sy); PLC.lineTo(ex,ey); PLC.stroke(); PLC.setLineDash([]);
+  PLC.fillStyle='#ffb02e'; PLC.shadowColor='rgba(255,176,46,.8)'; PLC.shadowBlur=8;
+  PLC.beginPath(); PLC.arc(sx,sy,5,0,Math.PI*2); PLC.fill(); PLC.shadowBlur=0;
+  PLC.fillStyle='#ffb02e'; PLC.font='9px "IBM Plex Mono"'; PLC.textAlign='center';
+  PLC.fillText('声源',sx,sy+16);
+  /* 右侧信息面板 */
+  const ix=Math.max(cx+R+70,W*0.52);
+  PLC.textAlign='left'; PLC.fillStyle='#dcebe1'; PLC.font='15px "IBM Plex Mono"';
+  PLC.fillText(POL[pat].n,ix,58);
+  PLC.fillStyle='#5c7264'; PLC.font='11px "IBM Plex Mono"';
+  PLC.fillText(POL[pat].fm,ix,80);
+  const db=polDb(sr);
+  PLC.fillStyle='#8aa294'; PLC.font='11px "IBM Plex Mono"';
+  PLC.fillText('θ = '+Math.round(theta*180/Math.PI)+'°',ix,116);
+  PLC.fillStyle=db<-20?'#ff6478':'#34e08a'; PLC.font='14px "IBM Plex Mono"';
+  PLC.fillText('衰减 '+(db===-Infinity?'−∞ dB':fmtDb(db)),ix,142);
+  PLC.fillStyle='#5c7264'; PLC.font='9.5px "IBM Plex Mono"';
+  PLC.fillText('r(θ) = '+sr.toFixed(2),ix,164);
+  wrapText(PLC,POL[pat].desc,ix,196,W-ix-20,15,'#8aa294','10.5px "IBM Plex Mono"');
+  $('polRead').innerHTML=
+    '<span class="k">图案</span> <b>'+POL[pat].n+'</b>'+
+    '<span class="k">公式</span> <b class="c">'+POL[pat].fm+'</b>'+
+    '<span class="k">θ</span> <b>'+Math.round(theta*180/Math.PI)+'°</b>'+
+    '<span class="k">r(θ)</span> <b class="g">'+sr.toFixed(2)+'</b>'+
+    '<span class="k">衰减</span> <b class="'+(db<-20?'r':'g')+'">'+(db===-Infinity?'−∞（完全抑制）':fmtDb(db))+'</b>';
+}
+function wrapText(ctx,txt,x,y,maxW,lh,color,font){
+  ctx.fillStyle=color; ctx.font=font;
+  let line='', yy=y;
+  for (const ch of txt){
+    if (ctx.measureText(line+ch).width>maxW){ ctx.fillText(line,x,yy); line=ch; yy+=lh; }
+    else line+=ch;
+  }
+  if (line) ctx.fillText(line,x,yy);
+}
+
+/* ================================================================
+   ⑦ §07 实时采声实验室（仿真 / getUserMedia 实况）
+================================================================ */
+const LIVE={f:440, amp:.45, playing:true, t:0, micOn:false,
+            actx:null, analyser:null, stream:null, peak:0, clip:0};
+const LVC=$('liveCanvas');
+const LC=LVC?LVC.getContext('2d'):null;
+function liveSig(t){
+  const a=LIVE.amp;
+  return a*(0.62*Math.sin(2*Math.PI*LIVE.f*t)+0.22*Math.sin(4*Math.PI*LIVE.f*t)
+            +0.05*Math.sin(2*Math.PI*53*t));
+}
+function liveStopMic(){
+  if (LIVE.stream){ try{ LIVE.stream.getTracks().forEach(tr=>tr.stop()); }catch(e){} LIVE.stream=null; }
+  if (LIVE.actx){ try{ LIVE.actx.close(); }catch(e){} LIVE.actx=null; }
+  LIVE.analyser=null; LIVE.micOn=false;
+  const b=$('liveMic'); if (b) b.classList.remove('on');
+  $('liveState').textContent='仿真信号 · '+LIVE.f+'Hz + 泛音';
+}
+function liveStartMic(){
+  const md=(typeof navigator!=='undefined')&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia;
+  if (!md){ $('liveState').textContent='此环境不支持 getUserMedia · 保持仿真'; return; }
+  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})
+    .then(stream=>{
+      const AC=(typeof AudioContext!=='undefined')?AudioContext:(typeof webkitAudioContext!=='undefined'?webkitAudioContext:null);
+      if (!AC) throw new Error('no-audio-context');
+      LIVE.actx=new AC();
+      if (LIVE.actx.state==='suspended'&&LIVE.actx.resume) LIVE.actx.resume();
+      LIVE.analyser=LIVE.actx.createAnalyser();
+      LIVE.analyser.fftSize=2048;
+      const src=LIVE.actx.createMediaStreamSource(stream);
+      src.connect(LIVE.analyser);            /* 只分析不回放，防啸叫 */
+      LIVE.stream=stream; LIVE.micOn=true;
+      $('liveMic').classList.add('on');
+      $('liveState').textContent='实况 · 本机麦克风（本地分析，不上传）';
+    })
+    .catch(()=>{ $('liveState').textContent='麦克风被拒绝/不可用 · 保持仿真'; });
+}
+function liveToggleMic(){
+  if (LIVE.micOn) liveStopMic(); else liveStartMic();
+}
+function liveTick(now){
+  if (!LC) return;
+  const W=LVC.width/Math.min(devicePixelRatio||1,2);
+  const Hh=300;
+  if (LIVE.playing) LIVE.t+=1/60;
+  let wave=null, spec=null;
+  if (LIVE.micOn&&LIVE.analyser){
+    wave=new Uint8Array(LIVE.analyser.fftSize);
+    spec=new Uint8Array(LIVE.analyser.frequencyBinCount);
+    LIVE.analyser.getByteTimeDomainData(wave);
+    LIVE.analyser.getByteFrequencyData(spec);
+  }
+  LC.clearRect(0,0,W,Hh);
+  /* ---- 上：波形 pane ---- */
+  const gy0=26, gy1=150, mid=(gy0+gy1)/2, x0=30, x1=W-30;
+  LC.strokeStyle='rgba(52,224,138,.07)'; LC.lineWidth=1;
+  for (let i=1;i<4;i++){ LC.beginPath(); LC.moveTo(x0,gy0+(gy1-gy0)*i/4); LC.lineTo(x1,gy0+(gy1-gy0)*i/4); LC.stroke(); }
+  LC.strokeStyle='rgba(138,162,148,.35)';
+  LC.beginPath(); LC.moveTo(x0,mid); LC.lineTo(x1,mid); LC.stroke();
+  /* 电平刻度 */
+  LC.fillStyle='#5c7264'; LC.font='8.5px "IBM Plex Mono"'; LC.textAlign='right';
+  for (const d of [0,-6,-12]){
+    LC.fillText(d+'dBFS',x0-4,mid-(Math.pow(10,d/20))*(gy1-gy0)/2.4+3);
+  }
+  LC.textAlign='left'; LC.fillStyle='#8aa294'; LC.font='10.5px "IBM Plex Mono"';
+  LC.fillText(LIVE.micOn?'波形 · 实况（time domain）':'波形 · 仿真',x0,gy0-8);
+  let pk=0;
+  LC.strokeStyle='#34e08a'; LC.lineWidth=2; LC.beginPath();
+  if (wave){
+    for (let i=0;i<=560;i++){
+      const v=(wave[Math.floor(i/560*(wave.length-1))]-128)/128;
+      pk=Math.max(pk,Math.abs(v));
+      const x=x0+i/560*(x1-x0), y=mid-v*(gy1-gy0)/2.4;
+      if (i===0) LC.moveTo(x,y); else LC.lineTo(x,y);
+    }
+  } else {
+    for (let i=0;i<=560;i++){
+      const tt=LIVE.t+ (i/560)*0.02;
+      const v=liveSig(tt);
+      pk=Math.max(pk,Math.abs(v));
+      const x=x0+i/560*(x1-x0), y=mid-Math.max(-1,Math.min(1,v))*(gy1-gy0)/2.4;
+      if (i===0) LC.moveTo(x,y); else LC.lineTo(x,y);
+    }
+  }
+  LC.stroke();
+  if (pk>=0.985) LIVE.clip++;
+  /* ---- 下：频谱 pane ---- */
+  const sy0=172, sy1=288, sx0=30, sx1=W-30;
+  const fMin=100, fMax=8000;
+  const fx=f=>sx0+Math.log(Math.max(f,fMin)/fMin)/Math.log(fMax/fMin)*(sx1-sx0);
+  LC.strokeStyle='rgba(52,224,138,.07)';
+  for (const f of [100,200,500,1000,2000,5000]){
+    LC.beginPath(); LC.moveTo(fx(f),sy0); LC.lineTo(fx(f),sy1); LC.stroke();
+    LC.fillStyle='#5c7264'; LC.font='8.5px "IBM Plex Mono"'; LC.textAlign='center';
+    LC.fillText(f>=1000?(f/1000)+'k':f,fx(f),sy1+12);
+  }
+  LC.strokeStyle='rgba(138,162,148,.35)';
+  LC.beginPath(); LC.moveTo(sx0,sy1); LC.lineTo(sx1,sy1); LC.stroke();
+  LC.textAlign='left'; LC.fillStyle='#8aa294'; LC.font='10.5px "IBM Plex Mono"';
+  LC.fillText('频谱（frequency domain · 对数轴 100Hz–8kHz）',sx0,sy0-8);
+  if (spec){
+    const nyq=LIVE.actx?LIVE.actx.sampleRate/2:24000;
+    LC.strokeStyle='#57d8f2'; LC.lineWidth=1.6; LC.beginPath();
+    LC.moveTo(sx0,sy1);
+    for (let i=0;i<=280;i++){
+      const f=fMin*Math.pow(fMax/fMin,i/280);
+      const bin=Math.min(spec.length-1,Math.round(f/nyq*spec.length));
+      const h=(spec[bin]/255)*(sy1-sy0-4);
+      LC.lineTo(fx(f),sy1-h);
+    }
+    LC.lineTo(sx1,sy1); LC.stroke();
+  } else {
+    /* 仿真谱线：f、2f、53Hz 纹波 */
+    const bars=[[53,LIVE.amp*0.05],[LIVE.f,LIVE.amp*0.62],[LIVE.f*2,LIVE.amp*0.22]];
+    for (const [f,a] of bars){
+      const h=Math.min(1,a*1.15)*(sy1-sy0-4);
+      const x=fx(f);
+      LC.strokeStyle='rgba(87,216,242,.9)'; LC.lineWidth=3;
+      LC.beginPath(); LC.moveTo(x,sy1); LC.lineTo(x,sy1-h); LC.stroke();
+    }
+    LC.strokeStyle='rgba(87,216,242,.35)'; LC.lineWidth=1;
+    LC.beginPath(); LC.moveTo(sx0,sy1-3); LC.lineTo(sx1,sy1-3); LC.stroke();
+  }
+  /* 峰值电平条 */
+  const dbfs=pk>0?20*Math.log10(pk):-Infinity;
+  const bx0=sx1-150, bx1=sx1;
+  LC.strokeStyle='#27392d'; LC.strokeRect(bx0,sy0,bx1-bx0,8);
+  const lv=Math.max(0,Math.min(1,(dbfs+40)/40));
+  LC.fillStyle=dbfs>-1?'#ff6478':(dbfs>-6?'#ffb02e':'#34e08a');
+  LC.fillRect(bx0+1,sy0+1,(bx1-bx0-2)*lv,6);
+  LC.fillStyle='#5c7264'; LC.font='9px "IBM Plex Mono"'; LC.textAlign='left';
+  LC.fillText('peak '+(dbfs===-Infinity?'−∞':dbfs.toFixed(1))+' dBFS'+(LIVE.clip?' · 削波×'+LIVE.clip:''),bx0,sy0-4);
+  /* 读数栏 */
+  $('liveRead').innerHTML=
+    '<span class="k">状态</span> <b class="'+(LIVE.micOn?'g':'')+'">'+(LIVE.micOn?'实况 · 本机麦克风':'仿真 · '+LIVE.f+' Hz 合成')+'</b>'+
+    '<span class="k">峰值</span> <b class="'+(dbfs>-1?'r':'')+'">'+(dbfs===-Infinity?'−∞':fmtDb(dbfs)+' dBFS')+'</b>'+
+    '<span class="k">削波计数</span> <b class="'+(LIVE.clip?'r':'')+'">'+LIVE.clip+'</b>'+
+    '<span class="k">合成频率</span> <b class="c">'+(LIVE.micOn?'—':LIVE.f+' Hz')+'</b>';
+  requestAnimationFrame(liveTick);
+}
+if (LVC&&LC){
+  new ResizeObserver(()=>{
+    const r=LVC.parentElement.getBoundingClientRect();
+    const w=Math.max(320,r.width);
+    const dpr=Math.min(devicePixelRatio||1,2);
+    LVC.width=w*dpr; LVC.height=300*dpr; LVC.style.height='300px';
+    LC.setTransform(dpr,0,0,dpr,0,0);
+  }).observe(LVC.parentElement);
+  $('liveF').addEventListener('input',e=>{
+    LIVE.f=+e.target.value;
+    $('liveFVal').textContent=LIVE.f+' Hz';
+    if (!LIVE.micOn) $('liveState').textContent='仿真信号 · '+LIVE.f+'Hz + 泛音';
+  });
+  $('liveA').addEventListener('input',e=>{ LIVE.amp=+e.target.value/100; });
+  $('liveMic').addEventListener('click',liveToggleMic);
+  $('livePlay').addEventListener('click',()=>{
+    LIVE.playing=!LIVE.playing;
+    $('livePlay').classList.toggle('on',LIVE.playing);
+    $('livePlay').textContent=LIVE.playing?'❚❚':'▶';
+  });
+  requestAnimationFrame(liveTick);
+}
+
+/* ================================================================
+   ⑧ §08 选型五步 + 终端复制
+================================================================ */
+const SEL=[
+ {t:'定界面',
+  v:'<b>先问主控有什么口：</b>只有 ADC → ECM + 前级或 MEMS 模拟；有 SAI/I2S → I2S 数字麦（免 codec 免算力，首选）；引脚紧张但有定时器 → PDM 两线。界面决定了 BOM 的后半张：模拟要运放+偏置+耦合，数字只要去耦电容。',
+  rows:[['主控资源','选型','代价'],
+        ['仅 ADC','ECM/MEMS 模拟','自建 40dB 增益链'],
+        ['I2S/SAI','I2S MEMS','走线稍多 · 最省心'],
+        ['引脚紧张','PDM 两线','SoC 侧做抽取']]},
+ {t:'定声学指标',
+  v:'<b>三个数：</b>SNR（安静环境语音 62dB+）；灵敏度（决定增益链预算，03 节计算器）；AOP 声学过载点（120dB SPL 级，靠近声源的场景别选 100dB 的型号）。语音识别另加一条：<b>全双工回声消除</b>要求双麦一致性好 → 选 ±1dB 灵敏度散布的 MEMS。',
+  rows:[['指标','门槛','典型'],
+        ['SNR','≥62 dBA','65 dBA（ICS-43434）'],
+        ['灵敏度','−38…−26 dBV','按增益链反推'],
+        ['AOP','≥110 dB SPL','120dB（近讲）']]},
+ {t:'定指向与布局',
+  v:'<b>拾谁的声音：</b>环境声级计 → 全向单颗；定向拾音 → 心形（双进声孔型号或波束阵列）；双麦差分消背景 → 间距 ≤50mm 保证相关性。<b>布局三查：</b>声孔别被封（09 节）、远离喇叭与天线、远离 DC-DC 开关节点。',
+  rows:[['用途','方案','要点'],
+        ['环境声','全向单颗','无指向要求'],
+        ['人声指令','心形/阵列','抑制侧后噪声'],
+        ['通话降噪','双麦差分','间距 ≤50mm']]},
+ {t:'定增益链',
+  v:'<b>倒着算：</b>最小要听的声音（比如 55dB SPL 远场语音）→ 灵敏度 → 裸输出 → 增益 → ADC 满幅的 −30dB 左右；再验最大声压不削（−6dBFS）。两级放大优于一级：第一级低噪运放 20–30dB，第二级/codec PGA 补足。<b>第一级运放噪声直接进总账</b>（&lt;10nV/√Hz）。',
+  rows:[['环节','典型','注意'],
+        ['第一级','×10–30 低噪','决定底噪'],
+        ['第二级','codec PGA','可调/AGC'],
+        ['数字端','AGC/压缩','抢救动态范围']]},
+ {t:'定验证',
+  v:'<b>三步实测：</b>① 示波器看前端——静态工作点、说话时的摆幅、有没有削顶；② 录 1kHz 参考音回放频谱（本页 07 节就是模板），量 SNR 对标手册；③ 整机底噪——安静房录 10 秒看 RMS，超 −60dBFS 先查电源与地。别忘了<strong>结构验收</strong>：装进外壳后再测一次，声孔被挡 6dB 就没了。',
+  rows:[['项目','工具','判据'],
+        ['工作点','万用表/示波器','0.3–0.8×VDD'],
+        ['SNR','录参考音','≥手册 −2dB'],
+        ['底噪','静默录 10s','≤ −60dBFS']]},
+];
+function renderSelRows(rows){
+  let h='<table class="cmp-table" style="margin-top:14px">';
+  for (let i=0;i<rows.length;i++){
+    if (i===0) h+='<tr><th>'+rows[i].join('</th><th>')+'</th></tr>';
+    else h+='<tr><td>'+rows[i].join('</td><td>')+'</td></tr>';
+  }
+  return h+'</table>';
+}
+function renderSel(i){
+  $('selSteps').innerHTML=SEL.map((d,k)=>
+    '<button class="dbg-step'+(k===i?' on':'')+'" data-i="'+k+'" type="button"><span class="n">'+(k+1)+'</span>'+d.t+'</button>').join('');
+  $('selVerdict').innerHTML='<b>第 '+(i+1)+' 步 · '+SEL[i].t+'：</b>'+SEL[i].v+renderSelRows(SEL[i].rows);
+}
+if ($('selSteps')){
+  $('selSteps').addEventListener('click',e=>{
+    const b=e.target.closest('.dbg-step'); if(!b) return;
+    renderSel(+b.dataset.i);
+  });
+  renderSel(0);
+}
+/* 终端点击复制 */
+document.querySelectorAll('.t-cmd').forEach(el=>{
+  el.addEventListener('click',async ()=>{
+    const txt=el.getAttribute('data-copy')||'';
+    let okFlag=false;
+    try { await navigator.clipboard.writeText(txt); okFlag=true; }
+    catch(e){
+      try{
+        const ta=document.createElement('textarea');
+        ta.value=txt; document.body.appendChild(ta); ta.select();
+        okFlag=document.execCommand('copy'); ta.remove();
+      }catch(e2){ okFlag=false; }
+    }
+    const old=el.textContent;
+    el.classList.add('copied');
+    el.textContent=okFlag?'已复制 ✓':'复制失败';
+    setTimeout(()=>{ el.classList.remove('copied'); el.textContent=old; },900);
+  });
+});
+
+/* ---------------- 初始化 + 滚动显现 ---------------- */
+(function initAll(){
+  if ($('trSteps')){
+    $('trSteps').addEventListener('click',e=>{
+      const b=e.target.closest('button'); if(!b) return;
+      const i=+b.dataset.i;
+      $('trSteps').querySelectorAll('button').forEach((x,k)=>x.classList.toggle('on',k===i));
+      renderTr(i);
+    });
+    renderTr(0);
+  }
+  if ($('lSpl')){
+    ['lSpl','lSens','lGain'].forEach(id=>$(id).addEventListener('change',calcLev));
+    calcLev();
+    ['bVdd','bR','bC','bRin'].forEach(id=>$(id).addEventListener('change',calcBias));
+    calcBias();
+  }
+  if (CCV&&CX){
+    new ResizeObserver(()=>{
+      const r=CCV.parentElement.getBoundingClientRect();
+      const w=Math.max(320,r.width);
+      const dpr=Math.min(devicePixelRatio||1,2);
+      CCV.width=w*dpr; CCV.height=CCH*dpr; CCV.style.height=CCH+'px';
+      CX.setTransform(dpr,0,0,dpr,0,0);
+    }).observe(CCV.parentElement);
+    $('ccMCir').addEventListener('click',e=>{
+      const b=e.target.closest('button'); if(!b) return;
+      ccMSetScene(+b.dataset.i);
+    });
+    $('ccMMode').addEventListener('click',e=>{
+      const b=e.target.closest('button'); if(!b) return;
+      CCM.mode=+b.dataset.m;
+      CCM.t0=performance.now();
+      ccMBuildMode();
+    });
+    $('ccMPlay').addEventListener('click',()=>{
+      CCM.playing=!CCM.playing;
+      if (CCM.playing) CCM.t0+=performance.now()-CCM.frozen;
+      else CCM.frozen=performance.now();
+      $('ccMPlay').classList.toggle('on',CCM.playing);
+      $('ccMPlay').textContent=CCM.playing?'❚❚':'▶';
+    });
+    ccMSetScene(0);
+    requestAnimationFrame(ccMLoop);
+  }
+  if (POLCV&&PLC){
+    new ResizeObserver(()=>{
+      const r=POLCV.parentElement.getBoundingClientRect();
+      const w=Math.max(320,r.width);
+      const dpr=Math.min(devicePixelRatio||1,2);
+      POLCV.width=w*dpr; POLCV.height=300*dpr; POLCV.style.height='300px';
+      PLC.setTransform(dpr,0,0,dpr,0,0);
+      polDraw();
+    }).observe(POLCV.parentElement);
+    $('polPat').addEventListener('click',e=>{
+      const b=e.target.closest('button'); if(!b) return;
+      POLS.pat=+b.dataset.i;
+      $('polPat').querySelectorAll('button').forEach((x,k)=>x.classList.toggle('on',k===POLS.pat));
+      polDraw();
+    });
+    $('polTheta').addEventListener('input',e=>{
+      POLS.theta=+e.target.value*Math.PI/180;
+      $('polThetaVal').textContent=e.target.value+'°';
+      polDraw();
+    });
+    polDraw();
+  }
+})();
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<script src="component-nav.js" defer></script>
+</body>
+</html>
