@@ -565,7 +565,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
         <div class="fact">
           <div class="f-no">SPEC · 04</div>
           <h4>供电 <code>2–10V / 1.8–3.6V</code></h4>
-          <p>ECM 经 Rbias 从信号脚「蹭电」（典型 0.5mA）；MEMS 是正经 VDD——<b>有的 PDM 型号严格 1.8V</b>，接 3.3V 会永久哑掉。</p>
+          <p>ECM 经 Rbias 从信号脚「蹭电」（0.1–0.5mA · 本页按 0.45mA 建模）；MEMS 是正经 VDD——<b>有的 PDM 型号严格 1.8V</b>，接 3.3V 会永久哑掉。</p>
         </div>
       </div>
     </div>
@@ -615,7 +615,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
         <text x="120" y="62" fill="#34e08a" font-size="9" font-family="IBM Plex Mono,monospace">→ 感应电动势 e = BLv</text>
         <text x="120" y="88" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">输出 mV 级 · 需低噪声话放 40–60dB</text>
       </svg>
-      <div class="fb">同一颗器件正着用是扬声器、反着用是话筒——对讲机的喇叭麦一体方案正是这么干的。动圈输出阻抗低（几十–几百 Ω）但灵敏度只有 <b>1–2 mV/Pa</b>，比 ECM 低 10–20dB，需要干净的话放才堪一用。</div></div>
+      <div class="fb">同一颗器件正着用是扬声器、反着用是话筒——对讲机的喇叭麦一体方案正是这么干的。动圈输出阻抗低（几十–几百 Ω）但灵敏度只有 <b>1–2 mV/Pa</b>，比 ECM 的 −38dBV 再低 16–22dB，需要干净的话放才堪一用。</div></div>
     <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">ELECTRET</span><h4>驻极体 · 冻住的电荷</h4><span class="en">C = εA/d</span></div>
       <svg viewBox="0 0 300 104">
         <rect x="30" y="34" width="86" height="36" fill="none" stroke="#8aa294" stroke-width="1.4"/>
@@ -867,11 +867,11 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
         <circle cx="54" cy="42" r="12" fill="none" stroke="#ff6478" stroke-width="1.4"/>
         <path d="M84 28 h56 M84 42 h56 M84 56 h56" stroke="#ff6478" stroke-width="1.6"/>
         <text x="152" y="32" fill="#8aa294" font-size="9.5" font-family="IBM Plex Mono,monospace">WS BCK DATA</text>
-        <text x="152" y="52" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">16–32kHz 字率 · 24bit 左对齐</text>
+          <text x="152" y="52" fill="#5c7264" font-size="9" font-family="IBM Plex Mono,monospace">WS 16–50kHz · 24bit/32slot</text>
       </svg></div>
       <div class="body">
         <div class="names"><span class="main">MEMS I2S</span><span class="alias">DIGITAL MIC</span><span class="tag">免 codec</span></div>
-        <p>把抽取滤波器也封进封装：输出<b>标准 I2S 主模式</b>，主控的 SAI/I2S 外设直接当 slave 收。免 ADC、免滤波、免算力。代表：ICS-43434、SPH0645LU4H-1。坑在<b>MSB 对齐偏移一个 BCK</b>（08 节实战代码有解法）。</p>
+        <p>把抽取滤波器也封进封装：输出<b>标准 I2S 数据流</b>（BCK/WS 时钟由主控提供，麦克风做从机），主控的 SAI/I2S 外设直接收。免 ADC、免滤波、免算力。代表：ICS-43434、SPH0645LU4H-1。坑在<b>MSB 对齐偏移一个 BCK</b>（08 节实战代码有解法）。</p>
         <div class="formula">BCK 0.5–3.2MHz · WS 16–50kHz · 64×BCK/WS</div>
       </div>
     </div>
@@ -907,7 +907,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       <svg viewBox="0 0 300 118">
         <g font-family="IBM Plex Mono,monospace" font-size="8" fill="#8aa294">
           <text x="6" y="18">WS</text>
-          <path d="M30 16 h34 v-10 h64 v20 h64 v-20 h48" fill="none" stroke="#ffb02e" stroke-width="1.8"/>
+          <path d="M30 26 h32 v-20 h64 v20 h64 v-20 h48" fill="none" stroke="#ffb02e" stroke-width="1.8"/>
           <text x="38" y="34" fill="#ffb02e" font-size="7.5">L</text><text x="102" y="34" fill="#ffb02e" font-size="7.5">R</text><text x="166" y="34" fill="#ffb02e" font-size="7.5">L</text>
           <text x="6" y="58">BCK</text>
           <path d="M30 56 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8 h8 v-8 h8 v8" fill="none" stroke="#57d8f2" stroke-width="1.4"/>
@@ -916,11 +916,11 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
             <path d="M34 84 v-14 M50 84 v-14 M58 84 v-14 M74 84 v-14 M106 84 v-14 M122 84 v-14 M138 84 v-14 M170 84 v-14 M186 84 v-14 M202 84 v-14"/>
           </g>
           <text x="150" y="60" fill="#5c7264" font-size="7.5">每 WS 半帧 16×BCK 示意（真实 32–64×）</text>
-          <text x="6" y="104" fill="#dcebe1" font-size="8">MSB-first · 数据在 WS 翻转后第 1 个 BCK 上升沿更新</text>
-          <text x="6" y="116" fill="#ff6478" font-size="7.5">SPH0645 坑：数据晚一个 BCK → 需 WS 相移或数据右移 1bit</text>
+          <text x="6" y="104" fill="#dcebe1" font-size="8">MSB-first · 标准 I2S：MSB 比 WS 翻转延迟 1 个 BCK（第 2 个上升沿）</text>
+          <text x="6" y="116" fill="#ff6478" font-size="7.5">SPH0645 坑：MSB 早一个 BCK（≈左对齐）→ 切 MSB 对齐模式或右移 1bit</text>
         </g>
       </svg>
-      <div class="fb">I2S 帧三线：<b>WS</b> 选左右声道（麦克风通常只占一个声道，另一个恒为静音数据）、<b>BCK</b> 位时钟、<b>SD</b> 数据。24bit 有效数据<b>左对齐</b>在 32bit 槽里。SPH0645 的 MSB 比 Philips 标准晚一个 BCK，STM32 上要么用 SAI 的 MSBJUSTIFY 模式、要么软件右移一位——不然永远是 2 倍幅度的错位噪声。</div></div>
+      <div class="fb">I2S 帧三线：<b>WS</b> 选左右声道（麦克风通常只占一个声道，另一个恒为静音数据）、<b>BCK</b> 位时钟、<b>SD</b> 数据。24bit 有效数据装在 32bit 槽里（MSB 先行、尾随补零）。SPH0645 的 MSB 比 Philips 标准<b>早一个 BCK</b>（等效左对齐格式）：按标准格式去读，整字左移一位、幅度凭空 ×2——STM32 上要么把 SAI 配成 MSB 对齐模式、要么软件右移一位修正。</div></div>
     <div class="fmt-card t-do reveal"><div class="fh"><span class="tag">SIGNAL</span><h4>PDM vs PCM 一图流</h4><span class="en">DENSITY = AMPLITUDE</span></div>
       <svg viewBox="0 0 300 118">
         <g font-family="IBM Plex Mono,monospace" font-size="8" fill="#8aa294">
@@ -1098,8 +1098,8 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   </div>
   <div class="lnx-note reveal">
     <b>SPH0645 的「半个采样」玄学：</b>示波器看 I2S 时钟全对、数据全是 0xFF/0x00 交替——先查 <code>WS 极性</code>（左右声道弄反时数据落在空声道里）；
-    数据有但声音像碎玻璃——是 <b>MSB 晚一个 BCK</b> 的对齐问题（上面代码的右移修正）。另外 I2S 麦克风是<b>主模式输出</b>：MCU 只做时钟主机、数据从机，
-    CubeMX 里把 Receive 方向配成 slave 之外的方向是新手第一大坑。
+    数据有但声音像碎玻璃——是 <b>MSB 早一个 BCK</b>（左对齐）的对齐问题（上面代码的右移修正）。另外 I2S 麦克风自己不出时钟：MCU 必须配成<b>时钟主机 + Receive 方向</b>，
+    把外设配成 slave 或 Transmit 就永远收不到数据——CubeMX 方向配错是新手第一大坑。
   </div>
 </section>
 
@@ -1112,7 +1112,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       <div class="fix">
         <b>偏置电阻漏接 / 接错位置</b>
         <p>两脚 ECM 的 JFET 要从<b>输出脚经 Rbias 到 VDD</b> 蹭电，另一脚接地。Rbias 没接、或把它接到 GND 侧——FET 没电，输出恒 0。
-          万用表先量输出脚直流：健康工作点在 <code>VDD 的 0.5–0.8 倍</code>（03 节计算器），读 0V 或 VDD 都是偏置网络断了。</p>
+          万用表先量输出脚直流：健康工作点在 <code>VDD 的 0.3–0.8 倍</code>（03 节计算器），读 0V 或 VDD 都是偏置网络断了。</p>
       </div>
     </div>
     <div class="pit">
@@ -1127,7 +1127,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       <div class="symptom">大声<br>破音</div>
       <div class="fix">
         <b>增益预算超了 ADC 满量程</b>
-        <p>110dB 近讲 + −38dBV 灵敏度 + 60dB 增益 = 峰值 3.6V，3.3V ADC 直接削顶（04 节场景③梯形波）。用 03 节计算器按<b>最大预期声压</b>反推增益，
+        <p>110dB 近讲 + −38dBV 灵敏度 + 30dB 增益（×32）= 峰值 3.6V，超出 1.65V 满摆一倍多，ADC 直接削顶（04 节场景③梯形波）。用 03 节计算器按<b>最大预期声压</b>反推增益，
           留 6dB 余量；或选带 AGC/压缩的 codec（WM8960 类）让芯片替你动态调。</p>
       </div>
     </div>
@@ -1135,7 +1135,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       <div class="symptom">声音<br>闷/发虚</div>
       <div class="fix">
         <b>耦合 fc 卡在频段中间</b>
-        <p>0.1µF 进 10kΩ 的高通 fc = 159Hz——人声基频男低 85Hz、女声 165Hz 全被压掉 3dB 以上还附赠相位扭转。要么加 C 到 1µF+，
+        <p>0.1µF 进 10kΩ 的高通 fc = 159Hz——男低 85Hz 被压掉 6.5dB、女声 165Hz 也 −3dB 上下，还附赠相位扭转。要么加 C 到 1µF+，
           要么提高 Rin。低频「有但虚」多半是 fc 落在了 100–300Hz：<code>fc = 1/(2π·Rin·Cout)</code> 一算便知。</p>
       </div>
     </div>
@@ -1400,7 +1400,7 @@ const TR_STEPS=[
   cap:'<b>安静环境：</b>瞬时声压围绕大气压起伏 ≈ 0，振膜停在中位。注意「静默」不是「没有空气」——大气压 101.3kPa 一直压着振膜，麦克风只对<b>变化量</b>敏感：电容式经 JFET 后直流工作点被隔离，动圈的变压器也隔直，输出永远是交流。'},
  {t:'1 Pa 声压（94 dB SPL）',
   read:'v = '+TR_V1*1e3+' mm/s → e = B·L·v = '+TR_B+' × '+TR_L.toFixed(1)+' × '+TR_V1.toFixed(3)+' = <b>'+(TR_E1*1e3).toFixed(1)+' mV</b>',
-  cap:'<b>声波到达：</b>密集区空气把振膜推向内，稀疏区拉它回来——振膜随声压同相运动，带着音圈在磁隙里以速度 v 切割磁力线。法拉第定律给出感应电动势 <code>e = B·L·v</code>（0.8T × 2.5m × 1mm/s = 2.0mV）——正好是动圈话筒「1–2mV/Pa」的典型灵敏度，比 ECM 低 10 倍以上。'},
+  cap:'<b>声波到达：</b>密集区空气把振膜推向内，稀疏区拉它回来——振膜随声压同相运动，带着音圈在磁隙里以速度 v 切割磁力线。法拉第定律给出感应电动势 <code>e = B·L·v</code>（0.8T × 2.5m × 1mm/s = 2.0mV）——正好是动圈话筒「1–2mV/Pa」的典型灵敏度，比 ECM 的 12.6mV/Pa 低 16–22dB。'},
  {t:'声压 ×4（+12 dB）',
   read:'v ×4 → e = <b>'+(TR_E1*4*1e3).toFixed(1)+' mV</b>（线性 ×4）',
   cap:'<b>线性换能：</b>声压翻倍 → 振膜速度翻倍 → 电动势翻倍。链路每一环都成比例，所以 12dB 的声压差就是电压 ×4——这也是 dB 刻度的由来：SPL 每差 20dB = 电压差 10 倍。注意「×4」靠的是声压，不是靠你把增益拧大：增益链的失真也得是线性的才行。'},
@@ -1413,7 +1413,7 @@ function renderTr(i){
   const mode=i;
   const disp = mode===0?0:(mode===1?0.35:(mode===2?1:0));   /* 振膜偏移视觉幅度 */
   const ac = mode===3;
-  const vm = mode===0?0:(mode===1?TR_V1:(mode===2?TR_V1*4:0));
+  const vm = mode===0?0:(mode===1?TR_V1:(mode===2?TR_V1*4:TR_V1));   /* 步④ v(t) 峰值仍 1mm/s */
   const em = mode===0?0:(mode===1?TR_E1:(mode===2?TR_E1*4:0));
   /* 空气分子点阵：密疏随声压 */
   let dots='';
@@ -1426,9 +1426,8 @@ function renderTr(i){
     }
   }
   const waveLbl = mode===0?'无声':(mode===1?'1 Pa':(mode===2?'4 Pa':'440Hz 交变'));
-  /* 音圈位置：交流模式画在中位（振动中），静态模式按声压偏移 */
-  const coilTop = ac?100:104;
-  const coilBot = ac?128:124;
+  /* 音圈位置：跟随振膜偏移（交流模式画在中位，残影示意振动） */
+  const coilCy = 130-(ac?0:disp*6);
   const memY = 114-(ac?0:disp*6);
   $('trSvg').innerHTML=
   '<svg viewBox="0 0 640 250" xmlns="http://www.w3.org/2000/svg">'+
@@ -1443,19 +1442,21 @@ function renderTr(i){
   '  <rect x="252" y="70" width="18" height="88" fill="#2b3038" stroke="rgba(255,255,255,.2)"/>'+
   '  <text x="261" y="62" text-anchor="middle" fill="#dcebe1" font-size="9.5">S</text>'+
   '  <g stroke="#57d8f2" stroke-width="1.4">'+
-  '    <line x1="238" y1="76" x2="238" y2="94"/><path d="M238 100 l-3 -6 h6 z" fill="#57d8f2" stroke="none"/>'+
-  '    <line x1="250" y1="76" x2="250" y2="94"/><path d="M250 100 l-3 -6 h6 z" fill="#57d8f2" stroke="none"/>'+
+  '    <line x1="228" y1="86" x2="242" y2="86"/><path d="M248 86 l-6 -3 v6 z" fill="#57d8f2" stroke="none"/>'+
+  '    <line x1="228" y1="146" x2="242" y2="146"/><path d="M248 146 l-6 -3 v6 z" fill="#57d8f2" stroke="none"/>'+
   '  </g>'+
-  '  <text x="244" y="176" text-anchor="middle" fill="#57d8f2" font-size="9">B = '+TR_B.toFixed(1)+' T</text>'+
-  /* 音圈（两根导线，在磁隙中） */
-  '  <g stroke="#ffb02e" stroke-width="2.6">'+
-  '    <line x1="238" y1="'+coilTop+'" x2="238" y2="'+coilBot+'"/>'+
-  '    <line x1="250" y1="'+coilTop+'" x2="250" y2="'+coilBot+'"/></g>'+
+  '  <text x="244" y="176" text-anchor="middle" fill="#57d8f2" font-size="9">B = '+TR_B.toFixed(1)+' T · N→S 穿磁隙</text>'+
+  /* 音圈：截面圆（导线垂直画面，随振膜上下切割横向 B） */
+  (ac?('<circle cx="238" cy="'+(coilCy-7)+'" r="4.2" fill="none" stroke="#ffb02e" stroke-width="1.4" opacity=".35"/>'+
+       '<circle cx="250" cy="'+(coilCy+7)+'" r="4.2" fill="none" stroke="#ffb02e" stroke-width="1.4" opacity=".35"/>'):'')+
+  '  <g fill="none" stroke="#ffb02e" stroke-width="2.4">'+
+  '    <circle cx="238" cy="'+coilCy+'" r="4.2"/>'+
+  '    <circle cx="250" cy="'+coilCy+'" r="4.2"/></g>'+
   /* 振膜（连接声波与音圈） */
   '  <path d="M216 '+memY+' q18 0 34 0" fill="none" stroke="#34e08a" stroke-width="2.4"/>'+
-  '  <line x1="234" y1="'+memY+'" x2="238" y2="'+coilTop+'" stroke="#34e08a" stroke-width="1.6"/>'+
-  '  <line x1="252" y1="'+coilTop+'" x2="258" y2="'+memY+'" stroke="#34e08a" stroke-width="1.6"/>'+
-  '  <text x="244" y="196" text-anchor="middle" fill="#34e08a" font-size="9.5">振膜 + 音圈 L = '+TR_L.toFixed(1)+' m</text>'+
+  '  <line x1="234" y1="'+memY+'" x2="238" y2="'+(coilCy-4)+'" stroke="#34e08a" stroke-width="1.6"/>'+
+  '  <line x1="258" y1="'+memY+'" x2="250" y2="'+(coilCy-4)+'" stroke="#34e08a" stroke-width="1.6"/>'+
+  '  <text x="244" y="196" text-anchor="middle" fill="#34e08a" font-size="9.5">振膜 + 音圈截面（导线⊥画面）L = '+TR_L.toFixed(1)+' m</text>'+
   /* 输出电压表 */
   '  <g transform="translate(330,40)">'+
   '    <text x="120" y="0" text-anchor="middle" fill="#dcebe1" font-size="10.5">输出电压</text>'+
@@ -1644,12 +1645,12 @@ const CM_V104=micVol(104,CM_SENS)*Math.SQRT2;   /* 104dB     Vpk ≈ 0.056V */
 const SCN=[
  { /* ① 偏置电阻：2.2k ✓ vs 100k 贴地 */
    modes:['R 2.2k ✓','R 100k ⚠'],
-   note:'<b>场景 ①：</b>两脚 ECM 内置 JFET 是<b>漏极开路</b>：Rbias 从 VDD 供出 0.45mA 静态电流，工作点 <b>Vdc = 3.3 − 0.45mA×R</b>。R=2.2k → 2.31V，落在 0.3–0.8×VDD 健康区，±0.11V 的近讲信号双向都有余量；R=100k → 压降 45V 远超电源，FET 被压进变阻区，输出贴在 0.30V、摆幅窒息——「省电的偏置」直接聋掉。手册推荐 1k–4.7k@3.3V、2.2k 是绝对主流。',
+   note:'<b>场景 ①：</b>两脚 ECM 内置 JFET 是<b>漏极开路</b>：Rbias 从 VDD 供出 0.45mA 静态电流，工作点 <b>Vdc = 3.3 − 0.45mA×R</b>。R=2.2k → 2.31V，落在 0.3–0.8×VDD 健康区，±0.11V 的近讲信号双向都有余量；R=100k → 压降 45V 远超电源，FET 被压进变阻区，输出贴在 0.20V、摆幅窒息——「省电的偏置」直接聋掉。手册推荐 1k–4.7k@3.3V、2.2k 是绝对主流。',
    draw(now,W){
      const bigR=CCM.mode===1;
      const R=bigR?100:2.2, Rk=R*1e3;
      const vraw=CM_VDD-CM_ID*Rk;
-     const vdc=bigR?0.30:vraw;
+     const vdc=bigR?0.20:vraw;
      const vsw=bigR?0.06:CM_V110;
      const bus=278;
      /* 顶部电源轨 */
@@ -1688,7 +1689,7 @@ const SCN=[
      /* 波形 pane */
      const p=ccMPane(3.6,0,'MIC_OUT 节点电压（直流 + 交流）');
      ccMRefLine(p,CM_VDD,'VDD 3.3V','rgba(52,224,138,.4)');
-     ccMRefLine(p,vdc,'Vdc '+(bigR?'0.30V 贴地 ⚠':'2.31V 工作点'));
+     ccMRefLine(p,vdc,'Vdc '+(bigR?'0.20V 贴地 ⚠':'2.31V 工作点'));
      const ph0=(now/1000*0.6)%1;
      CX.strokeStyle='#34e08a'; CX.lineWidth=2.2; CX.beginPath();
      for (let i=0;i<=460;i++){
@@ -1703,13 +1704,13 @@ const SCN=[
        ['Rbias',bigR?'100 kΩ ⚠':'2.2 kΩ ✓',bigR?'r':'g'],
        ['工作点',vdc.toFixed(2)+' V'+(bigR?'（贴地 ⚠）':'（0.70×VDD ✓）'),bigR?'r':'g'],
        ['信号摆幅','±'+(bigR?0.06:CM_V110).toFixed(2)+' V'+(bigR?'（压缩）':''),bigR?'r':''],
-       ['余量',bigR?'0.30 V（单边）':Math.min(CM_VDD-vdc,vdc).toFixed(2)+' V（双向）',bigR?'r':'g'],
+       ['余量',bigR?'0.20 V（单边）':Math.min(CM_VDD-vdc,vdc).toFixed(2)+' V（双向）',bigR?'r':'g'],
        ['判定',bigR?'FET 变阻区 · 摆幅窒息':'0.3–0.8×VDD 健康区 ✓',bigR?'r':'g'],
      ]);
    }},
  { /* ② 耦合电容：隔直 ✓ vs 直耦顶轨 */
    modes:['Cout 1µF ✓','直耦 ⚠'],
-   note:'<b>场景 ②：</b>ECM 输出是「2.31V 直流 ± 0.11V 交流」的混合体。经 <b>1µF 耦合电容</b>，直流被隔断、下级把信号重新偏置在 VDD/2=1.65V，×8 放大后输出 1.65±0.88V 干净正弦（fc = 1/(2π·10k·1µF) = 15.9Hz，人声全通）。省掉电容直耦：2.31V 直流也被放大 8 倍 = 18.5V，单电源输出直接<b>钉死在 3.18V</b>——波形一条死线，交流完全淹没。这就是「隔直再放大」铁律的由来（<a href="capacitor.html">电容页</a>的高通）。',
+   note:'<b>场景 ②：</b>ECM 输出是「2.31V 直流 ± 0.11V 交流」的混合体。经 <b>1µF 耦合电容</b>，直流被隔断、下级把信号重新偏置在 VDD/2=1.65V，×8 放大后输出 1.65±0.90V 干净正弦（fc = 1/(2π·10k·1µF) = 15.9Hz，人声全通）。省掉电容直耦：2.31V 直流也被放大 8 倍 = 18.5V，单电源输出直接<b>钉死在 3.18V</b>——波形一条死线，交流完全淹没。这就是「隔直再放大」铁律的由来（<a href="capacitor.html">电容页</a>的高通）。',
    draw(now,W){
      const hasC=CCM.mode===0;
      const AV=8, VOFF=1.65;
@@ -1742,6 +1743,7 @@ const SCN=[
      }
      /* 运放：偏置网络 + 同相放大三角 */
      ccMWire([[300,140],[330,140]]);
+     ccMWire([[330,140],[346,140]]);   /* 节点进运放同相输入端 */
      ccMWire([[330,140],[330,196]]);
      ccMWire([[330,196],[316,196]]);
      ccMRes(316,196,'10k','#8aa294');   /* 下偏置 Rin→GND 简画为 Rin */
@@ -1835,7 +1837,7 @@ const SCN=[
      CX.fillText('×'+AV,342,152);
      /* Rf 环（上）与 Rg（下） */
      ccMWire([[286,130],[262,130],[262,96],[356,96],[356,148]]);
-     ccMBox(292,86,56,20,bigG?'Rf 62k':'Rf 10k','#8aa29d');
+     ccMBox(292,86,56,20,bigG?'Rf 62k':'Rf 7k','#8aa29d');
      ccMWire([[286,168],[262,168]]);
      ccMBox(292,178,56,20,'Rg 1k','#8aa79d');
      ccMWire([[320,198],[320,bus]],'#5c7264');
@@ -1874,7 +1876,7 @@ const SCN=[
      } else {
        ccMRefLine(p,3.3,'VDD 3.3V','rgba(52,224,138,.4)');
        ccMReadout([
-         ['增益','×'+AV+'（Rf 10k/Rg 1.3k）','g'],
+         ['增益','×'+AV+'（Rf 7k/Rg 1k）','g'],
          ['输入 Vpk',(CM_V104*1e3).toFixed(1)+' mV（104dB SPL）','c'],
          ['输出',VOFF.toFixed(2)+' ± '+vth.toFixed(2)+' V','g'],
          ['削波','无 ✓','g'],
@@ -1885,7 +1887,7 @@ const SCN=[
    }},
  { /* ④ 差分接收：全差分 ✓ vs 单端 ⚠ */
    modes:['差分接收 ✓','单端取一端 ⚠'],
-   note:'<b>场景 ④：</b>MEMS 模拟麦输出是挂在 Vcm≈0.9V 上的<b>差分对</b>：OUT+ 与 OUT− 反相摆动 ±0.5V。全差分接收（差分 ADC 或减法器）取两者之差 → ±1.0V 满信号，且电源/地上的共模噪声在相减时<b>成对抵消</b>。只接 OUT+、OUT− 悬空：有效信号立刻减半（±0.25V），共模噪声却全额进链——SNR 双重恶化约 6dB+。手机板那些走线凌乱却干净的音频，秘密就是差分。',
+   note:'<b>场景 ④：</b>MEMS 模拟麦输出是挂在 Vcm≈0.9V 上的<b>差分对</b>：OUT+ 与 OUT− 反相摆动 ±0.5V。全差分接收（差分 ADC 或减法器）取两者之差 → ±1.0V 满信号，且电源/地上的共模噪声在相减时<b>成对抵消</b>。只接 OUT+、OUT− 悬空：有效信号从差分 ±1.0V 减半到 ±0.50V，共模噪声却全额进链——SNR 双重恶化约 6dB+。手机板那些走线凌乱却干净的音频，秘密就是差分。',
    draw(now,W){
      const diff=CCM.mode===0;
      const VCM=0.9, VD=0.5, VCMN=0.06;
@@ -1937,7 +1939,7 @@ const SCN=[
      CX.setLineDash([]);
      CX.fillStyle='#5c7264'; CX.font='8.5px "IBM Plex Mono"'; CX.textAlign='left';
      CX.fillText('探测接收输出',426,106);
-     const p=ccMPane(2.4,-0.6,'输出（Vcm 0.9V · 差分 ±0.5V）');
+     const p=ccMPane(2.4,-1.2,'输出（Vcm 0.9V · 每边摆 ±0.5V · 差分 ±1.0V）');
      ccMRefLine(p,VCM,'Vcm 0.90V');
      const ph0=(now/1000*0.6)%1;
      /* OUT+ / OUT− 细线 */
@@ -1962,7 +1964,7 @@ const SCN=[
      for (let i=0;i<=460;i++){
        const f=i/460;
        const s=Math.sin((f*3+ph0)*Math.PI*2);
-       const v=diff?VD*s:(VD/2*s+VCMN*Math.sin((f*0.75+ph0)*Math.PI*2));
+       const v=diff?2*VD*s:(VD*s+VCMN*Math.sin((f*0.75+ph0)*Math.PI*2));
        const x=p.x0+f*(p.x1-p.x0), y=p.py(v);
        if (i===0) CX.moveTo(x,y); else CX.lineTo(x,y);
      }
@@ -1972,12 +1974,12 @@ const SCN=[
      ccMReadout(diff?[
        ['拓扑','全差分接收 ✓','g'],
        ['Vcm','0.90 V（共模）','c'],
-       ['差分幅度','±'+VD.toFixed(2)+' V','g'],
+       ['差分幅度','±'+(2*VD).toFixed(2)+' V（V+−V−）','g'],
        ['共模抑制','相减抵消 · CMRR 60dB+','g'],
-       ['有效信号','满幅 ±0.50V ✓','g'],
+       ['有效信号','满幅 ±1.00 V ✓','g'],
      ]:[
        ['拓扑','单端取 OUT+ ⚠','r'],
-       ['信号','减半 ±'+(VD/2).toFixed(2)+' V','r'],
+       ['信号','减半 ±'+VD.toFixed(2)+' V','r'],
        ['共模噪声','全额进链 ±0.06 V','r'],
        ['SNR','双重恶化 ≈6dB','r'],
        ['修法','差分 ADC / 减法器','g'],
@@ -2127,8 +2129,8 @@ const POL=[
   desc:'所有方向一视同仁：ECM/MEMS 单颗的默认形态。拾环境声、不挑嘴位，但也无法拒绝噪声。'},
  {n:'心形 CARDIOID', en:'CARDIOID', f:t=>Math.max(0,0.5*(1+Math.cos(t))), fm:'r = 0.5(1+cos θ)',
   desc:'正面最灵、180° 背面归零：歌手话筒的标准图案。单指向要双进声孔的声学延迟或阵列算法。'},
- {n:'超心形 SUPER', en:'SUPER', f:t=>Math.max(0,0.37+0.63*Math.cos(t)), fm:'r = 0.37+0.63cos θ',
-  desc:'比心形更窄的前瓣（−3dB 约 ±63°）+ 一点侧后瓣残留：摄像/会议拾音的折中选择。'},
+ {n:'超心形 SUPER', en:'SUPER', f:t=>Math.abs(0.37+0.63*Math.cos(t)), fm:'r = |0.37+0.63cos θ|',
+  desc:'前瓣比心形窄（−3dB 约 ±58°），零点移到 ±126°，180° 留一点反相后瓣（r≈0.26）：摄像/会议拾音的折中选择。'},
  {n:'8 字 FIG-8', en:'FIG-8', f:t=>Math.abs(Math.cos(t)), fm:'r = |cos θ|',
   desc:'前后灵、左右死（90° 全抑制）：铝带话筒的天然图案，也用于双麦阵列的差分单元。'},
 ];
