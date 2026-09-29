@@ -16,6 +16,7 @@
 | [麦克风](docs/microphone.html) | 声→电逆向换能原理（动圈 e=BLv 与驻极体 ΔC 四步步进）、换能家族谱系（动圈/电容/ECM/MEMS 模拟/PDM/I2S/压电）、灵敏度声学账本计算器（SPL→电压→ADC dBFS 裕量）与偏置耦合计算器（Rbias 工作点/fc 低频下限）、ECM 读放电路实验室（偏置 2.2k vs 100k 贴地/耦合隔直 vs 直耦顶轨/×8 vs ×63 削波/差分 vs 单端）、PDM ΣΔ 码流实验室（密度=幅度+抽取恢复）、指向性极坐标实验室（全向/心形/超心/8 字）、getUserMedia 实时波形频谱采声实验室、选型五步与 Arduino/STM32 I2S/Linux ALSA 实战、踩坑八条与速查表 |
 | [数码管](docs/sevenseg.html) | 七段字形与段码原理（a–g+dp 字节序）、段码构建实验室（实时共阴/共阳 hex/二进制）、共阴共阳电流路径步进与拉/灌电流、万用表二极管挡引脚判别侦探实验室（随机管找 COM/极性/段映射）、动态扫描与鬼影实验室（余辉模型+逻辑分析仪+错误时序对比）、限流电阻与亮度计算器（E24 就近/峰值×N/位选红线）、四档驱动电路实验室（GPIO 直驱/三极管位驱动/74HC595 移位/TM1637 两线）、0–F 字符画廊、选型五步与 Arduino/STM32/Linux 实战、踩坑八条与速查表 |
 | [电源](docs/power.html) | 输入在抖输出钉死的稳压器原理、线性（NPN/准 LDO/CMOS）×开关（Buck/Boost/电荷泵）×基准家族谱系、LDO 压差实验室（AMS1117 vs ME6211 双器件传输曲线三区+功耗结温红警）、Buck 闭环开关实验室（锯齿交截 PWM/SW 节点/电感电流 CCM-DCM/输出纹波四 pane+同步整流对比）、Boost 逐周期泵电荷动画（Vout=Vin/(1−D)）、效率对决实验室（1mA–3A 双曲线+功耗柱）、电源树与上电时序实验室（功耗预算/PG 菊花链/latch-up 病理）、Buck 外围计算器（L/Cout/ESR/LDO 热校验）、Linux regulator/DVFS 实战、踩坑八条与选型决策树速查 |
+| [USB](docs/usb.html) | 一根线上的电源+数据：四线总线与主机中心制、连接器家族解剖（Type-A/B·Micro-B 与 ID 脚 OTG·Type-C 24pin 触点对称图·90Ω 差分线缆剖面）、NRZI 位流逻辑分析仪（LSB-first·遇 1 翻转·六连一 stuff·EOP=SE0SE0J 逐位拆解）、包结构与三段式事务（令牌/数据/握手）×四种传输、枚举状态机七步实验室（地址 0→领地址→描述符链→ttyACM0）、速度五档与批量吞吐计算器（帧填满模型 FS 19×64B/HS 13×512B/SS 8b10b）、供电协商四场景电路实验室（unit load 账本与 over-current 断口/BC1.2 D+≡D− 短接/Type-C Rp·Rd 分压三档/PD 5V→9V 台阶 PS_RDY）、Linux lsusb·usbmon/STM32 CDC/Arduino HID 三终端、选型五步与踩坑八条速查 |
 
 ## 页面规范
 

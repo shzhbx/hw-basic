@@ -25,7 +25,8 @@
     ]},
     { group: '机电与连接', items: [
       ['speaker.html', '扬声器/蜂鸣器'],
-      ['microphone.html', '麦克风']
+      ['microphone.html', '麦克风'],
+      ['usb.html', 'USB']
     ]},
     { group: '显示与指示', items: [
       ['sevenseg.html', '数码管']
