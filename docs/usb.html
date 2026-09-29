@@ -516,7 +516,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   <div class="two-col">
     <div class="prose reveal">
       <p>
-        USB（Universal Serial Bus，通用串行总线）1996 年由 Intel / Microsoft / Compaq / IBM / DEC 联盟推出，
+        USB（Universal Serial Bus，通用串行总线）1996 年由 Compaq / DEC / IBM / Intel / Microsoft / NEC / Nortel 七家联盟推出，
         动机简单粗暴：<b>PC 背面接口太多了</b>。串口鼠标一个 RS-232、打印机一个并口、键盘 PS/2、
         扫描仪一张 ISA 卡——每个外设一套接口、一张驱动盘、一次重启。USB 的答案是
         <b>一个口 + 一套协议 + 一套类驱动</b>：即插即用、热插拔、可级联（hub 展开成树，最多 127 个设备）。
@@ -682,10 +682,10 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       </g>
       <text x="310" y="104" text-anchor="middle" fill="#8aa294" font-size="10" font-family="IBM Plex Mono,monospace">B 面 —— 翻转 180° 后 B 面朝上接替 A 面的全部功能</text>
       <path d="M60 116 q30 20 60 0 q30 -20 60 0 q30 20 60 0" fill="none" stroke="#ffb02e" stroke-width="1.6" stroke-dasharray="5 4"/>
-      <text x="200" y="132" fill="#ffb02e" font-size="9.5" font-family="IBM Plex Mono,monospace">翻转 = TX1↔TX2 · RX1↔RX2 · CC1↔VCONN · D+/D− 原生对称</text>
+      <text x="200" y="132" fill="#ffb02e" font-size="9.5" font-family="IBM Plex Mono,monospace">翻转 = TX1↔TX2 · RX1↔RX2 · CC 换到镜像位 · D+/D− 原生对称</text>
       <text x="200" y="148" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">每一组高速信号在对面都有镜像备份 · 所以哪个方向插都通</text>
     </svg>
-    <div class="fb">这张图解释 Type-C 「无呆」的工程代价：<b>24 个触点里一半是镜像备份</b>。方向检测由 CC 完成后，收发器切换到实际接通的那组差分对；D+/D− 是唯一原生对称的低速对。VBUS/GND 多针并联是为了 5A 大电流（<a href="power.html">电源页</a>的电源树思维）。</div>
+    <div class="fb">这张图解释 Type-C 「无呆」的工程代价：<b>24 个触点里一半是镜像备份</b>。方向检测由 CC 完成后，收发器切换到实际接通的那组差分对；D+/D− 是唯一原生对称的低速对（图为<b>插头视角</b>：A 面 CC 引脚、B 面 VCONN 供电给线内芯片；插座侧两根分别叫 CC1/CC2）。VBUS/GND 多针并联是为了 5A 大电流（<a href="power.html">电源页</a>的电源树思维）。</div>
   </div>
 </section>
 
@@ -694,7 +694,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   <div class="sec-head reveal"><span class="no">03</span><h2>差分信号与 NRZI 实验室</h2><span class="en">Differential &amp; NRZI Lab</span></div>
   <p class="sec-sub reveal">
     D+/D− 上跑的是<b>一对互补信号</b>：J 态 D+ 高 D− 低，K 态相反，<b>SE0</b> 双低用来发包尾与复位。
-    数据用 <b>NRZI</b> 编码（遇 1 翻转、遇 0 保持）——长时间不翻转接收端会失同步，于是又加了一条
+    数据用 <b>NRZI</b> 编码（遇 0 翻转、遇 1 保持）——连续的 1 会让电平长时间不动、接收端失同步，于是又加了一条
     <b>位填充</b> 铁律：连发 6 个 1 必须强插一个 0。切下面的字节，逻辑分析仪逐位拆解给你看。
   </p>
   <div class="lab reveal">
@@ -733,19 +733,20 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       <div class="fb">总线上永远只有三种物理态。主机保持 <b>SE0 超 10ms</b> 就是复位信号——枚举的第一脚（05 节）。LS/FS 用<b>不同的上拉位置</b>报身份：FS 设备把 D+ 拉高、LS 拉高 D−，主机看哪根线被拉起就知道对方跑多快。</div></div>
     <div class="fmt-card t-sod reveal"><div class="fh"><span class="tag">STUFF</span><h4>位填充 · 六连一强插零</h4><span class="en">BIT STUFFING</span></div>
       <svg viewBox="0 0 300 104">
-        <path d="M30 30 v-8 h12 v8 h12 v-14 h12 v14 h12 v-8 h12 v8" fill="none" stroke="#ffb02e" stroke-width="2"/>
-        <path d="M126 30 v-8 h12 v8" fill="none" stroke="#ff6478" stroke-width="2"/>
-        <path d="M150 30 v-8 h12 v14 h12 v-14 h12 v8" fill="none" stroke="#ffb02e" stroke-width="2" transform="translate(0,0)"/>
+        <text x="30" y="14" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">六连 1：一位都没翻转</text>
+        <path d="M30 22 h72" fill="none" stroke="#ffb02e" stroke-width="2"/>
+        <path d="M102 22 v8 h12" fill="none" stroke="#ff6478" stroke-width="2"/>
+        <path d="M114 30 h36" fill="none" stroke="#ffb02e" stroke-width="2"/>
         <line x1="30" y1="34" x2="270" y2="34" stroke="#27392d" stroke-width="1.4"/>
         <text x="30" y="54" fill="#8aa294" font-size="8.5" font-family="IBM Plex Mono,monospace">1 1 1 1 1 1</text>
-        <text x="122" y="54" fill="#ff6478" font-size="8.5" font-family="IBM Plex Mono,monospace">0</text>
-        <text x="150" y="54" fill="#8aa294" font-size="8.5" font-family="IBM Plex Mono,monospace">1 1 …</text>
-        <path d="M126 62 v10" stroke="#ff6478" stroke-width="1.4"/>
-        <path d="M122 74 l4 6 l4 -6" fill="none" stroke="#ff6478" stroke-width="1.4"/>
-        <text x="140" y="80" fill="#ff6478" font-size="8.5" font-family="IBM Plex Mono,monospace">stuff 位：发送端强插</text>
+        <text x="102" y="54" fill="#ff6478" font-size="8.5" font-family="IBM Plex Mono,monospace">0</text>
+        <text x="120" y="54" fill="#8aa294" font-size="8.5" font-family="IBM Plex Mono,monospace">1 1 …</text>
+        <path d="M108 62 v10" stroke="#ff6478" stroke-width="1.4"/>
+        <path d="M104 74 l4 6 l4 -6" fill="none" stroke="#ff6478" stroke-width="1.4"/>
+        <text x="122" y="80" fill="#ff6478" font-size="8.5" font-family="IBM Plex Mono,monospace">stuff 位：强插的 0 = 唯一一次翻转</text>
         <text x="30" y="98" fill="#5c7264" font-size="8.5" font-family="IBM Plex Mono,monospace">保证最坏 7 bit 内有一次电平翻转 → 接收端可重同步</text>
       </svg>
-      <div class="fb">NRZI 的死穴是长 0 串（不翻转 = 没有时钟信息）。位填充从发送方向「治好」它：连 6 个 1（= 连续 6 次翻转）后插入一个 0。接收端数到 6 个 1 后自动丢弃下一位——两端的规则对称，数据无损。</div></div>
+      <div class="fb">NRZI 的死穴是<b>长 1 串</b>（1 = 保持 = 没有时钟信息）。位填充从发送方向「治好」它：连 6 个 1（连续 6 位不翻转）后插入一个 0——正好制造一次翻转。接收端数到 6 个 1 后自动丢弃下一位——两端的规则对称，数据无损。</div></div>
     <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">90Ω</span><h4>差分抗共模的数学</h4><span class="en">COMMON MODE</span></div>
       <svg viewBox="0 0 300 104">
         <path d="M30 38 q40 -22 80 0 q40 22 80 0" fill="none" stroke="#34e08a" stroke-width="2"/>
@@ -758,9 +759,9 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
       <div class="fb">两根线紧贴双绞，外部噪声在两根线上<b>几乎同相</b>（共模）；接收端做差，噪声项相减抵消、信号项相加翻倍——信噪比白赚一倍。前提是两线等长、对称、阻抗连续：<b>90Ω ±15% 差分阻抗</b> 是硬指标，过孔和桩线都是它的敌人。</div></div>
   </div>
   <div class="rule-callout reveal">
-    <div class="mnemonic">遇 1 翻转 · 六一插零<small>NRZI + BIT STUFFING</small></div>
+    <div class="mnemonic">遇 0 翻转 · 六一插零<small>NRZI + BIT STUFFING</small></div>
     <p>
-      USB 2.0 的物理层编码一句话说完了：<b>NRZI 编码 + 位填充</b>。1 = 翻转、0 = 保持；连 6 个 1 强插一个 0 保证时钟可恢复。
+      USB 2.0 的物理层编码一句话说完了：<b>NRZI 编码 + 位填充</b>。0 = 翻转、1 = 保持；连 6 个 1（连续不翻转）强插一个 0 制造翻转，保证时钟可恢复。
       注意字节序是 <b>LSB-first</b>——0x55 在线上是 1010… 从低位发起，抓逻辑分析仪别把位序读反（这是新手解析 USB 流量最常见的翻车点）。
     </p>
   </div>
@@ -811,7 +812,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   <p class="sec-sub reveal" style="margin-top:22px;margin-bottom:0">
     主机每 <b>1ms 发一帧 SOF 包</b>（High-Speed 细分为 125µs 微帧）当总节拍器；四种传输在帧内按
     「控制 → 中断 → 同步 → 批量」的优先级瓜分带宽——<b>批量传输吃的是剩饭</b>，这正是 06 节计算器里
-    「标称 480Mbps、实测只有 30–40MB/s」的第一个原因。
+    「标称 480Mbps、实测只有 30–42 MB/s」的第一个原因。
   </p>
 </section>
 
@@ -850,7 +851,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
   <div class="tbl-scroll reveal">
   <table class="cmp-table" style="min-width:560px">
     <tr><th>档位</th><th>速率</th><th>编码</th><th>线缆</th><th>帧/微帧</th><th>bulk 实测</th></tr>
-    <tr><td>Low-Speed</td><td>1.5 Mbps</td><td>NRZI+stuff</td><td>D+/D−（不屏蔽可）</td><td>1 ms</td><td>—（只有控制/中断）</td></tr>
+    <tr><td>Low-Speed</td><td>1.5 Mbps</td><td>NRZI+stuff</td><td>D+/D−（可不屏蔽）</td><td>1 ms</td><td>—（只有控制/中断）</td></tr>
     <tr><td>Full-Speed</td><td>12 Mbps</td><td>NRZI+stuff</td><td>4 线</td><td>1 ms</td><td>≈ 1.0 MB/s</td></tr>
     <tr><td>High-Speed</td><td>480 Mbps</td><td>NRZI+stuff</td><td>4 线（屏蔽）</td><td>125 µs</td><td>30–42 MB/s</td></tr>
     <tr><td>SuperSpeed</td><td>5 Gbps</td><td>8b/10b</td><td>+SSRX/SSTX 全双工</td><td>125 µs</td><td>300–400 MB/s</td></tr>
@@ -990,9 +991,9 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
     <div class="fmt-card t-sma reveal"><div class="fh"><span class="tag">BC 1.2</span><h4>充电口识别</h4><span class="en">SDP · CDP · DCP</span></div>
       <div class="fb">SDP（标准数据口）按上面账本；<b>DCP（专用充电口）把 D+ 与 D− 短接</b>告诉设备「我是充电器，别枚举」，电流放宽到 1.5A+；CDP 两者兼顾（先探测后通信）。苹果/高通的私有快充在 D+/D− 上叠电压挡位，是同一根线的方言变体。</div></div>
     <div class="fmt-card t-vi reveal"><div class="fh"><span class="tag">TYPE-C</span><h4>Rp/Rd 分压表</h4><span class="en">CC VOLTAGE TIERS</span></div>
-      <div class="fb">电源端 Rp 上拉（5V 经 56k/22k/10k），设备端 Rd=5.1k 下拉，CC 电压分出三档电流能力：<b>0.41V→默认(500mA@USB2)、0.94V→1.5A、1.69V→3A</b>。双 CC 线保证正反插；有源线缆的 e-marker 芯片挂另一根 CC（VCONN）上报 5A 能力。</div></div>
+      <div class="fb">电源端 Rp 上拉（5V 经 56k/22k/10k），设备端 Rd=5.1k 下拉，CC 电压分出三档电流能力：<b>0.42V→默认(500mA@USB2)、0.94V→1.5A、1.69V→3A</b>。双 CC 线保证正反插；有源线缆的 e-marker 芯片挂另一根 CC（VCONN）上报 5A 能力。</div></div>
     <div class="fmt-card t-pd reveal"><div class="fh"><span class="tag">PD</span><h4>USB PD 功率阶梯</h4><span class="en">POWER DELIVERY</span></div>
-      <div class="fb">PD 在 CC 线上用 BMC 编码谈合同：Source 广播能力（5V/9V/15V/20V 固定挡 + PPS 20mV 步进），Sink 点菜 Request，Source 应 Accept 并在 <b>PS_RDY</b> 后抬压。从 0.5W 到 <b>240W（48V/5A）</b>，电压变更期间 VBUS 必须先回 vSafe5V 再爬升——大功率快充的仪式感。</div></div>
+      <div class="fb">PD 在 CC 线上用 BMC 编码谈合同：Source 广播能力（5V/9V/15V/20V 固定挡 + PPS 20mV 步进），Sink 点菜 Request，Source 应 Accept → 抬压稳定后发 <b>PS_RDY</b> 宣告生效。从 0.5W 到 <b>240W（48V/5A）</b>，电压变更期间 VBUS 必须先回 vSafe5V 再爬升——大功率快充的仪式感。</div></div>
   </div>
 </section>
 
@@ -1124,7 +1125,7 @@ footer .f-r small{display:block;font-family:var(--mono);font-weight:400;font-siz
         <tr><th>体系</th><th>识别方式</th><th>电流/电压</th></tr>
         <tr><td>USB 2.0</td><td>— / bMaxPower 申报</td><td>100→500 mA@5V</td></tr>
         <tr><td>USB 3.x</td><td>同上</td><td>150→900 mA@5V</td></tr>
-        <tr><td>BC1.2 DCP</td><td>D+≡D− 短接</td><td>≤1.5A@5V</td></tr>
+        <tr><td>BC1.2 DCP</td><td>D+≡D− 短接</td><td>≥1.5A@5V</td></tr>
         <tr><td>Type-C Rp/Rd</td><td>CC 分压 0.42/0.94/1.69V</td><td>500mA/1.5A/3A</td></tr>
         <tr><td>USB PD</td><td>CC BMC 消息</td><td>5–48V · ≤240W</td></tr>
       </table></div>
@@ -1338,7 +1339,7 @@ function bitsStr(v){ let s=''; for(let i=0;i<8;i++) s+=(v>>i)&1; return s; }
 
 /* ================================================================
    ② §03 NRZI 位流逻辑分析仪
-      LSB-first 发送序 · NRZI（1=翻转 0=保持）· 六连一 stuff · EOP=SE0,SE0,J
+      LSB-first 发送序 · NRZI（0=翻转 1=保持）· 六连一 stuff · EOP=SE0,SE0,J
 ================================================================ */
 const NZI_BYTES=[0xFF,0x00,0x55,0x0F];
 const NZI={idx:0, playing:true, cursor:0, ph:0};
@@ -1347,9 +1348,9 @@ function nziEncode(bits){
   let st=1, ones=0;
   const dp=[], stuff=[];
   for (let k=0;k<bits.length;k++){
-    if (bits[k]){ st^=1; ones++; } else { ones=0; }
+    if (bits[k]){ ones++; } else { st^=1; ones=0; }   /* 1=保持 · 0=翻转 */
     dp.push(st);
-    if (ones===6){ dp.push(st); stuff.push(dp.length-1); ones=0; }
+    if (ones===6){ st^=1; dp.push(st); stuff.push(dp.length-1); ones=0; }  /* 六连一后强插 0=翻转 */
   }
   return {dp, stuff};
 }
@@ -1363,10 +1364,10 @@ function nziModel(){
   return {byte,bits,dp,dm,stuff:enc.stuff,n,segs:n+3};
 }
 const NZI_CAP=[
-  '<b>0xFF · 全 1 字节：</b>LSB-first 位序 1111 1111。NRZI 里每个 1 都翻转——但发到第 6 个 1 时<b>必须强插一个 stuff 0</b>（红色列）让接收端喘口气。注意 stuff 位不是数据：接收端数到 6 个 1 就自动丢弃下一位。EOP 用双低的 SE0 加一个 J 收尾，总线回到空闲。',
-  '<b>0x00 · 全 0 字节：</b>NRZI 遇 0 不翻转——整整 8 位 D+ 都钉在 J 态不动的。位填充只管长 1 串不管长 0 串：时钟恢复靠的是<b>接收端自由采样时钟</b>在短窗口内足够准（±0.25% 晶振的用处），NRZI+stuff 只保证「最坏 7 位一次翻转」让锁相环有得对。',
-  '<b>0x55 · 交替位：</b>LSB-first 序列 1010…——1 翻 0 保持，D+ 呈现宽方块（两个位一个翻转）。这是逻辑分析仪上最好认的模式：连续 0101 的数据位让差分对看起来像在「呼吸」。EOP 之后再回到 J 空闲等待下一包的 SYNC。',
-  '<b>0x0F · 四连一后四连零：</b>低位 4 个 1 连翻 4 次、不足 6 个<b>不触发 stuff</b>；随后 4 个 0 全程保持——一位 stuffing 规则的边界演示。真实 USB 包以 SYNC（0000 0001）打头、SOP 由 IDLE→K 的第一次翻转宣告，本实验室从数据字节直接开始。',
+  '<b>0xFF · 全 1 字节：</b>LSB-first 位序 1111 1111。NRZI 里 1 = 保持——若没有位填充，D+ 会<b>整字节钉在 J 态不动</b>。发到第 6 个 1 时<b>必须强插一个 stuff 0</b>（红色列），它是全字节唯一的一次翻转，接收端靠它才有得对钟。注意 stuff 位不是数据：接收端数到 6 个 1 就自动丢弃下一位。EOP 用双低的 SE0 加一个 J 收尾，总线回到空闲。',
+  '<b>0x00 · 全 0 字节：</b>NRZI 遇 0 翻转——每一位都让 D+ 翻个面，整字节是一段<b>标准方波</b>。这正是 SYNC 字段用 0000 0001 打头的原因：前 7 个 0 连翻 7 次，天然就是给接收端锁相环准备的时钟序列。位填充只管长 1 串不管长 0 串——0 自带翻转，永远不会失同步。',
+  '<b>0x55 · 交替位：</b>LSB-first 序列 1010…——1 保持、0 翻转，D+ 每两位翻一次，呈现<b>半频方块</b>。这是逻辑分析仪上最好认的模式：数据位在交替，线上的翻转密度恒定，差分对看起来像在「呼吸」。EOP 之后再回到 J 空闲等待下一包的 SYNC。',
+  '<b>0x0F · 四连一后四连零：</b>低位 4 个 1 连续保持（不足 6 个<b>不触发 stuff</b>）、随后 4 个 0 连翻 4 次——一条 stuffing 规则的边界演示。真实 USB 包以 SYNC（0000 0001）打头、SOP 由 IDLE→K 的第一次翻转宣告，本实验室从数据字节直接开始。',
 ];
 const NZV=$('nziCanvas');
 const NX=NZV?NZV.getContext('2d'):null;
@@ -1382,7 +1383,7 @@ function nziLabelSeg(i,m){
     if (di<0||di>=dataLen) return '线位 '+(k+1)+'/'+m.segs;
     const b=m.bits[di];
     const st=m.dp[k];
-    return '位 '+(di+1)+'/8 · 数据 <b>'+b+'</b> · NRZI <b>'+(b?'翻转':'保持')+'</b> → 线态 <b class="'+(st?'g':'c')+'">'+(st?'J':'K')+'</b>';
+    return '位 '+(di+1)+'/8 · 数据 <b>'+b+'</b> · NRZI <b>'+(b?'保持':'翻转')+'</b> → 线态 <b class="'+(st?'g':'c')+'">'+(st?'J':'K')+'</b>';
   }
   const eop=['SE0（双低）','SE0（双低）','J（回空闲）'][i-m.n];
   return 'EOP '+(i-m.n+1)+'/3 · <b class="r">'+eop+'</b>';
@@ -1537,19 +1538,19 @@ const ENUM=[
       'FS 典型 64B（旧设备 8/16/32）'],
   v:'<b>鸡生蛋问题：</b>主机不知道 EP0 的包大小就没法读完整描述符——所以第一次只读 8 字节，专门去问「你 EP0 多大」。这一步失败就是著名的 <code>device descriptor read/64 error</code>（09 节踩坑 2）。'},
  {t:'④ SET_ADDRESS(5)', st:3, addr:'0 → 5',
-  pkt:[['SETUP','g','SET_ADDRESS(5)'],
-       ['DATA0','c','零长度包（ZLP）= 收到'],
-       ['STATUS','g','设备回 ACK · 从此只应答 addr=5']],
+  pkt:[['SETUP','g','SET_ADDRESS(5) · 无数据阶段'],
+       ['IN+DATA1','c','状态阶段：设备回零长度包（ZLP）'],
+       ['ACK','g','主机确认 · 设备从此只应答 addr=5']],
   dt:['主机挑一个 1–127 的空闲地址发给设备',
-      '本例分配 5 → lsusb 里的 "Device 005"',
-      '枚举后设备彻底告别地址 0'],
-  v:'<b>领地址：</b>主机给设备发新住址，设备回一个零长度的状态包确认。之后所有令牌都喊 addr=5，设备才应答——这就是同一台主机带 127 个设备不打架的原因（ADDR 7 位的上限）。'},
+      '状态阶段 ZLP 由设备发出（DATA1）· 主机回 ACK',
+      '本例分配 5 → lsusb 里的 "Device 005"'],
+  v:'<b>领地址：</b>主机给设备发新住址。SET_ADDRESS 无数据阶段，状态阶段由<b>设备回一个零长度包、主机 ACK</b>——这次握手完成后新地址才正式生效，之后所有令牌都喊 addr=5，设备才应答。这就是同一台主机带 127 个设备不打架的原因（ADDR 7 位的上限）。'},
  {t:'⑤ 读完整设备描述符', st:3, addr:'5',
-  pkt:[['SETUP','g','GET_DESCRIPTOR(Device) · wLength = 18'],
-       ['DATA0','c','12 01 00 02 FF 00 00 40 <b>83 04</b> <b>40 57</b> …'],
+   pkt:[['SETUP','g','GET_DESCRIPTOR(Device) · wLength = 18'],
+       ['DATA0','c','12 01 00 02 EF 02 01 40 <b>83 04</b> <b>40 57</b> …'],
        ['ACK','g','主机拿到 VID/PID → 匹配驱动']],
   dt:['VID 0x0483（STMicro）· PID 0x5740（CDC 虚拟串口）',
-      'bDeviceClass 0xEF/0x02 → CDC 类',
+      'EF 02 01 = IAD 指路 · 类别在接口层（CDC 控制 02 / 数据 0A）',
       'bMaxPower = 100 mA → 电源预算申报'],
   v:'<b>交身份证：</b>18 字节设备描述符报出厂商 ID、产品 ID、类别、电源预算。Linux 拿 VID:PID 去匹配驱动表——<b>没匹配上就退而求类驱动（class driver）</b>，这是「免驱」的实际机制：匹配的是类，不是具体产品。'},
  {t:'⑥ 读配置描述符链', st:3, addr:'5',
@@ -1561,8 +1562,8 @@ const ENUM=[
       '端点：EP1 IN / EP2 OUT（bulk 64B）+ bInterval'],
   v:'<b>嵌套的说明书：</b>配置描述符是套娃——先读 9 字节知道总长，再整段读出「几个接口、每个接口几个端点、端点什么类型多大包」。主机由此分配带宽（中断/同步）和缓冲区（bulk）。'},
  {t:'⑦ SET_CONFIG(1) 生效', st:5, addr:'5',
-  pkt:[['SETUP','g','SET_CONFIGURATION(1)'],
-       ['DATA0','c','ZLP 状态包'],
+  pkt:[['SETUP','g','SET_CONFIGURATION(1) · 无数据阶段'],
+       ['IN+DATA1','c','状态阶段 ZLP（设备回）'],
        ['绑定','g','cdc_acm 探测成功 → /dev/ttyACM0']],
   dt:['设备进入 CONFIGURED · bMaxPower 预算生效',
       '此刻才允许抽到申报的电流（07 节铁律）',
@@ -1767,7 +1768,7 @@ const PWR_SCN=[
          ['预算','100→500 mA（已申报 bMaxPower 300mA）','g'],
          ['负载',fmtA(I),'c'],
          ['Vdev',vdev.toFixed(2)+' V（5 − I×R线）','g'],
-         ['余量',(vdev-4.5).toFixed(2)+' V ≥ 4.5V','g'],
+         ['余量','距 4.5V 红线 +'+(vdev-4.5).toFixed(2)+' V','g'],
          ['判定','健康 ✓','g'],
        ]);
      } else {
@@ -1807,14 +1808,14 @@ const PWR_SCN=[
      PX.fillText('D+',180,127);
      PX.fillText('D−',180,159);
      if (dcp){
-       /* 短接线 */
-      pwWire([[300,124],[300,156]],'#34e08a',2.6);
-      pwNode(300,124,'#34e08a'); pwNode(300,156,'#34e08a');
+       /* 短接线（规范：短接发生在充电口内部，画在充电器一侧） */
+      pwWire([[240,124],[240,156]],'#34e08a',2.6);
+      pwNode(240,124,'#34e08a'); pwNode(240,156,'#34e08a');
       PX.fillStyle='#34e08a'; PX.font='9px "IBM Plex Mono"'; PX.textAlign='center';
-      PX.fillText('D+ ≡ D− 短接',300,178);
+      PX.fillText('D+ ≡ D− 短接（口内）',240,178);
      } else {
        PX.fillStyle='#5c7264'; PX.font='9px "IBM Plex Mono"'; PX.textAlign='center';
-       PX.fillText('D+/D− 正常通信',300,178);
+       PX.fillText('D+/D− 正常通信',240,178);
      }
      /* 手机 */
      pwBox(470,60,96,110,'手机','#57d8f2','充电 '+fmtA(I));
@@ -1841,7 +1842,7 @@ const PWR_SCN=[
    }},
  { /* ③ Type-C Rp/Rd 分压定电流：56k/22k/10k 三档 */
    modes:['Rp 56k → 0.42V','Rp 22k → 0.94V','Rp 10k → 1.69V'],
-   note:'<b>场景 ③：</b>Type-C 的角色与电流都在 CC 线上谈：电源端（DFP）用 Rp 上拉到 5V，设备端（UFP）用 <b>Rd = 5.1kΩ</b> 下拉到地，CC 电压 = 5×Rd/(Rp+Rd)。Sink 量这个电压对表：<b>0.25–0.61V → 默认档（USB2 500mA）；0.70–1.25V → 1.5A；1.31–2.04V → 3A</b>。Rp 换挡不用改电源——三只电阻（或电流源）就是完整的「电流菜单」。注意 CC1/CC2 各挂一个 Rd（不知道哪面朝上）。',
+   note:'<b>场景 ③：</b>Type-C 的角色与电流都在 CC 线上谈：电源端（DFP）用 Rp 上拉到 5V，设备端（UFP）用 <b>Rd = 5.1kΩ</b> 下拉到地，CC 电压 = 5×Rd/(Rp+Rd)。Sink 量这个电压对表：<b>0.25–0.71V → 默认档（USB2 500mA）；0.71–1.23V → 1.5A；1.31–2.04V → 3A</b>（1.23–1.31V 是无效盲区，规范故意留的判定空隙）。Rp 换挡不用改电源——三只电阻（或电流源）就是完整的「电流菜单」。注意 CC1/CC2 各挂一个 Rd（不知道哪面朝上）。',
    draw(ph){
      const m=PWR.mode;
      const rp=PW_RPS[m];
@@ -1874,10 +1875,13 @@ const PWR_SCN=[
      PX.fillText('Vcc = 5 × Rd / (Rp + Rd)',268,120);
      /* pane：CC 电压 + 三档阈值窗 */
      const p=pwPane(2.1,0,'CC 线电压（Sink 侧测量）');
-     pwRef(p,0.61,'0.61V','rgba(255,100,120,.35)');
-     pwRef(p,0.70,'0.70V','rgba(52,224,138,.35)');
-     pwRef(p,1.25,'1.25V','rgba(255,100,120,.35)');
+     pwRef(p,0.71,'0.71V','rgba(255,176,46,.4)');
      pwRef(p,1.31,'1.31V','rgba(52,224,138,.35)');
+     /* 1.23V 盲区下界：标签置线下方，避免与 1.31V 标签叠字 */
+     PX.strokeStyle='rgba(255,100,120,.35)'; PX.setLineDash([6,5]); PX.lineWidth=1.2;
+     PX.beginPath(); PX.moveTo(p.x0,p.py(1.23)); PX.lineTo(p.x1,p.py(1.23)); PX.stroke(); PX.setLineDash([]);
+     PX.fillStyle='#8aa294'; PX.textAlign='left'; PX.font='9px "IBM Plex Mono"';
+     PX.fillText('1.23V',p.x0+8,p.py(1.23)+12);
      pwLevel(p,vcc,'#34e08a');
      pwReadout([
        ['Rp',rp+' kΩ 上拉 5V','c'],
@@ -1949,8 +1953,8 @@ const PWR_SCN=[
      }
      pwReadout(pd?[
        ['协商','Request(9V/3A) → Accept ✓','g'],
-       ['电压','5 → 9 V（PS_RDY 后生效）','g'],
-       ['电流','3.0 A（e-marker 线 ≥3A）','c'],
+       ['电压','5 → 9 V（PS_RDY = 抬压完成）','g'],
+       ['电流','3.0 A（超 3A 才需 e-marker 线）','c'],
        ['功率',fmtW(V*I)+'（×3.6 vs 5V）','g'],
        ['判定','谈出来的高压大电流','g'],
      ]:[
@@ -1998,7 +2002,7 @@ const SEL=[
         ['Host','大（拓扑管理）','要 hub/多设备仲裁'],
         ['DRP 双角色','中','Type-C CC 动态换向']]},
  {t:'定带宽',
-  v:'<b>按数据量选档：</b>HID 键盘鼠标/虚拟串口低速数据 → FS 12Mbps 绰绰有余；U 盘/摄像头/大数据量 → HS 480Mbps 起步（实测 30–40MB/s，06 节计算器算过账）；更高速率考虑 SS——但板级走线（差分 90Ω、等长）难度陡增，没有 4 层板经验慎选。',
+  v:'<b>按数据量选档：</b>HID 键盘鼠标/虚拟串口低速数据 → FS 12Mbps 绰绰有余；U 盘/摄像头/大数据量 → HS 480Mbps 起步（实测 30–42MB/s，06 节计算器算过账）；更高速率考虑 SS——但板级走线（差分 90Ω、等长）难度陡增，没有 4 层板经验慎选。',
   rows:[['场景','推荐','实测'],
         ['HID/低速 CDC','FS 12 Mbps','<1 MB/s 够用'],
         ['U 盘/采集卡','HS 480 Mbps','30–42 MB/s'],
